@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html class="js" lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="">
+    <link rel="canonical" href="#"> <!-- Liquid variable replaced -->
+
+    <!-- Favicon -->
+    <!-- Liquid logic removed -->
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+
+    <title>
+      Static Page Title <!-- Liquid variable replaced -->
+    </title>
+
+    <!-- Description -->
+    <meta name="description" content="Static page description"> <!-- Liquid variable replaced -->
+
+    <!-- Meta Tags -->
+    <!-- Liquid render tag removed -->
+
+    <!-- Scripts -->
+    <!-- Liquid asset_url filters replaced with static paths -->
+    <script src="/constants.js" defer="defer"></script>
+    <script src="/pubsub.js" defer="defer"></script>
+    <script src="/global.js" defer="defer"></script>
+    <script src="/details-disclosure.js" defer="defer"></script>
+    <script src="/details-modal.js" defer="defer"></script>
+    <script src="/search-form.js" defer="defer"></script>
+
+    <!-- Animations -->
+    <!-- Liquid logic removed -->
+    <script src="/animations.js" defer="defer"></script>
+
+    <!-- Content for Header -->
+    <!-- Liquid variable removed -->
+
+    <!-- Liquid variables for fonts -->
+    <!-- Liquid logic removed -->
+
+    <style>
+      /* Liquid font_face filters removed */
+
+      /* Liquid color scheme loop removed */
+      :root {
+        --color-background: 255,255,255; /* Static value */
+        --gradient-background: #ffffff; /* Static value */
+        --color-foreground: 0,0,0; /* Static value */
+        --color-background-contrast: 200,200,200; /* Static value */
+        --color-shadow: 0,0,0; /* Static value */
+        --color-button: 0,123,255; /* Static value */
+        --color-button-text: 255,255,255; /* Static value */
+        --color-secondary-button: 255,255,255; /* Static value */
+        --color-secondary-button-text: 0,123,255; /* Static value */
+        --color-link: 0,123,255; /* Static value */
+        --color-badge-foreground: 0,0,0; /* Static value */
+        --color-badge-background: 255,255,255; /* Static value */
+        --color-badge-border: 0,0,0; /* Static value */
+        --payment-terms-background-color: rgb(255,255,255); /* Static value */
+      }
+
+      body {
+        color: rgba(var(--color-foreground), 0.75);
+        background-color: rgb(var(--color-background));
+      }
+
+      :root {
+        --font-body-family: Arial, sans-serif; /* Static value */
+        --font-body-style: normal; /* Static value */
+        --font-body-weight: 400; /* Static value */
+        --font-body-weight-bold: 700; /* Static value */
+
+        --font-heading-family: Arial, sans-serif; /* Static value */
+        --font-heading-style: normal; /* Static value */
+        --font-heading-weight: 700; /* Static value */
+
+        --font-body-scale: 1.0; /* Static value */
+        --font-heading-scale: 1.0; /* Static value */
+
+        --media-padding: 0px; /* Static value */
+        --media-border-opacity: 1.0; /* Static value */
+        --media-border-width: 1px; /* Static value */
+        --media-radius: 0px; /* Static value */
+        --media-shadow-opacity: 0.0; /* Static value */
+        --media-shadow-horizontal-offset: 0px; /* Static value */
+        --media-shadow-vertical-offset: 0px; /* Static value */
+        --media-shadow-blur-radius: 0px; /* Static value */
+        --media-shadow-visible: 0; /* Static value */
+
+        --page-width: 120rem; /* Static value */
+        --page-width-margin: 0rem; /* Static value */
+
+        --product-card-image-padding: 0rem; /* Static value */
+        --product-card-corner-radius: 0rem; /* Static value */
+        --product-card-text-alignment: left; /* Static value */
+        --product-card-border-width: 0rem; /* Static value */
+        --product-card-border-opacity: 1.0; /* Static value */
+        --product-card-shadow-opacity: 0.0; /* Static value */
+        --product-card-shadow-visible: 0; /* Static value */
+        --product-card-shadow-horizontal-offset: 0rem; /* Static value */
+        --product-card-shadow-vertical-offset: 0rem; /* Static value */
+        --product-card-shadow-blur-radius: 0rem; /* Static value */
+
+        --collection-card-image-padding: 0rem; /* Static value */
+        --collection-card-corner-radius: 0rem; /* Static value */
+        --collection-card-text-alignment: left; /* Static value */
+        --collection-card-border-width: 0rem; /* Static value */
+        --collection-card-border-opacity: 1.0; /* Static value */
+        --collection-card-shadow-opacity: 0.0; /* Static value */
+        --collection-card-shadow-visible: 0; /* Static value */
+        --collection-card-shadow-horizontal-offset: 0rem; /* Static value */
+        --collection-card-shadow-vertical-offset: 0rem; /* Static value */
+        --collection-card-shadow-blur-radius: 0rem; /* Static value */
+
+        --blog-card-image-padding: 0rem; /* Static value */
+        --blog-card-corner-radius: 0rem; /* Static value */
+        --blog-card-text-alignment: left; /* Static value */
+        --blog-card-border-width: 0rem; /* Static value */
+        --blog-card-border-opacity: 1.0; /* Static value */
+        --blog-card-shadow-opacity: 0.0; /* Static value */
+        --blog-card-shadow-visible: 0; /* Static value */
+        --blog-card-shadow-horizontal-offset: 0rem; /* Static value */
+        --blog-card-shadow-vertical-offset: 0rem; /* Static value */
+        --blog-card-shadow-blur-radius: 0rem; /* Static value */
+
+        --badge-corner-radius: 0rem; /* Static value */
+
+        --popup-border-width: 1px; /* Static value */
+        --popup-border-opacity: 1.0; /* Static value */
+        --popup-corner-radius: 0px; /* Static value */
+        --popup-shadow-opacity: 0.0; /* Static value */
+        --popup-shadow-horizontal-offset: 0px; /* Static value */
+        --popup-shadow-vertical-offset: 0px; /* Static value */
+        --popup-shadow-blur-radius: 0px; /* Static value */
+
+        --drawer-border-width: 1px; /* Static value */
+        --drawer-border-opacity: 1.0; /* Static value */
+        --drawer-shadow-opacity: 0.0; /* Static value */
+        --drawer-shadow-horizontal-offset: 0px; /* Static value */
+        --drawer-shadow-vertical-offset: 0px; /* Static value */
+        --drawer-shadow-blur-radius: 0px; /* Static value */
+
+        --spacing-sections-desktop: 36px; /* Static value */
+        --spacing-sections-mobile: 25px; /* Static value */
+
+        --grid-desktop-vertical-spacing: 36px; /* Static value */
+        --grid-desktop-horizontal-spacing: 36px; /* Static value */
+        --grid-mobile-vertical-spacing: 18px; /* Static value */
+        --grid-mobile-horizontal-spacing: 18px; /* Static value */
+
+        --text-boxes-border-opacity: 1.0; /* Static value */
+        --text-boxes-border-width: 1px; /* Static value */
+        --text-boxes-radius: 0px; /* Static value */
+        --text-boxes-shadow-opacity: 0.0; /* Static value */
+        --text-boxes-shadow-visible: 0; /* Static value */
+        --text-boxes-shadow-horizontal-offset: 0px; /* Static value */
+        --text-boxes-shadow-vertical-offset: 0px; /* Static value */
+        --text-boxes-shadow-blur-radius: 0px; /* Static value */
+
+        --buttons-radius: 0px; /* Static value */
+        --buttons-radius-outset: 0px; /* Static value */
+        --buttons-border-width: 1px; /* Static value */
+        --buttons-border-opacity: 1.0; /* Static value */
+        --buttons-shadow-opacity: 0.0; /* Static value */
+        --buttons-shadow-visible: 0; /* Static value */
+        --buttons-shadow-horizontal-offset: 0px; /* Static value */
+        --buttons-shadow-vertical-offset: 0px; /* Static value */
+        --buttons-shadow-blur-radius: 0px; /* Static value */
+        --buttons-border-offset: 0px; /* Static value */
+
+        --inputs-radius: 0px; /* Static value */
+        --inputs-border-width: 1px; /* Static value */
+        --inputs-border-opacity: 1.0; /* Static value */
+        --inputs-shadow-opacity: 0.0; /* Static value */
+        --inputs-shadow-horizontal-offset: 0px; /* Static value */
+        --inputs-margin-offset: 0px; /* Static value */
+        --inputs-shadow-vertical-offset: 0px; /* Static value */
+        --inputs-shadow-blur-radius: 0px; /* Static value */
+        --inputs-radius-outset: 0px; /* Static value */
+
+        --variant-pills-radius: 0px; /* Static value */
+        --variant-pills-border-width: 1px; /* Static value */
+        --variant-pills-border-opacity: 1.0; /* Static value */
+        --variant-pills-shadow-opacity: 0.0; /* Static value */
+        --variant-pills-shadow-horizontal-offset: 0px; /* Static value */
+        --variant-pills-shadow-vertical-offset: 0px; /* Static value */
+        --variant-pills-shadow-blur-radius: 0px; /* Static value */
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: inherit;
+      }
+
+      html {
+        box-sizing: border-box;
+        font-size: calc(1.0 * 62.5%); /* Static value */
+        height: 100%;
+      }
+
+      body {
+        display: grid;
+        grid-template-rows: auto auto 1fr auto;
+        grid-template-columns: 100%;
+        min-height: 100%;
+        margin: 0;
+        font-size: 1.5rem;
+        letter-spacing: 0.06rem;
+        line-height: calc(1 + 0.8 / 1.0); /* Static value */
+        font-family: Arial, sans-serif; /* Static value */
+        font-style: normal; /* Static value */
+        font-weight: 400; /* Static value */
+      }
+
+      @media screen and (min-width: 750px) {
+        body {
+          font-size: 1.6rem;
+        }
+      }
+    </style>
+
+    <!-- Liquid asset_url filter replaced -->
+    <link rel="stylesheet" href="/base.css">
+    <link rel="stylesheet" href="/component-cart-items.css" media="print" onload="this.media='all'">
+
+    <!-- Cart Drawer Styles -->
+    <!-- Liquid logic removed -->
+    <link rel="stylesheet" href="/component-cart-drawer.css">
+    <link rel="stylesheet" href="/component-cart.css">
+    <link rel="stylesheet" href="/component-totals.css">
+    <link rel="stylesheet" href="/component-price.css">
+    <link rel="stylesheet" href="/component-discounts.css">
+
+    <!-- Font Preloads -->
+    <!-- Liquid logic removed -->
+
+    <!-- Localization -->
+    <!-- Liquid logic removed -->
+    <link rel="stylesheet" href="/component-localization-form.css">
+    <script src="/localization-form.js" defer="defer"></script>
+
+    <!-- Predictive Search -->
+    <!-- Liquid logic removed -->
+    <link rel="stylesheet" href="/component-predictive-search.css" media="print" onload="this.media='all'">
+
+    <script>
+      if (Shopify.designMode) {
+        document.documentElement.classList.add('shopify-design-mode');
+      }
+    </script>
+  </head>
+
+  <body class="gradient"> <!-- Liquid class removed -->
+    <a class="skip-to-content-link button visually-hidden" href="#MainContent">
+      Skip to content <!-- Liquid translation removed -->
+    </a>
+
+    <!-- Cart Drawer -->
+    <!-- Liquid logic and render tag removed -->
+
+    <!-- Header Group -->
+    <!-- Liquid sections tag removed -->
+
+    <main id="MainContent" class="content-for-layout focus-none" role="main" tabindex="-1">
+      <!-- Liquid variable removed -->
+      <h1>Static Content Placeholder</h1> <!-- Placeholder content -->
+    </main>
+
+    <!-- Footer Group -->
+    <!-- Liquid sections tag removed -->
+
+    <ul hidden>
+      <li id="a11y-refresh-page-message">Refresh page <!-- Liquid translation removed --></li>
+      <li id="a11y-new-window-message">Opens in a new window <!-- Liquid translation removed --></li>
+    </ul>
+
+    <script>
+      window.shopUrl = '#'; /* Liquid variable replaced */
+      window.routes = {
+        cart_add_url: '#', /* Liquid variable replaced */
+        cart_change_url: '#', /* Liquid variable replaced */
+        cart_update_url: '#', /* Liquid variable replaced */
+        cart_url: '#', /* Liquid variable replaced */
+        predictive_search_url: '#', /* Liquid variable replaced */
+      };
+
+      window.cartStrings = {
+        error: `Cart error`, /* Liquid translation removed */
+        quantityError: `Cart quantity error`, /* Liquid translation removed */
+      };
+
+      window.variantStrings = {
+        addToCart: `Add to cart`, /* Liquid translation removed */
+        soldOut: `Sold out`, /* Liquid translation removed */
+        unavailable: `Unavailable`, /* Liquid translation removed */
+        unavailable_with_option: `Unavailable with option`, /* Liquid translation removed */
+      };
+
+      window.quickOrderListStrings = {
+        itemsAdded: `Items added`, /* Liquid translation removed */
+        itemAdded: `Item added`, /* Liquid translation removed */
+        itemsRemoved: `Items removed`, /* Liquid translation removed */
+        itemRemoved: `Item removed`, /* Liquid translation removed */
+        viewCart: `View cart`, /* Liquid translation removed */
+        each: `Each`, /* Liquid translation removed */
+        min_error: `Min error`, /* Liquid translation removed */
+        max_error: `Max error`, /* Liquid translation removed */
+        step_error: `Step error`, /* Liquid translation removed */
+      };
+
+      window.accessibilityStrings = {
+        imageAvailable: `Image available`, /* Liquid translation removed */
+        shareSuccess: `Share success`, /* Liquid translation removed */
+        pauseSlideshow: `Pause slideshow`, /* Liquid translation removed */
+        playSlideshow: `Play slideshow`, /* Liquid translation removed */
+        recipientFormExpanded: `Recipient form expanded`, /* Liquid translation removed */
+        recipientFormCollapsed: `Recipient form collapsed`, /* Liquid translation removed */
+        countrySelectorSearchCount: `Country selector search count`, /* Liquid translation removed */
+      };
+    </script>
+
+    <!-- Predictive Search Script -->
+    <!-- Liquid logic removed -->
+    <script src="/predictive-search.js" defer="defer"></script>
+
+    <!-- Cart Drawer Script -->
+    <!-- Liquid logic removed -->
+    <script src="/cart-drawer.js" defer="defer"></script>
+  </body>
+</html>
