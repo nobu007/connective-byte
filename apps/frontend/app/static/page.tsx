@@ -1,14 +1,10 @@
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Static Page',
-};
+import fs from 'fs';
+import path from 'path';
 
 export default function StaticPage() {
+  const htmlContent = fs.readFileSync(path.join(process.cwd(), 'app/static/output.html'), 'utf8');
+
   return (
-    <div className="container">
-      <h1>Static Page</h1>
-      <p>This is a static page.</p>
-    </div>
+    <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
   );
 }
