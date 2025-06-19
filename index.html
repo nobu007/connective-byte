@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B1教育事業 - エンジニアβ受講生募集</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #0f1419 0%, #1a2332 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 80px 0 60px;
+            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .subtitle {
+            font-size: 1.4rem;
+            color: #94a3b8;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .hero .description {
+            font-size: 1.1rem;
+            color: #cbd5e1;
+            max-width: 800px;
+            margin: 0 auto 40px;
+        }
+
+        .beta-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: #000;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .value-props {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin: 60px 0;
+        }
+
+        .value-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 16px;
+            padding: 32px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .value-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.1);
+        }
+
+        .value-card h3 {
+            color: #3b82f6;
+            font-size: 1.4rem;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .value-card p {
+            color: #cbd5e1;
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .selection-criteria {
+            background: rgba(30, 41, 59, 0.4);
+            border-radius: 20px;
+            padding: 48px;
+            margin: 60px 0;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .selection-criteria h2 {
+            color: #3b82f6;
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: 800;
+        }
+
+        .criteria-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .criteria-item {
+            background: rgba(15, 20, 25, 0.6);
+            border-radius: 12px;
+            padding: 24px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .criteria-item h4 {
+            color: #ffffff;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .criteria-item p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        .application-form {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 20px;
+            padding: 48px;
+            margin: 60px 0;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .application-form h2 {
+            color: #06b6d4;
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: 800;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            color: #f1f5f9;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(15, 20, 25, 0.8);
+            border: 1px solid rgba(71, 85, 105, 0.6);
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #06b6d4;
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin: 24px 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-top: 4px;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: #ffffff;
+            border: none;
+            padding: 18px 48px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 40px auto 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(6, 182, 212, 0.3);
+        }
+
+        .timeline {
+            background: rgba(30, 41, 59, 0.4);
+            border-radius: 20px;
+            padding: 48px;
+            margin: 60px 0;
+        }
+
+        .timeline h2 {
+            color: #f59e0b;
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: 800;
+        }
+
+        .timeline-items {
+            display: grid;
+            gap: 24px;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding: 20px;
+            background: rgba(15, 20, 25, 0.4);
+            border-radius: 12px;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .timeline-date {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: #000;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .timeline-content h4 {
+            color: #ffffff;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .timeline-content p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        .exclusive-benefits {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 20px;
+            padding: 48px;
+            margin: 60px 0;
+        }
+
+        .exclusive-benefits h2 {
+            color: #a855f7;
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: 800;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .benefit-item {
+            background: rgba(15, 20, 25, 0.6);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .benefit-item h4 {
+            color: #a855f7;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .benefit-item p {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 0 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <div class="beta-badge">限定β受講生募集</div>
+            <h1>接続思考エンジニア</h1>
+            <p class="subtitle">APIコスト効率×チーム創造力を最大化する</p>
+            <p class="description">
+                1人完結の技術力から、チーム全体の創造システムへ。<br>
+                次世代の技術リーダーシップを確立するβプログラム
+            </p>
+        </div>
+
+        <div class="value-props">
+            <div class="value-card">
+                <h3>🚀 APIコスト効率化</h3>
+                <p>システム設計×コスト最適化の統合思考で、技術判断が経営を左右する時代に対応。月間API費用70%削減の実証手法を習得。</p>
+            </div>
+            <div class="value-card">
+                <h3>🔗 チーム開発システム</h3>
+                <p>個人技術力からチーム創造力へ。人数×Claude N個の創造性を束ねた開発チーム構築手法を実践。</p>
+            </div>
+            <div class="value-card">
+                <h3>📊 データドリブン判断</h3>
+                <p>技術的直感を定量化し、チーム全体で再現可能な判断システムを構築。実証主義に基づく技術リーダーシップ。</p>
+            </div>
+            <div class="value-card">
+                <h3>⚡ 接続可能エンジニア</h3>
+                <p>AIとの協働を最大化し、技術知識をチーム資産に変換。次世代の技術競争力を確立する人材へ。</p>
+            </div>
+        </div>
+
+        <div class="selection-criteria">
+            <h2>β受講生選定基準</h2>
+            <div class="criteria-grid">
+                <div class="criteria-item">
+                    <h4>技術レベル</h4>
+                    <p>3年以上の開発経験、システム設計・アーキテクチャ判断の実務経験</p>
+                </div>
+                <div class="criteria-item">
+                    <h4>チーム経験</h4>
+                    <p>チーム開発・技術リーダーシップ経験、または強い関心と学習意欲</p>
+                </div>
+                <div class="criteria-item">
+                    <h4>フィードバック意欲</h4>
+                    <p>建設的なフィードバック提供、プログラム改善への積極的貢献</p>
+                </div>
+                <div class="criteria-item">
+                    <h4>実証参加</h4>
+                    <p>6週間の実証プログラム完走、週次ミーティング参加</p>
+                </div>
+                <div class="criteria-item">
+                    <h4>データ協力</h4>
+                    <p>学習データ・成果測定への協力、匿名化での事例共有同意</p>
+                </div>
+                <div class="criteria-item">
+                    <h4>技術領域多様性</h4>
+                    <p>Web・モバイル・インフラ・AI/ML等、多様な技術領域からの代表性</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="application-form">
+            <h2>β受講生申込フォーム</h2>
+            <form id="betaApplicationForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="name">氏名 *</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">メールアドレス *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="company">所属会社・組織</label>
+                        <input type="text" id="company" name="company">
+                    </div>
+                    <div class="form-group">
+                        <label for="position">役職・ポジション</label>
+                        <input type="text" id="position" name="position">
+                    </div>
+                    <div class="form-group">
+                        <label for="experience">開発経験年数 *</label>
+                        <select id="experience" name="experience" required>
+                            <option value="">選択してください</option>
+                            <option value="3-5">3-5年</option>
+                            <option value="5-8">5-8年</option>
+                            <option value="8-12">8-12年</option>
+                            <option value="12+">12年以上</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tech-stack">主要技術スタック *</label>
+                        <select id="tech-stack" name="tech-stack" required>
+                            <option value="">選択してください</option>
+                            <option value="frontend">フロントエンド (React/Vue/Angular等)</option>
+                            <option value="backend">バックエンド (Node.js/Python/Java等)</option>
+                            <option value="fullstack">フルスタック</option>
+                            <option value="mobile">モバイル (iOS/Android/React Native等)</option>
+                            <option value="infrastructure">インフラ・DevOps (AWS/GCP/Azure等)</option>
+                            <option value="aiml">AI/ML・データサイエンス</option>
+                            <option value="other">その他</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="technical-background">技術的背景・専門領域 *</label>
+                        <textarea id="technical-background" name="technical-background" placeholder="開発経験、技術スタック、担当プロジェクト、技術的強み等を具体的に記載" required></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="team-experience">チーム開発・リーダーシップ経験 *</label>
+                        <textarea id="team-experience" name="team-experience" placeholder="チーム規模、リーダーシップ役割、技術判断・意思決定経験等を記載" required></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="api-cost-awareness">APIコスト・効率化への関心・経験</label>
+                        <textarea id="api-cost-awareness" name="api-cost-awareness" placeholder="API設計・コスト最適化経験、関心、課題感等があれば記載"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="motivation">β参加動機・期待する成果 *</label>
+                        <textarea id="motivation" name="motivation" placeholder="なぜβプログラムに参加したいか、どのような成果を期待するか、チーム開発への課題意識等" required></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="availability">参加可能性・時間確保 *</label>
+                        <textarea id="availability" name="availability" placeholder="6週間プログラム、週次ミーティング、フィードバック提供への参加可能性と時間確保状況" required></textarea>
+                    </div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="data-consent" name="data-consent" required>
+                    <label for="data-consent">
+                        学習データ・成果測定への協力、匿名化での事例共有に同意します *
+                    </label>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="feedback-commitment" name="feedback-commitment" required>
+                    <label for="feedback-commitment">
+                        建設的なフィードバック提供、プログラム改善への積極的貢献を約束します *
+                    </label>
+                </div>
+
+                <button type="submit" class="submit-btn">β受講生に申し込む</button>
+            </form>
+        </div>
+
+        <div class="timeline">
+            <h2>β実証プログラム・スケジュール</h2>
+            <div class="timeline-items">
+                <div class="timeline-item">
+                    <div class="timeline-date">6/17-19</div>
+                    <div class="timeline-content">
+                        <h4>β受講生選定・確定</h4>
+                        <p>申込者から技術背景・動機・参加可能性を総合評価し、10名を選定</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">6/20</div>
+                    <div class="timeline-content">
+                        <h4>βプログラム開始</h4>
+                        <p>キックオフミーティング、技術診断、個別最適化プログラム提供</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">6/20-7/31</div>
+                    <div class="timeline-content">
+                        <h4>6週間実証プログラム</h4>
+                        <p>週次ミーティング、実践課題、リアルタイムフィードバック収集</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">8/1-15</div>
+                    <div class="timeline-content">
+                        <h4>結果分析・改善実装</h4>
+                        <p>β実証結果の分析、フィードバック統合、本格版プログラム完成</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="exclusive-benefits">
+            <h2>β受講生限定特典</h2>
+            <div class="benefits-grid">
+                <div class="benefit-item">
+                    <h4>🎯 完全無料参加</h4>
+                    <p>本格版¥100,000相当のプログラムを完全無料で受講可能</p>
+                </div>
+                <div class="benefit-item">
+                    <h4>🔧 個別カスタマイズ</h4>
+                    <p>技術スタック・キャリア目標に応じた完全個別最適化プログラム</p>
+                </div>
+                <div class="benefit-item">
+                    <h4>📊 直接フィードバック</h4>
+                    <p>開発者との直接対話、リアルタイム改善、優先的サポート</p>
+                </div>
+                <div class="benefit-item">
+                    <h4>🚀 先行者優位</h4>
+                    <p>業界最先端手法の先行習得、技術リーダーシップ確立の機会</p>
+                </div>
+                <div class="benefit-item">
+                    <h4>🤝 エリートネットワーク</h4>
+                    <p>選抜されたエンジニア10名とのネットワーク構築機会</p>
+                </div>
+                <div class="benefit-item">
+                    <h4>📈 成果保証</h4>
+                    <p>6週間で明確な技術的成長・チーム効率化成果を保証</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // フォーム送信処理
+        document.getElementById('betaApplicationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // フォームデータ収集
+            const formData = new FormData(this);
+            const applicationData = {};
+            
+            for (let [key, value] of formData.entries()) {
+                applicationData[key] = value;
+            }
+            
+            // 送信中表示
+            const submitBtn = document.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '送信中...';
+            submitBtn.disabled = true;
+            
+            // 模擬送信処理（実際はAPIエンドポイントに送信）
+            setTimeout(() => {
+                alert('β受講生申込を受け付けました！\n\n選定結果は6/19までにメールでご連絡いたします。\n技術的権威性と実証への貢献意欲を重視して選定いたします。');
+                
+                // フォームリセット
+                this.reset();
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                
+                // データをローカルストレージに保存（実際はデータベースに保存）
+                const applications = JSON.parse(localStorage.getItem('betaApplications') || '[]');
+                applications.push({
+                    ...applicationData,
+                    timestamp: new Date().toISOString(),
+                    id: Date.now()
+                });
+                localStorage.setItem('betaApplications', JSON.stringify(applications));
+                
+                console.log('β受講生申込データ:', applicationData);
+            }, 1500);
+        });
+
+        // エンゲージメント測定
+        window.addEventListener('load', function() {
+            console.log('β募集ページ読み込み完了');
+            
+            // スクロール追跡
+            let maxScroll = 0;
+            window.addEventListener('scroll', function() {
+                const scrollPercent = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+                if (scrollPercent > maxScroll) {
+                    maxScroll = scrollPercent;
+                }
+            });
+            
+            // ページ離脱時の測定
+            window.addEventListener('beforeunload', function() {
+                console.log('最大スクロール率:', maxScroll + '%');
+                console.log('滞在時間:', Math.round((Date.now() - window.loadTime) / 1000) + '秒');
+            });
+            
+            window.loadTime = Date.now();
+        });
+    </script>
+</body>
+</html>
