@@ -1,0 +1,44 @@
+{
+  "name": "connective-byte",
+  "version": "1.0.0",
+  "description": "ConnectiveByteは、モダンなWeb開発の基盤となる包括的なフレームワークです。",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "serve .",
+    "test": "start-server-and-test start http-get://localhost:3000 test:all",
+    "test:all": "npm-run-all --parallel lint:* test:html test:a11y",
+    "test:html": "html-validate index.html",
+    "test:a11y": "axe http://localhost:3000",
+    "lint": "npm-run-all --parallel lint:*",
+    "lint:css": "stylelint '**/*.css' --fix",
+    "lint:js": "eslint .",
+    "format": "prettier --write ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nobu007/connective-byte.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/nobu007/connective-byte/issues"
+  },
+  "homepage": "https://github.com/nobu007/connective-byte#readme",
+  "devDependencies": {
+    "@axe-core/cli": "^4.10.2",
+    "eslint": "^9.29.0",
+    "eslint-config-prettier": "^10.1.5",
+    "html-validate": "^9.7.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.6.0",
+    "serve": "^14.2.4",
+    "start-server-and-test": "^2.0.12",
+    "stylelint": "^16.21.0",
+    "stylelint-config-standard": "^38.0.0"
+  }
+}
