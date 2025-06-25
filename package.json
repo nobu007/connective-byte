@@ -9,6 +9,8 @@
   "scripts": {
     "start": "serve .",
     "test": "start-server-and-test start http-get://localhost:3000 test:all",
+    "minify": "html-minifier --input-dir . --output-dir dist --file-ext html --remove-comments --collapse-whitespace --minify-js true --minify-css true",
+    "build": "npm test && npm run minify",
     "test:all": "npm-run-all --parallel lint:* test:html test:a11y",
     "test:html": "html-validate index.html",
     "test:a11y": "axe http://localhost:3000",
@@ -33,6 +35,7 @@
     "@axe-core/cli": "^4.10.2",
     "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.1.5",
+    "html-minifier": "^4.0.0",
     "html-validate": "^9.7.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^3.6.0",
