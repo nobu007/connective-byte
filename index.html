@@ -388,26 +388,100 @@
             </section>
 
             <section class="selection-criteria">
-                <h2>[Placeholder] β受講生選定基準</h2>
-                <!-- Criteria items will be added here -->
+                <h2>β受講生選定基準</h2>
+                <div class="criteria-grid">
+                    <div class="criteria-item">
+                        <h3>こんな方を求めています</h3>
+                        <p>3年以上の開発経験、システム設計・アーキテクチャ判断の実務経験</p>
+                    </div>
+                    <div class="criteria-item">
+                        <h3>チーム経験</h3>
+                        <p>チーム開発・技術リーダーシップ経験、または強い関心と学習意欲</p>
+                    </div>
+                </div>
             </section>
 
             <section class="application-form">
-                <h2>[Placeholder] βプログラムに申し込む</h2>
-                <form id="beta-application-form">
-                    <!-- Form fields will be added here -->
+                <h2>βプログラムに申し込む</h2>
+                <form id="betaApplicationForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="name">氏名</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">メールアドレス</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="experience">開発経験年数</label>
+                            <select id="experience" name="experience" required>
+                                <option value="">選択してください</option>
+                                <option value="1-2">1-2年</option>
+                                <option value="3-5">3-5年</option>
+                                <option value="6-10">6-10年</option>
+                                <option value="10+">10年以上</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="reason">応募動機</label>
+                            <textarea id="reason" name="reason" rows="5" required></textarea>
+                        </div>
+                    </div>
                     <button type="submit" class="submit-btn">β受講生に申し込む</button>
                 </form>
             </section>
 
             <section class="timeline">
-                <h2>[Placeholder] β実証プログラム・スケジュール</h2>
-                <!-- Timeline items will be added here -->
+                <h2>β実証プログラム・スケジュール</h2>
+                <div class="timeline-items">
+                    <div class="timeline-item">
+                        <div class="timeline-date">6/10-16</div>
+                        <div class="timeline-content">
+                            <h3>β受講生募集</h3>
+                            <p>応募期間となります。</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">6/17-19</div>
+                        <div class="timeline-content">
+                            <h3>β受講生選定・確定</h3>
+                            <p>選定結果をご連絡します。</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">6/24</div>
+                        <div class="timeline-content">
+                            <h3>プログラム開始</h3>
+                            <p>オリエンテーションと第1回セッションを実施します。</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">7/29</div>
+                        <div class="timeline-content">
+                            <h3>プログラム終了</h3>
+                            <p>最終成果発表とフィードバックセッション。</p>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <section class="exclusive-benefits">
-                <h2>[Placeholder] 参加者限定の特典</h2>
-                <!-- Benefit items will be added here -->
+                <h2>参加者限定の特典</h2>
+                <div class="benefits-grid">
+                    <div class="benefit-item">
+                        <h3>🎯 完全無料参加</h3>
+                        <p>本格版¥100,000相当のプログラムを完全無料で受講可能</p>
+                    </div>
+                    <div class="benefit-item">
+                        <h3>🤝 エリートネットワーク</h3>
+                        <p>選抜されたエンジニア10名とのネットワーク構築機会</p>
+                    </div>
+                    <div class="benefit-item">
+                        <h3>🚀 圧倒的な成長機会</h3>
+                        <p>6週間で明確な技術的成長・チーム効率化成果を保証</p>
+                    </div>
+                </div>
             </section>
         </div>
     </main>
@@ -419,7 +493,70 @@
     </footer>
 
     <script>
-        // Script content will be added later
+        // フォーム送信処理
+        document.getElementById('betaApplicationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // フォームデータ収集
+            const formData = new FormData(this);
+            const applicationData = {};
+            
+            for (let [key, value] of formData.entries()) {
+                applicationData[key] = value;
+            }
+            
+            // 送信中表示
+            const submitBtn = document.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '送信中...';
+            submitBtn.disabled = true;
+            
+            // 模擬送信処理（実際はAPIエンドポイントに送信）
+            setTimeout(() => {
+                alert('β受講生申込を受け付けました！\n\n選定結果は6/19までにメールでご連絡いたします。\n技術的権威性と実証への貢献意欲を重視して選定いたします。');
+                
+                // フォームリセット
+                this.reset();
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                
+                // データをローカルストレージに保存（実際はデータベースに保存）
+                const applications = JSON.parse(localStorage.getItem('betaApplications') || '[]');
+                applications.push({
+                    ...applicationData,
+                    timestamp: new Date().toISOString(),
+                    id: Date.now()
+                });
+                localStorage.setItem('betaApplications', JSON.stringify(applications));
+                
+                console.log('β受講生申込データ:', applicationData);
+            }, 1500);
+        });
+
+        // エンゲージメント測定
+        window.addEventListener('load', function() {
+            console.log('β募集ページ読み込み完了');
+            
+            // スクロール追跡
+            let maxScroll = 0;
+            window.addEventListener('scroll', function() {
+                const scrollPercent = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+                if (scrollPercent > maxScroll) {
+                    maxScroll = scrollPercent;
+                }
+            });
+            
+            // ページ離脱時の測定
+            window.addEventListener('beforeunload', function() {
+                console.log('最大スクロール率:', maxScroll + '%');
+                // a small bug fix from the original script
+                if (window.loadTime) {
+                    console.log('滞在時間:', Math.round((Date.now() - window.loadTime) / 1000) + '秒');
+                }
+            });
+            
+            window.loadTime = Date.now();
+        });
     </script>
 </body>
 </html>
