@@ -2,9 +2,16 @@
   "name": "backend",
   "version": "1.0.0",
   "scripts": {
-    "liquid-to-html": "node src/liquid-to-html.js"
+    "liquid-to-html": "node src/liquid-to-html.js",
+    "dev": "ts-node src/index.ts"
   },
   "dependencies": {
+    "@types/express": "^5.0.3",
+    "express": "^5.1.0",
     "liquidjs": "^10.0.0"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   }
 }
