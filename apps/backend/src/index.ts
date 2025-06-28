@@ -5,7 +5,7 @@ const PORT = 3001;
 
 app.use(express.json());
 
-app.get('/health', (req: Request, res: Response) => {
+app.get('/api/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'healthy' });
 });
 
