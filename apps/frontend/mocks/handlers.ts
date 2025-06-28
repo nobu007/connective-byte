@@ -9,3 +9,12 @@ export const handlers = [
     )
   }),
 ]
+
+export const errorHandlers = [
+  rest.get('/api/health', (req, res, ctx) => {
+    return res(
+      ctx.status(500),
+      ctx.json({ message: 'Internal Server Error' })
+    )
+  }),
+]
