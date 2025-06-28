@@ -7,7 +7,12 @@ export default function HealthCheck() {
 
   useEffect(() => {
     fetch('/api/health')
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('API Error');
+        }
+        return res.json();
+      })
       .then((data) => setStatus(data.status))
       .catch(() => setStatus('error'));
   }, []);
