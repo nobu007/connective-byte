@@ -8,3 +8,12 @@ build/
 .env.production
 .DS_Store
 *.log
+
+# Local work instructions
+/IMPROVEMENT_WORK_INSTRUCTIONS.md
+
+# Test coverage reports
+/apps/backend/coverage/
+
+# E2E test reports
+/apps/frontend/playwright-report/
