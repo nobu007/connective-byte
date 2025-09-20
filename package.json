@@ -15,7 +15,7 @@
     "test:html": "html-validate index.html",
     "test:a11y": "axe http://localhost:3000",
     "lint": "npm-run-all --parallel lint:*",
-    "lint:css": "stylelint '**/*.css' --fix",
+    "lint:css": "stylelint '**/*.css' --ignore-path .gitignore --ignore-pattern '**/coverage/**' --fix",
     "lint:js": "eslint .",
     "format": "prettier --write ."
   },
