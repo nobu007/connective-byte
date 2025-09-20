@@ -6,6 +6,9 @@ import 'whatwg-fetch';
 import '@testing-library/jest-dom';
 import { server } from './mocks/server';
 
+// Import Jest globals
+import { beforeAll, afterEach, afterAll } from '@jest/globals';
+
 // Establish API mocking before all tests.
 beforeAll(() => server.listen());
 
