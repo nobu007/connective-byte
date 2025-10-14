@@ -7,6 +7,7 @@
 
 import { BaseService } from '../common/base/BaseService';
 import { HealthStatus, HealthCheck, ServiceResult } from '../common/types';
+import { loggingService } from './loggingService';
 
 /**
  * Health check function type
@@ -16,12 +17,14 @@ export type HealthCheckFunction = () => Promise<HealthCheck>;
 /**
  * Enhanced Health Service using BaseService
  * Provides extensible health checking with multiple checks
+ * Uses centralized logging service for structured logging
  */
 export class HealthService extends BaseService {
   private healthChecks: Map<string, HealthCheckFunction> = new Map();
 
   constructor() {
-    super('HealthService');
+    // Use centralized logging service
+    super('HealthService', loggingService.createLogger('HealthService'));
     this.registerDefaultChecks();
   }
 

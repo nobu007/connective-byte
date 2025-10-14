@@ -8,14 +8,17 @@
 import { Request, Response } from 'express';
 import { BaseController } from '../common/base/BaseController';
 import { healthService } from '../services/healthService';
+import { loggingService } from '../services/loggingService';
 
 /**
  * Enhanced Health Controller using BaseController
  * Provides consistent response formatting and error handling
+ * Uses centralized logging service for structured logging
  */
 class HealthController extends BaseController {
   constructor() {
-    super('HealthController');
+    // Use centralized logging service
+    super('HealthController', loggingService.createLogger('HealthController'));
   }
 
   /**

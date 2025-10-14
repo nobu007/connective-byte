@@ -5,7 +5,7 @@
  *
  * Benefits:
  * - Consistent error handling across all services
- * - Built-in logging capability
+ * - Built-in logging capability with structured logging
  * - Standardized result wrapping
  * - Reusable validation patterns
  */
@@ -18,6 +18,8 @@ export abstract class BaseService {
 
   constructor(serviceName: string, logger?: Logger) {
     this.serviceName = serviceName;
+    // Use provided logger or create default logger
+    // LoggingService will be integrated later to avoid circular dependency
     this.logger = logger || this.createDefaultLogger();
   }
 
