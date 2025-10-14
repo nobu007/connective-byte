@@ -9,11 +9,12 @@ describe('HealthCheck Component', () => {
     render(<HealthCheck />);
 
     // Initially, it should show loading
-    expect(screen.getByText('API Status: loading...')).toBeInTheDocument();
+    expect(screen.getByText(/API Status: loading/i)).toBeInTheDocument();
 
-    // After the fetch is mocked and completes, it should show the healthy status
+    // After the fetch is mocked and completes, it should show the success status
     await waitFor(() => {
-      expect(screen.getByText('API Status: healthy')).toBeInTheDocument();
+      expect(screen.getByText(/API Status: success/i)).toBeInTheDocument();
+      expect(screen.getByText(/Backend status: ok/i)).toBeInTheDocument();
     });
   });
 
@@ -24,11 +25,12 @@ describe('HealthCheck Component', () => {
     render(<HealthCheck />);
 
     // Initially, it should show loading
-    expect(screen.getByText('API Status: loading...')).toBeInTheDocument();
+    expect(screen.getByText(/API Status: loading/i)).toBeInTheDocument();
 
     // After the fetch fails, it should show the error status
     await waitFor(() => {
-      expect(screen.getByText('API Status: error')).toBeInTheDocument();
+      expect(screen.getByText(/API Status: error/i)).toBeInTheDocument();
+      expect(screen.getByText(/Failed to connect/i)).toBeInTheDocument();
     });
   });
 });

@@ -1,31 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useHealthCheck } from './hooks/useHealthCheck';
 
 export default function Home() {
-  const [status, setStatus] = useState('loading');
-  const [message, setMessage] = useState('Connecting to backend...');
-
-  useEffect(() => {
-    const fetchHealth = async () => {
-      try {
-        console.log('--- FETCHING API STATUS ---');
-        const response = await fetch('/api/health');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setStatus('success');
-        setMessage(`Backend status: ${data.status}`);
-      } catch (error) {
-        setStatus('error');
-        setMessage('Failed to connect to the backend.');
-        console.error('Error fetching health:', error);
-      }
-    };
-
-    fetchHealth();
-  }, []);
+  const { status, message } = useHealthCheck();
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
