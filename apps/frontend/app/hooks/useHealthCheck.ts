@@ -7,7 +7,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { fetchHealthStatus } from '../../../../libs/logic/api/health';
+import { fetchHealthStatus } from '@libs/logic';
 
 export type HealthStatus = 'loading' | 'success' | 'error';
 

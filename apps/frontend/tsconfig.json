@@ -19,7 +19,11 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@libs/logic": ["../../libs/logic/index.ts"],
+      "@libs/logic/*": ["../../libs/logic/*"],
+      "@libs/components": ["../../libs/components/index.ts"],
+      "@libs/components/*": ["../../libs/components/*"]
     },
     "types": ["jest"]
   },

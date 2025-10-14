@@ -1,16 +1,11 @@
 'use client';
 
 import { useHealthCheck } from './hooks/useHealthCheck';
-
-const statusConfig = {
-  loading: { bg: 'bg-yellow-200', text: 'text-yellow-900' },
-  success: { bg: 'bg-green-200', text: 'text-green-900' },
-  error: { bg: 'bg-red-200', text: 'text-red-900' },
-};
+import { getStatusConfig } from '@libs/components/config/statusConfig';
 
 export default function Home() {
   const { status, message } = useHealthCheck();
-  const config = statusConfig[status] || statusConfig.error;
+  const config = getStatusConfig(status);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
