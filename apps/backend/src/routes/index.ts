@@ -6,8 +6,14 @@
 
 import { Router } from 'express';
 import healthRoutes from './healthRoutes';
+import { handleRoot } from '../controllers/healthController';
 
 const router = Router();
+
+/**
+ * Root route
+ */
+router.get('/', handleRoot);
 
 /**
  * Register all application routes

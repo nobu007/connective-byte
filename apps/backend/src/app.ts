@@ -22,11 +22,6 @@ export function createApp(): Application {
   // Routes
   app.use(routes);
 
-  // Root route
-  app.get('/', (req, res) => {
-    res.send('Hello from backend!');
-  });
-
   // Error handling
   app.use(notFoundHandler);
   app.use(errorHandler);
