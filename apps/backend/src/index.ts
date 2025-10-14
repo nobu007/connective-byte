@@ -1,24 +1,17 @@
-import express, { Request, Response } from 'express';
+/**
+ * Server Entry Point
+ * Starts the Express server
+ * Following clean architecture - separates app setup from server startup
+ */
 
-const app = express();
-const port = process.env.PORT || 3001;
-
-// Middlewares
-app.use(express.json());
-
-// API Routes
-app.get('/api/health', (req: Request, res: Response) => {
-  res.status(200).json({ status: 'ok' });
-});
-
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello from backend!');
-});
+import app from './app';
+import { config } from './config';
 
 // Start server only if not in test environment
-if (process.env.NODE_ENV !== 'test') {
-  app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+if (!config.isTest) {
+  app.listen(config.port, () => {
+    console.log(`Server is running on http://localhost:${config.port}`);
+    console.log(`Environment: ${config.environment}`);
   });
 }
 

@@ -13,6 +13,11 @@ const config = {
   testPathIgnorePatterns: ['/node_modules/', '/e2e/'],
   // Add more setup options before each test is run
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  // Module path mapping for monorepo structure
+  moduleDirectories: ['node_modules', '<rootDir>/../..'],
+  testEnvironmentOptions: {
+    customExportConditions: [''],
+  },
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

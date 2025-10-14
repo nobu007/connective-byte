@@ -4,23 +4,33 @@
  * Following single responsibility principle - handles only API communication
  */
 
+import { fetchWithRetry } from '../utils/fetchWithRetry';
+import { API_ENDPOINTS } from '../config/apiConfig';
+
 export interface HealthCheckResponse {
   status: string;
+  timestamp?: string;
+  uptime?: number;
 }
 
 export interface HealthCheckResult {
   success: boolean;
   status: string;
+  timestamp?: string;
+  uptime?: number;
   error?: string;
 }
 
 /**
- * Fetches health status from the backend API
+ * Fetches health status from the backend API with automatic retry
  * @returns Promise with health check result
  */
 export async function fetchHealthStatus(): Promise<HealthCheckResult> {
   try {
-    const response = await fetch('/api/health');
+    const response = await fetchWithRetry(API_ENDPOINTS.health, {
+      retryAttempts: 2, // Fewer retries for health checks
+      retryDelay: 500,
+    });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -31,6 +41,8 @@ export async function fetchHealthStatus(): Promise<HealthCheckResult> {
     return {
       success: true,
       status: data.status,
+      timestamp: data.timestamp,
+      uptime: data.uptime,
     };
   } catch (error) {
     console.error('Error fetching health:', error);
