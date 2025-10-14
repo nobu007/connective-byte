@@ -75,3 +75,45 @@ export interface Logger {
   warn(message: string, meta?: Record<string, unknown>): void;
   debug(message: string, meta?: Record<string, unknown>): void;
 }
+
+/**
+ * Log levels in order of severity
+ */
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+
+/**
+ * Log entry structure
+ * Internal representation of a log entry before formatting
+ */
+export interface LogEntry {
+  level: LogLevel;
+  message: string;
+  context: string;
+  timestamp: Date;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Log formatter interface
+ * Transforms log entries into formatted strings
+ */
+export interface LogFormatter {
+  format(entry: LogEntry): string;
+}
+
+/**
+ * Log transport interface
+ * Handles output of formatted logs to destinations
+ */
+export interface LogTransport {
+  log(formatted: string, level: LogLevel): void;
+}
+
+/**
+ * Logging configuration
+ */
+export interface LoggingConfig {
+  level: LogLevel;
+  format: 'json' | 'pretty';
+  transports: string[];
+}
