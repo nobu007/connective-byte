@@ -4,3 +4,4 @@
  */
 
 export { ConsoleTransport } from './ConsoleTransport';
+export { FileTransport, type FileTransportOptions } from './FileTransport';
