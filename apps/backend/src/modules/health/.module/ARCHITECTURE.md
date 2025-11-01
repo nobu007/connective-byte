@@ -38,6 +38,7 @@ The Health Check module follows clean architecture principles with clear separat
 ### HealthService (Core Business Logic)
 
 **Responsibilities:**
+
 - Register and manage health check functions
 - Execute all checks in parallel for performance
 - Aggregate individual check results
@@ -45,34 +46,40 @@ The Health Check module follows clean architecture principles with clear separat
 - Provide extensibility through check registration
 
 **Dependencies:**
+
 - BaseService (common/base)
 - HealthStatus, HealthCheck types (common/types)
 
 **Extension Points:**
+
 - `registerCheck(name, fn)` - Add custom health checks
 - `unregisterCheck(name)` - Remove health checks
 
 ### HealthController (HTTP Interface)
 
 **Responsibilities:**
+
 - Handle HTTP requests for health endpoint
 - Format responses using BaseController
 - Map health status to HTTP status codes (200 OK, 503 Service Unavailable)
 - Handle errors gracefully
 
 **Dependencies:**
+
 - BaseController (common/base)
 - HealthService (services)
 
 ### Base Infrastructure
 
 **BaseService:**
+
 - Provides `executeOperation()` for automatic error handling
 - Built-in logging with context
 - Performance tracking (duration)
 - Standardized result wrapping
 
 **BaseController:**
+
 - Provides `executeAction()` for request handling
 - Standardized success/error responses
 - Automatic error-to-HTTP-status mapping
@@ -110,7 +117,7 @@ healthService.registerCheck('database', async () => {
   return {
     name: 'database',
     status: connected ? 'ok' : 'error',
-    message: connected ? 'Connected' : 'Connection failed'
+    message: connected ? 'Connected' : 'Connection failed',
   };
 });
 ```

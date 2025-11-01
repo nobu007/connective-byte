@@ -21,10 +21,7 @@ class TestService extends BaseService {
     return this.executeOperation(operation, context);
   }
 
-  public testExecuteSync<T>(
-    operation: () => T,
-    context?: string
-  ): ServiceResult<T> {
+  public testExecuteSync<T>(operation: () => T, context?: string): ServiceResult<T> {
     return this.executeSync(operation, context);
   }
 
@@ -75,9 +72,7 @@ describe('BaseService', () => {
       expect(result.metadata?.duration).toBeGreaterThanOrEqual(0);
       expect(operation).toHaveBeenCalledTimes(1);
 
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        'TestService: Starting testOp'
-      );
+      expect(mockLogger.debug).toHaveBeenCalledWith('TestService: Starting testOp');
       expect(mockLogger.info).toHaveBeenCalledWith(
         'TestService: testOp completed',
         expect.objectContaining({
@@ -111,9 +106,7 @@ describe('BaseService', () => {
 
       await service.testExecuteOperation(operation);
 
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        'TestService: Starting operation'
-      );
+      expect(mockLogger.debug).toHaveBeenCalledWith('TestService: Starting operation');
       expect(mockLogger.info).toHaveBeenCalledWith(
         'TestService: operation completed',
         expect.any(Object)
@@ -132,9 +125,11 @@ describe('BaseService', () => {
 
     it('should track operation duration accurately', async () => {
       const delay = 50; // 50ms delay
-      const operation = jest.fn().mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve('data'), delay))
-      );
+      const operation = jest
+        .fn()
+        .mockImplementation(
+          () => new Promise((resolve) => setTimeout(() => resolve('data'), delay))
+        );
 
       const result = await service.testExecuteOperation(operation);
 
@@ -154,13 +149,10 @@ describe('BaseService', () => {
       expect(result.data).toEqual(mockData);
       expect(operation).toHaveBeenCalledTimes(1);
 
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        'TestService: Starting syncOp'
-      );
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'TestService: syncOp completed',
-        { success: true }
-      );
+      expect(mockLogger.debug).toHaveBeenCalledWith('TestService: Starting syncOp');
+      expect(mockLogger.info).toHaveBeenCalledWith('TestService: syncOp completed', {
+        success: true,
+      });
     });
 
     it('should handle sync operation errors gracefully', () => {
@@ -174,10 +166,7 @@ describe('BaseService', () => {
       expect(result.success).toBe(false);
       expect(result.error).toBe(mockError);
 
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        'TestService: failSyncOp failed',
-        mockError
-      );
+      expect(mockLogger.error).toHaveBeenCalledWith('TestService: failSyncOp failed', mockError);
     });
 
     it('should use default context for sync operations', () => {
@@ -185,9 +174,7 @@ describe('BaseService', () => {
 
       service.testExecuteSync(operation);
 
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        'TestService: Starting operation'
-      );
+      expect(mockLogger.debug).toHaveBeenCalledWith('TestService: Starting operation');
     });
 
     it('should handle non-Error exceptions in sync operations', () => {
@@ -267,10 +254,7 @@ describe('BaseService', () => {
 
       logger.info('Test message', { meta: 'data' });
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        '[INFO] Test message',
-        { meta: 'data' }
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith('[INFO] Test message', { meta: 'data' });
     });
 
     it('should log error messages with default logger', () => {
@@ -280,11 +264,9 @@ describe('BaseService', () => {
 
       logger.error('Error occurred', error, { context: 'test' });
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[ERROR] Error occurred',
-        'Test error',
-        { context: 'test' }
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith('[ERROR] Error occurred', 'Test error', {
+        context: 'test',
+      });
     });
 
     it('should log warn messages with default logger', () => {
@@ -293,10 +275,7 @@ describe('BaseService', () => {
 
       logger.warn('Warning message', { level: 'low' });
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        '[WARN] Warning message',
-        { level: 'low' }
-      );
+      expect(consoleWarnSpy).toHaveBeenCalledWith('[WARN] Warning message', { level: 'low' });
     });
 
     it('should log debug messages in non-production with default logger', () => {
@@ -308,10 +287,7 @@ describe('BaseService', () => {
 
       logger.debug('Debug message', { detail: 'info' });
 
-      expect(consoleDebugSpy).toHaveBeenCalledWith(
-        '[DEBUG] Debug message',
-        { detail: 'info' }
-      );
+      expect(consoleDebugSpy).toHaveBeenCalledWith('[DEBUG] Debug message', { detail: 'info' });
 
       process.env.NODE_ENV = originalEnv;
     });
@@ -366,9 +342,9 @@ describe('BaseService', () => {
         id: 1,
         nested: {
           array: [1, 2, 3],
-          object: { key: 'value' }
+          object: { key: 'value' },
         },
-        date: new Date('2025-01-01')
+        date: new Date('2025-01-01'),
       };
       const operation = jest.fn().mockResolvedValue(complexData);
 

@@ -41,8 +41,7 @@ export class LoggingService extends BaseService {
 
     // Initialize configuration from environment
     this.logLevel = this.getLogLevelFromEnv();
-    this.format =
-      process.env.LOG_FORMAT === 'json' ? 'json' : 'pretty';
+    this.format = process.env.LOG_FORMAT === 'json' ? 'json' : 'pretty';
 
     // Initialize formatters
     this.formatters = new Map<string, LogFormatter>();
@@ -126,9 +125,7 @@ export class LoggingService extends BaseService {
    * @param metadata - User-provided metadata
    * @returns Enriched metadata
    */
-  private enrichMetadata(
-    metadata?: Record<string, unknown>
-  ): Record<string, unknown> {
+  private enrichMetadata(metadata?: Record<string, unknown>): Record<string, unknown> {
     return {
       ...metadata,
       service: 'backend',

@@ -44,6 +44,7 @@ The Logging module follows clean architecture principles with clear separation b
 ### LoggingService (Core Business Logic)
 
 **Responsibilities:**
+
 - Filter logs based on configured log level
 - Enrich log entries with metadata (timestamp, service name, etc.)
 - Apply formatters to log entries
@@ -51,10 +52,12 @@ The Logging module follows clean architecture principles with clear separation b
 - Provide centralized logging interface
 
 **Dependencies:**
+
 - BaseService (common/base)
 - Logger type (common/types)
 
 **Extension Points:**
+
 - `registerFormatter(name, fn)` - Add custom log formatters
 - `registerTransport(name, transport)` - Add custom log destinations
 - `setLogLevel(level)` - Change log level at runtime
@@ -62,17 +65,20 @@ The Logging module follows clean architecture principles with clear separation b
 ### LoggingController (HTTP Interface - Optional)
 
 **Responsibilities:**
+
 - Provide API endpoint for log configuration
 - Allow runtime log level changes
 - Expose logging metrics (optional)
 
 **Dependencies:**
+
 - BaseController (common/base)
 - LoggingService (services)
 
 ### Formatters
 
 **JsonFormatter:**
+
 ```typescript
 {
   "level": "info",
@@ -87,6 +93,7 @@ The Logging module follows clean architecture principles with clear separation b
 ```
 
 **PrettyFormatter:**
+
 ```
 [2025-10-15 12:34:56] INFO backend: Request processed
   requestId: abc-123
@@ -132,7 +139,7 @@ import { loggingService } from '../services/loggingService';
 loggingService.registerTransport('file', {
   log: (formatted) => {
     fs.appendFileSync('/var/log/app.log', formatted + '\n');
-  }
+  },
 });
 ```
 
@@ -143,7 +150,7 @@ import { createLogger } from '../services/loggingService';
 
 const requestLogger = createLogger({
   requestId: req.id,
-  userId: req.user?.id
+  userId: req.user?.id,
 });
 
 requestLogger.info('User action', { action: 'login' });
@@ -169,12 +176,12 @@ requestLogger.info('User action', { action: 'login' });
 
 ```typescript
 // Development
-LOG_LEVEL=debug
-LOG_FORMAT=pretty
+LOG_LEVEL = debug;
+LOG_FORMAT = pretty;
 
 // Production
-LOG_LEVEL=info
-LOG_FORMAT=json
+LOG_LEVEL = info;
+LOG_FORMAT = json;
 ```
 
 ## Future Enhancements

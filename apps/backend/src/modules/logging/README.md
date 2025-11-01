@@ -154,12 +154,12 @@ Output
 
 ## Log Levels
 
-| Level | Usage | Output |
-|-------|-------|--------|
-| `debug` | Detailed debugging information | stdout |
-| `info` | General informational messages | stdout |
-| `warn` | Warning messages (degraded state) | stderr |
-| `error` | Error messages (failure state) | stderr |
+| Level   | Usage                             | Output |
+| ------- | --------------------------------- | ------ |
+| `debug` | Detailed debugging information    | stdout |
+| `info`  | General informational messages    | stdout |
+| `warn`  | Warning messages (degraded state) | stderr |
+| `error` | Error messages (failure state)    | stderr |
 
 ## Best Practices
 

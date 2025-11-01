@@ -19,23 +19,25 @@ HealthController (controllers/healthController.ts)
 **Location:** `apps/backend/src/services/healthService.ts`
 
 **Class Definition:**
+
 ```typescript
 class HealthService extends BaseService {
-  private healthChecks: Map<string, HealthCheckFunction>
+  private healthChecks: Map<string, HealthCheckFunction>;
 
-  constructor()
-  registerCheck(name: string, checkFn: HealthCheckFunction): void
-  unregisterCheck(name: string): void
-  getHealthStatus(): Promise<ServiceResult<HealthStatus>>
-  isHealthy(): Promise<boolean>
+  constructor();
+  registerCheck(name: string, checkFn: HealthCheckFunction): void;
+  unregisterCheck(name: string): void;
+  getHealthStatus(): Promise<ServiceResult<HealthStatus>>;
+  isHealthy(): Promise<boolean>;
 
-  private registerDefaultChecks(): void
-  private checkUptime(): Promise<HealthCheck>
-  private checkMemory(): Promise<HealthCheck>
+  private registerDefaultChecks(): void;
+  private checkUptime(): Promise<HealthCheck>;
+  private checkMemory(): Promise<HealthCheck>;
 }
 ```
 
 **Dependencies:**
+
 ```typescript
 import { BaseService } from '../common/base/BaseService';
 import { HealthStatus, HealthCheck, ServiceResult } from '../common/types';
@@ -44,6 +46,7 @@ import { HealthStatus, HealthCheck, ServiceResult } from '../common/types';
 **Key Methods:**
 
 #### `registerCheck(name, checkFn)`
+
 - **Purpose:** Register a new health check function
 - **Parameters:**
   - `name: string` - Unique identifier for the check
@@ -52,6 +55,7 @@ import { HealthStatus, HealthCheck, ServiceResult } from '../common/types';
 - **Thread Safety:** Map operations are atomic
 
 #### `getHealthStatus()`
+
 - **Purpose:** Execute all checks and return aggregated status
 - **Returns:** `Promise<ServiceResult<HealthStatus>>`
 - **Algorithm:**
@@ -64,6 +68,7 @@ import { HealthStatus, HealthCheck, ServiceResult } from '../common/types';
   7. Return wrapped in ServiceResult
 
 #### `isHealthy()`
+
 - **Purpose:** Simple boolean health check
 - **Returns:** `Promise<boolean>`
 - **Implementation:** Calls `getHealthStatus()` and checks if status is 'ok'
@@ -73,16 +78,18 @@ import { HealthStatus, HealthCheck, ServiceResult } from '../common/types';
 **Location:** `apps/backend/src/controllers/healthController.ts`
 
 **Class Definition:**
+
 ```typescript
 class HealthController extends BaseController {
-  constructor()
+  constructor();
 
-  async handleHealthCheck(req: Request, res: Response): Promise<void>
-  handleRoot(req: Request, res: Response): void
+  async handleHealthCheck(req: Request, res: Response): Promise<void>;
+  handleRoot(req: Request, res: Response): void;
 }
 ```
 
 **Dependencies:**
+
 ```typescript
 import { Request, Response } from 'express';
 import { BaseController } from '../common/base/BaseController';
@@ -92,6 +99,7 @@ import { healthService } from '../services/healthService';
 **Key Methods:**
 
 #### `handleHealthCheck(req, res)`
+
 - **Purpose:** Handle GET /api/health requests
 - **Parameters:** Express Request and Response objects
 - **Returns:** Promise<void>
@@ -105,6 +113,7 @@ import { healthService } from '../services/healthService';
 - **Error Handling:** Automatic via BaseController.executeAction()
 
 #### `handleRoot(req, res)`
+
 - **Purpose:** Handle GET / requests
 - **Returns:** void
 - **Implementation:** Sends welcome message with API information
@@ -143,6 +152,7 @@ export type HealthCheckFunction = () => Promise<HealthCheck>;
 ### BaseService
 
 **Key Features:**
+
 - `executeOperation<T>()`: Wraps async operations with try-catch
 - Automatic logging (start, success, error)
 - Performance tracking (duration measurement)
@@ -150,6 +160,7 @@ export type HealthCheckFunction = () => Promise<HealthCheck>;
 - Result wrapping in ServiceResult
 
 **Usage Pattern:**
+
 ```typescript
 async myMethod() {
   return this.executeOperation(async () => {
@@ -162,6 +173,7 @@ async myMethod() {
 ### BaseController
 
 **Key Features:**
+
 - `sendSuccess<T>()`: Standardized success response
 - `sendError()`: Standardized error response
 - `executeAction()`: Automatic error handling for controller methods
@@ -169,6 +181,7 @@ async myMethod() {
 - Consistent JSON formatting
 
 **Usage Pattern:**
+
 ```typescript
 async handleRequest(req: Request, res: Response) {
   await this.executeAction(req, res, async (req, res) => {
@@ -183,17 +196,20 @@ async handleRequest(req: Request, res: Response) {
 **No external configuration required** - Health checks are self-contained.
 
 Optional environment variables:
+
 - `NODE_ENV`: Affects error message verbosity (production hides details)
 - `PORT`: Server port (default: 3001)
 
 ## Dependencies
 
 ### Internal Dependencies
+
 - `common/base/BaseService.ts`
 - `common/base/BaseController.ts`
 - `common/types/index.ts`
 
 ### External Dependencies (from package.json)
+
 - `express`: ^4.x.x - HTTP framework
 - `@types/express`: Type definitions
 
@@ -211,6 +227,7 @@ export const handleHealthCheck = healthController.handleHealthCheck.bind(healthC
 ```
 
 **Rationale:**
+
 - Single shared state for registered health checks
 - Prevents multiple instances from conflicting
 - Simplifies dependency injection
@@ -231,13 +248,13 @@ async function checkDatabase(): Promise<HealthCheck> {
     return {
       name: 'database',
       status: 'ok',
-      message: 'Database connection healthy'
+      message: 'Database connection healthy',
     };
   } catch (error) {
     return {
       name: 'database',
       status: 'error',
-      message: error instanceof Error ? error.message : 'Database unreachable'
+      message: error instanceof Error ? error.message : 'Database unreachable',
     };
   }
 }
@@ -278,22 +295,26 @@ export const myCustomService = new MyCustomService();
 ## Code Quality Standards
 
 ### Type Safety
+
 - All public methods have explicit type annotations
 - Interfaces defined in common/types
 - No use of `any` type (except in error handling where necessary)
 
 ### Error Handling
+
 - All async operations wrapped in try-catch via BaseService
 - Errors logged with context
 - Errors never crash the application
 - Production mode hides sensitive error details
 
 ### Logging
+
 - All operations logged with appropriate level
 - Context included (service name, operation name)
 - Performance metrics tracked (duration)
 
 ### Testing
+
 - Service logic testable independently of HTTP
 - Controller testable with mock service
 - Individual health checks testable in isolation

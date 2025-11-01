@@ -148,12 +148,7 @@ describe('PrettyFormatter', () => {
     });
 
     it('should format different log levels', () => {
-      const levels: Array<'debug' | 'info' | 'warn' | 'error'> = [
-        'debug',
-        'info',
-        'warn',
-        'error',
-      ];
+      const levels: Array<'debug' | 'info' | 'warn' | 'error'> = ['debug', 'info', 'warn', 'error'];
 
       levels.forEach((level) => {
         const entry: LogEntry = {

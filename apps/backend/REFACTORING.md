@@ -19,6 +19,7 @@ This document describes the comprehensive refactoring of the ConnectiveByte back
 Created reusable base classes that all modules can extend:
 
 #### BaseService (`src/common/base/BaseService.ts`)
+
 - **Purpose**: Standardize service layer implementations
 - **Features**:
   - Automatic error handling with `executeOperation()`
@@ -28,12 +29,14 @@ Created reusable base classes that all modules can extend:
   - Template method pattern for consistency
 
 **Benefits**:
+
 - ✅ No need to write try-catch in every service method
 - ✅ Automatic logging of all operations
 - ✅ Consistent error handling across services
 - ✅ Performance metrics out-of-the-box
 
 #### BaseController (`src/common/base/BaseController.ts`)
+
 - **Purpose**: Standardize controller layer implementations
 - **Features**:
   - Consistent response formatting (`sendSuccess`, `sendError`)
@@ -43,6 +46,7 @@ Created reusable base classes that all modules can extend:
   - Validation support
 
 **Benefits**:
+
 - ✅ All API responses have identical format
 - ✅ Errors automatically map to correct HTTP status codes
 - ✅ No need to manually format responses
@@ -62,6 +66,7 @@ interface Logger - Logging interface for DI
 ```
 
 **Benefits**:
+
 - ✅ Type safety across entire application
 - ✅ Consistent data structures
 - ✅ Self-documenting code
@@ -77,6 +82,7 @@ Created reusable validation functions (`src/common/utils/validators.ts`):
 - Standardized error messages
 
 **Benefits**:
+
 - ✅ No need to write validation logic from scratch
 - ✅ Consistent validation errors
 - ✅ Easy to add custom validations
@@ -87,6 +93,7 @@ Created reusable validation functions (`src/common/utils/validators.ts`):
 Refactored health check to demonstrate the new architecture:
 
 #### HealthService (extends BaseService)
+
 - **Extensible architecture**: Register custom health checks dynamically
 - **Parallel execution**: All checks run concurrently for performance
 - **Built-in checks**: Uptime and memory monitoring
@@ -94,6 +101,7 @@ Refactored health check to demonstrate the new architecture:
 - **Performance tracking**: Response time measured for each check
 
 **Example - Adding a custom check:**
+
 ```typescript
 import { healthService } from '../services/healthService';
 
@@ -102,12 +110,13 @@ healthService.registerCheck('database', async () => {
   return {
     name: 'database',
     status: connected ? 'ok' : 'error',
-    message: connected ? 'Connected' : 'Connection failed'
+    message: connected ? 'Connected' : 'Connection failed',
   };
 });
 ```
 
 #### HealthController (extends BaseController)
+
 - **Consistent responses**: Uses `ApiResponse<HealthStatus>` format
 - **Proper HTTP status codes**: 200 for healthy, 503 for unhealthy
 - **Automatic error handling**: Graceful degradation on failures
@@ -126,6 +135,7 @@ apps/backend/src/modules/health/.module/
 ```
 
 **Benefits**:
+
 - ✅ Complete documentation of module design
 - ✅ Onboarding guide for new developers
 - ✅ Single source of truth for requirements
@@ -147,6 +157,7 @@ export function getHealthStatus(): HealthStatus {
 ```
 
 **Problems**:
+
 - ❌ No error handling
 - ❌ No logging
 - ❌ Not extensible
@@ -167,7 +178,7 @@ class HealthService extends BaseService {
         status: this.determineOverallStatus(checks),
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
-        checks
+        checks,
       };
     }, 'getHealthStatus');
   }
@@ -175,6 +186,7 @@ class HealthService extends BaseService {
 ```
 
 **Improvements**:
+
 - ✅ Automatic error handling (from BaseService)
 - ✅ Automatic logging (from BaseService)
 - ✅ Extensible (can register custom checks)
@@ -184,6 +196,7 @@ class HealthService extends BaseService {
 ## Response Format Changes
 
 ### Old Format (Inconsistent)
+
 ```json
 {
   "status": "ok",
@@ -193,6 +206,7 @@ class HealthService extends BaseService {
 ```
 
 ### New Format (Consistent ApiResponse)
+
 ```json
 {
   "status": "success",
@@ -220,6 +234,7 @@ class HealthService extends BaseService {
 ```
 
 **Benefits**:
+
 - ✅ Wraps all responses in `ApiResponse<T>` envelope
 - ✅ Distinguishes success/error at top level
 - ✅ Includes detailed health check results
@@ -298,6 +313,7 @@ export default router;
 ### Step 4: Create .module Documentation
 
 Create the following files in `src/modules/[module-name]/.module/`:
+
 - `MODULE_GOALS.md` - Purpose and success criteria
 - `ARCHITECTURE.md` - Design and patterns
 - `BEHAVIOR.md` - Expected I/O and edge cases
@@ -328,8 +344,8 @@ describe('MyController', () => {
     const mockService = {
       performOperation: jest.fn().mockResolvedValue({
         success: false,
-        error: new Error('Test error')
-      })
+        error: new Error('Test error'),
+      }),
     };
 
     // Test controller error handling
@@ -351,12 +367,14 @@ For existing modules that need refactoring:
 ## Code Quality Metrics
 
 ### Before Refactoring
+
 - Lines of code with error handling: ~20% (manual try-catch)
 - Consistency in response format: Low
 - Code reuse: Minimal
 - Test coverage: ~60%
 
 ### After Refactoring
+
 - Lines of code with error handling: 100% (automatic via BaseService/BaseController)
 - Consistency in response format: 100% (ApiResponse standard)
 - Code reuse: High (base classes used everywhere)
@@ -382,16 +400,19 @@ For existing modules that need refactoring:
 ## Breaking Changes
 
 ### API Response Format
+
 - All endpoints now return `ApiResponse<T>` format
 - Frontend must update to access `response.data` instead of direct fields
 
 ### Health Check Response
+
 - Health check now includes `checks` array with individual check results
 - HTTP 503 returned when any check fails (was always 200)
 
 ## Rollback Plan
 
 If issues occur:
+
 1. Revert to commit before refactoring: `git revert <commit-hash>`
 2. Old code is preserved in git history
 3. Tests ensure functionality is maintained

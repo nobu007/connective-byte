@@ -48,12 +48,14 @@ ConnectiveByte/
 ## 🚀 クイックスタート
 
 1. リポジトリのクローン:
+
 ```bash
 git clone https://github.com/nobu007/connective-byte.git
 cd connective-byte
 ```
 
 2. フロントエンドの起動:
+
 ```bash
 cd apps/frontend
 npm install
@@ -61,6 +63,7 @@ npm run dev
 ```
 
 3. バックエンドの起動:
+
 ```bash
 cd apps/backend
 npm install

@@ -30,16 +30,19 @@ apps/backend/src/modules/logging/
 ## Integration Points
 
 ### Service Layer
+
 - **Location**: `apps/backend/src/services/loggingService.ts`
 - **Purpose**: Core logging business logic
 - **Extends**: BaseService
 
 ### Controller Layer (Optional)
+
 - **Location**: `apps/backend/src/controllers/loggingController.ts`
 - **Purpose**: HTTP interface for log management
 - **Extends**: BaseController
 
 ### Routes Layer (Optional)
+
 - **Location**: `apps/backend/src/routes/loggingRoutes.ts`
 - **Purpose**: API endpoints for logging
 - **Routes**:
@@ -47,6 +50,7 @@ apps/backend/src/modules/logging/
   - `PUT /api/logging/config` - Update log level
 
 ### Types
+
 - **Location**: `apps/backend/src/common/types/index.ts`
 - **Purpose**: Logging interfaces and types
 - **Exports**: Logger, LogLevel, LogEntry, LogFormatter, LogTransport
@@ -73,11 +77,13 @@ logger.info('Operation completed', { duration: 123 });
 ## Dependencies
 
 ### Internal
+
 - `common/base/BaseService`
 - `common/base/BaseController`
 - `common/types/index`
 
 ### External
+
 - None (uses built-in Node.js capabilities)
 
 ## Configuration Files

@@ -7,6 +7,7 @@ After thorough analysis, **ConnectiveByte is already well-architected** followin
 **Current Status**: ✅ Production-ready with clean architecture
 
 **Architecture Score**: 9/10
+
 - ✅ Layered architecture
 - ✅ Separation of concerns
 - ✅ Type safety
@@ -18,30 +19,36 @@ After thorough analysis, **ConnectiveByte is already well-architected** followin
 ### ✅ What's Working Well
 
 #### 1. **Clean Layered Architecture**
+
 ```
 Frontend: Components → Hooks → API Services → Utils
 Backend: Controllers → Services → Routes → Middleware
 ```
+
 - Clear separation between presentation, business logic, and infrastructure
 - Each layer has a single responsibility
 - No layer violations detected
 
 #### 2. **Monorepo Structure**
+
 - Well-organized with `apps/` and `libs/`
 - Shared code properly extracted to `libs/logic` and `libs/components`
 - No code duplication between apps
 
 #### 3. **Type Safety**
+
 - TypeScript throughout the codebase
 - Proper interfaces defined
 - Strong type checking enabled
 
 #### 4. **Testing Strategy**
+
 - Unit tests: Jest + React Testing Library
 - E2E tests: Playwright with automatic server startup
 - API mocking: MSW (Mock Service Worker)
 
 #### 5. **Error Handling**
+
 - Consistent error handling patterns
 - Retry logic with exponential backoff
 - Global error middleware in backend
@@ -53,6 +60,7 @@ Backend: Controllers → Services → Routes → Middleware
 ### 1.1 Extract StatusConfig to Shared Constants
 
 **Current State**: `apps/frontend/app/page.tsx:5-9`
+
 ```typescript
 const statusConfig = {
   loading: { bg: 'bg-yellow-200', text: 'text-yellow-900' },
@@ -64,6 +72,7 @@ const statusConfig = {
 **Issue**: Duplicated in both `page.tsx` and `components/HealthCheck.tsx`
 
 **Solution**: Extract to shared constant
+
 ```typescript
 // libs/components/config/statusConfig.ts
 export const STATUS_CONFIG = {
@@ -80,6 +89,7 @@ export type StatusType = keyof typeof STATUS_CONFIG;
 ### 1.2 Improve Import Paths with TypeScript Path Aliases
 
 **Current State**: `apps/frontend/app/hooks/useHealthCheck.ts:10`
+
 ```typescript
 import { fetchHealthStatus } from '../../../../libs/logic/api/health';
 ```
@@ -87,6 +97,7 @@ import { fetchHealthStatus } from '../../../../libs/logic/api/health';
 **Issue**: Relative imports are brittle and hard to maintain
 
 **Solution**: Configure TypeScript path aliases in `tsconfig.json`
+
 ```json
 {
   "compilerOptions": {
@@ -101,6 +112,7 @@ import { fetchHealthStatus } from '../../../../libs/logic/api/health';
 ```
 
 **Usage**:
+
 ```typescript
 import { fetchHealthStatus } from '@libs/logic';
 ```
@@ -110,6 +122,7 @@ import { fetchHealthStatus } from '@libs/logic';
 ### 1.3 Add Environment Variable Validation
 
 **Current State**: `libs/logic/config/apiConfig.ts:7`
+
 ```typescript
 baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
 ```
@@ -117,6 +130,7 @@ baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
 **Issue**: No validation if env var is set but invalid
 
 **Solution**: Add runtime validation
+
 ```typescript
 // libs/logic/config/apiConfig.ts
 function getApiUrl(): string {
@@ -146,11 +160,13 @@ export const apiConfig = {
 **Current State**: `libs/logic/utils/fetchWithRetry.ts` has no tests
 
 **Solution**: Create `libs/logic/utils/__tests__/fetchWithRetry.test.ts`
+
 ```typescript
 describe('fetchWithRetry', () => {
   it('should retry on 5xx errors', async () => {
     // Mock fetch to fail twice, succeed third time
-    global.fetch = jest.fn()
+    global.fetch = jest
+      .fn()
       .mockRejectedValueOnce(new Error('500'))
       .mockRejectedValueOnce(new Error('503'))
       .mockResolvedValueOnce({ ok: true, json: async () => ({}) });
@@ -170,6 +186,7 @@ describe('fetchWithRetry', () => {
 ### 2.2 Add Integration Test for Health Check Flow
 
 **Solution**: Create `apps/frontend/e2e/health-check-flow.spec.ts`
+
 ```typescript
 test('health check full flow', async ({ page }) => {
   await page.goto('/');
@@ -191,6 +208,7 @@ test('health check full flow', async ({ page }) => {
 ### 2.3 Add Backend Service Tests
 
 **Solution**: Create `apps/backend/src/services/__tests__/healthService.test.ts`
+
 ```typescript
 describe('healthService', () => {
   describe('getHealthStatus', () => {
@@ -219,7 +237,8 @@ describe('healthService', () => {
 **Current State**: Some functions lack documentation
 
 **Solution**: Add comprehensive JSDoc comments
-```typescript
+
+````typescript
 /**
  * Fetches health status from the backend API with automatic retry
  *
@@ -243,13 +262,14 @@ describe('healthService', () => {
 export async function fetchHealthStatus(): Promise<HealthCheckResult> {
   // ...
 }
-```
+````
 
 **Benefit**: Better IDE autocomplete and documentation
 
 ### 3.2 Add Pre-commit Hooks
 
 **Solution**: Add Husky for git hooks
+
 ```bash
 npm install --save-dev husky lint-staged
 
@@ -264,6 +284,7 @@ npm run test
 ### 3.3 Add VS Code Workspace Settings
 
 **Solution**: Create `.vscode/settings.json`
+
 ```json
 {
   "typescript.tsdk": "node_modules/typescript/lib",
@@ -289,6 +310,7 @@ npm run test
 **Purpose**: Reduce redundant API calls
 
 **Solution**: Implement cache layer in `libs/logic/utils/cache.ts`
+
 ```typescript
 interface CacheEntry<T> {
   data: T;
@@ -320,6 +342,7 @@ export const apiCache = new Cache();
 ```
 
 **Usage**:
+
 ```typescript
 export async function fetchHealthStatus(): Promise<HealthCheckResult> {
   const cached = apiCache.get<HealthCheckResult>('health-status');
@@ -336,6 +359,7 @@ export async function fetchHealthStatus(): Promise<HealthCheckResult> {
 **Purpose**: Improve debugging and monitoring
 
 **Solution**: Create logging middleware
+
 ```typescript
 // apps/backend/src/middleware/logger.ts
 import { Request, Response, NextFunction } from 'express';
@@ -363,6 +387,7 @@ export function requestLogger(req: Request, res: Response, next: NextFunction) {
 **Purpose**: Check external service health
 
 **Solution**: Extend health service
+
 ```typescript
 // apps/backend/src/services/healthService.ts
 export interface HealthCheckDependency {
@@ -408,15 +433,18 @@ export async function getDetailedHealthStatus() {
 ### 5.1 Add API Documentation
 
 **Solution**: Create `docs/API.md`
-```markdown
+
+````markdown
 # API Documentation
 
 ## Endpoints
 
 ### GET /api/health
+
 Health check endpoint
 
 **Response**:
+
 ```json
 {
   "status": "ok",
@@ -424,12 +452,15 @@ Health check endpoint
   "uptime": 123.45
 }
 ```
+````
 
 **Status Codes**:
+
 - 200: Service is healthy
 - 503: Service unavailable
 - 500: Internal server error
-```
+
+````
 
 ### 5.2 Add Component Documentation
 
@@ -449,51 +480,57 @@ export const Loading = {
     message: 'Loading...',
   },
 };
-```
+````
 
 ## Implementation Priority
 
 ### High Priority (Phase 1)
+
 1. ✅ Extract status config to shared constants
 2. ✅ Add TypeScript path aliases
 3. ✅ Add environment variable validation
 
 ### Medium Priority (Phase 2-3)
+
 4. Add comprehensive tests
 5. Add JSDoc comments
 6. Add pre-commit hooks
 
 ### Low Priority (Phase 4-5)
+
 7. Add caching layer
 8. Add detailed logging
 9. Add Storybook documentation
 
 ## Estimated Timeline
 
-| Phase | Tasks | Effort | Priority |
-|-------|-------|--------|----------|
-| Phase 1 | Code organization | 2-4 hours | High |
-| Phase 2 | Testing | 4-6 hours | High |
-| Phase 3 | Developer experience | 2-3 hours | Medium |
-| Phase 4 | Architecture enhancements | 6-8 hours | Low |
-| Phase 5 | Documentation | 3-4 hours | Low |
+| Phase   | Tasks                     | Effort    | Priority |
+| ------- | ------------------------- | --------- | -------- |
+| Phase 1 | Code organization         | 2-4 hours | High     |
+| Phase 2 | Testing                   | 4-6 hours | High     |
+| Phase 3 | Developer experience      | 2-3 hours | Medium   |
+| Phase 4 | Architecture enhancements | 6-8 hours | Low      |
+| Phase 5 | Documentation             | 3-4 hours | Low      |
 
 **Total**: 17-25 hours for all improvements
 
 ## Success Metrics
 
 ### Code Quality
+
 - ✅ Zero ESLint errors
 - ✅ Zero TypeScript errors
 - ✅ Test coverage > 80%
 - ⚠️ No code duplication (improve from current)
 
 ### Performance
+
 - ✅ Page load < 2s
 - ✅ API response < 500ms
 - ⚠️ Add caching for < 100ms (future)
 
 ### Maintainability
+
 - ✅ Clear architecture
 - ✅ Single responsibility per module
 - ⚠️ Comprehensive documentation (in progress)
@@ -518,6 +555,7 @@ export const Loading = {
 ## Conclusion
 
 **ConnectiveByte requires minimal refactoring** because it already follows best practices:
+
 - Clean architecture with proper layering
 - Strong separation of concerns
 - Comprehensive testing strategy

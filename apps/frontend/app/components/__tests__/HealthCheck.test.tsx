@@ -33,7 +33,7 @@ describe('HealthCheck Component', () => {
         expect(screen.getByText(/API Status: ERROR/i)).toBeInTheDocument();
         expect(screen.getByText(/Failed to connect/i)).toBeInTheDocument();
       },
-      { timeout: 3000 }
+      { timeout: 3000 },
     );
   });
 });

@@ -21,10 +21,7 @@ export function isRequired(value: unknown): boolean {
 /**
  * Validate required field
  */
-export function validateRequired(
-  field: string,
-  value: unknown
-): ValidationError | null {
+export function validateRequired(field: string, value: unknown): ValidationError | null {
   if (!isRequired(value)) {
     return {
       field,
@@ -130,9 +127,7 @@ export function validateEnum<T>(
 /**
  * Combine multiple validation results
  */
-export function combineValidations(
-  ...validations: (ValidationError | null)[]
-): ValidationResult {
+export function combineValidations(...validations: (ValidationError | null)[]): ValidationResult {
   const errors = validations.filter((v): v is ValidationError => v !== null);
   return errors.length > 0 ? errors : null;
 }

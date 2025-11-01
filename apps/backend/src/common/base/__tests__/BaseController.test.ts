@@ -229,11 +229,7 @@ describe('BaseController', () => {
     it('should execute action successfully', async () => {
       const action = jest.fn().mockResolvedValue(undefined);
 
-      await controller.testExecuteAction(
-        mockReq as Request,
-        mockRes as Response,
-        action
-      );
+      await controller.testExecuteAction(mockReq as Request, mockRes as Response, action);
 
       expect(action).toHaveBeenCalledWith(mockReq, mockRes);
     });
@@ -242,11 +238,7 @@ describe('BaseController', () => {
       const error = new Error('Action failed');
       const action = jest.fn().mockRejectedValue(error);
 
-      await controller.testExecuteAction(
-        mockReq as Request,
-        mockRes as Response,
-        action
-      );
+      await controller.testExecuteAction(mockReq as Request, mockRes as Response, action);
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Error handling GET /test'),
@@ -267,11 +259,7 @@ describe('BaseController', () => {
         expect(res).toBe(mockRes);
       });
 
-      await controller.testExecuteAction(
-        mockReq as Request,
-        mockRes as Response,
-        action
-      );
+      await controller.testExecuteAction(mockReq as Request, mockRes as Response, action);
     });
   });
 
@@ -348,9 +336,7 @@ describe('BaseController', () => {
   describe('validateRequest', () => {
     it('should return validation errors when validation fails', () => {
       const data = { email: 'invalid' };
-      const errors: ValidationError[] = [
-        { field: 'email', message: 'Invalid format' },
-      ];
+      const errors: ValidationError[] = [{ field: 'email', message: 'Invalid format' }];
       const validationFn = jest.fn().mockReturnValue(errors);
 
       const result = controller.testValidateRequest(data, validationFn);
@@ -487,10 +473,7 @@ describe('BaseController', () => {
 
       logger.info('Info message', { data: 'test' });
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        '[INFO] Info message',
-        { data: 'test' }
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith('[INFO] Info message', { data: 'test' });
     });
 
     it('should log error messages', () => {
@@ -500,11 +483,9 @@ describe('BaseController', () => {
 
       logger.error('Error message', error, { context: 'test' });
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '[ERROR] Error message',
-        'Test error',
-        { context: 'test' }
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith('[ERROR] Error message', 'Test error', {
+        context: 'test',
+      });
     });
 
     it('should log warnings', () => {
@@ -551,11 +532,7 @@ describe('BaseController', () => {
         controller.testSendSuccess(res, { message: 'Success' }, 200);
       });
 
-      await controller.testExecuteAction(
-        mockReq as Request,
-        mockRes as Response,
-        action
-      );
+      await controller.testExecuteAction(mockReq as Request, mockRes as Response, action);
 
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith(
@@ -568,9 +545,7 @@ describe('BaseController', () => {
 
     it('should handle validation and error response', async () => {
       const data = { email: 'invalid' };
-      const validationFn = jest.fn().mockReturnValue([
-        { field: 'email', message: 'Invalid' },
-      ]);
+      const validationFn = jest.fn().mockReturnValue([{ field: 'email', message: 'Invalid' }]);
 
       const errors = controller.testValidateRequest(data, validationFn);
 

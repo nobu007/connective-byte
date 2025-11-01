@@ -15,10 +15,7 @@ export interface StatusIndicatorProps {
   showLabel?: boolean;
 }
 
-const statusConfig: Record<
-  StatusType,
-  { bgColor: string; textColor: string; label: string }
-> = {
+const statusConfig: Record<StatusType, { bgColor: string; textColor: string; label: string }> = {
   loading: {
     bgColor: 'bg-yellow-200',
     textColor: 'text-yellow-900',
@@ -66,12 +63,12 @@ export default function StatusIndicator({
   return (
     <div
       className={`p-4 rounded-lg ${config.bgColor} ${config.textColor} ${className}`}
-      data-testid="status-indicator"
-      role="status"
-      aria-live="polite"
+      data-testid='status-indicator'
+      role='status'
+      aria-live='polite'
     >
-      {showLabel && <p className="font-semibold">Current Status: {config.label}</p>}
-      {message && <p className="mt-1">{message}</p>}
+      {showLabel && <p className='font-semibold'>Current Status: {config.label}</p>}
+      {message && <p className='mt-1'>{message}</p>}
     </div>
   );
 }

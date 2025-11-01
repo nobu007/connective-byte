@@ -22,9 +22,9 @@ logger.error('Database connection failed', dbError, { retries: 3 });
 
 ```typescript
 // Environment variables
-LOG_LEVEL=debug|info|warn|error
-LOG_FORMAT=json|pretty
-LOG_ENABLED=true|false
+LOG_LEVEL = debug | info | warn | error;
+LOG_FORMAT = json | pretty;
+LOG_ENABLED = true | false;
 
 // Runtime configuration
 loggingService.setLogLevel('info');
@@ -34,6 +34,7 @@ loggingService.setFormat('json');
 ## Processing Flow
 
 ### 1. Log Entry Creation
+
 ```
 Application → logger.info(message, metadata)
     ↓
@@ -47,6 +48,7 @@ Create LogEntry object
 ```
 
 ### 2. Level Filtering
+
 ```
 LogEntry → LoggingService
     ↓
@@ -57,6 +59,7 @@ If at or above: proceed to formatting
 ```
 
 ### 3. Metadata Enrichment
+
 ```
 LogEntry → Add system metadata
     {
@@ -68,6 +71,7 @@ LogEntry → Add system metadata
 ```
 
 ### 4. Formatting
+
 ```
 Enriched Entry → Apply formatter (JSON or Pretty)
     ↓
@@ -76,6 +80,7 @@ Pretty: [2025-10-15 12:34] INFO: ...
 ```
 
 ### 5. Transport
+
 ```
 Formatted String → Send to all transports
     ↓
@@ -130,6 +135,7 @@ File: append to log file (if configured)
 ## Error Handling
 
 ### Invalid Log Level
+
 ```typescript
 // Input
 logger.setLogLevel('invalid');
@@ -141,6 +147,7 @@ logger.setLogLevel('invalid');
 ```
 
 ### Missing Metadata
+
 ```typescript
 // Input
 logger.info('Message', undefined);
@@ -152,6 +159,7 @@ logger.info('Message', undefined);
 ```
 
 ### Formatter Error
+
 ```typescript
 // If formatter throws
 - Catch error internally
@@ -162,6 +170,7 @@ logger.info('Message', undefined);
 ## Performance Characteristics
 
 ### Log Level Filtering (Fast Path)
+
 ```
 Debug log with LOG_LEVEL=info
     ↓
@@ -170,6 +179,7 @@ No formatting or transport overhead
 ```
 
 ### Active Logging
+
 ```
 Info log with LOG_LEVEL=info
     ↓
@@ -180,6 +190,7 @@ Minimal impact on request processing
 ## Edge Cases
 
 ### Circular References in Metadata
+
 ```typescript
 const obj: any = { name: 'test' };
 obj.self = obj;
@@ -192,6 +203,7 @@ logger.info('Test', obj);
 ```
 
 ### Large Metadata Objects
+
 ```typescript
 logger.info('Large data', { bigArray: Array(10000).fill('x') });
 
@@ -202,6 +214,7 @@ logger.info('Large data', { bigArray: Array(10000).fill('x') });
 ```
 
 ### Null/Undefined Messages
+
 ```typescript
 logger.info(null);
 logger.info(undefined);
@@ -215,6 +228,7 @@ logger.info(undefined);
 ## Integration Behavior
 
 ### With BaseController
+
 ```typescript
 class MyController extends BaseController {
   constructor() {
@@ -228,6 +242,7 @@ class MyController extends BaseController {
 ```
 
 ### With BaseService
+
 ```typescript
 class MyService extends BaseService {
   constructor() {
@@ -243,6 +258,7 @@ class MyService extends BaseService {
 ## Backwards Compatibility
 
 ### Existing Logger Interface
+
 ```typescript
 // Current Logger interface remains unchanged
 interface Logger {

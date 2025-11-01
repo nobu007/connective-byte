@@ -16,10 +16,7 @@ export class PrettyFormatter implements LogFormatter {
    */
   format(entry: LogEntry): string {
     // Format timestamp: 2025-10-15 12:34:56
-    const timestamp = entry.timestamp
-      .toISOString()
-      .replace('T', ' ')
-      .substring(0, 19);
+    const timestamp = entry.timestamp.toISOString().replace('T', ' ').substring(0, 19);
 
     // Align log level (pad to 5 characters)
     const level = entry.level.toUpperCase().padEnd(5);
@@ -77,8 +74,7 @@ export class PrettyFormatter implements LogFormatter {
     if (value === null) return 'null';
     if (value === undefined) return 'undefined';
     if (typeof value === 'string') return value;
-    if (typeof value === 'number' || typeof value === 'boolean')
-      return String(value);
+    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
 
     try {
       return JSON.stringify(value);

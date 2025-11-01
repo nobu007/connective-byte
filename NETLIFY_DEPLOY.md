@@ -46,11 +46,11 @@ NEXT_PUBLIC_API_URL=https://your-api-endpoint.com
 
 ```typescript
 const nextConfig: NextConfig = {
-  output: 'export',        // 静的HTMLとしてエクスポート
+  output: 'export', // 静的HTMLとしてエクスポート
   images: {
-    unoptimized: true,     // 画像最適化を無効化
+    unoptimized: true, // 画像最適化を無効化
   },
-  trailingSlash: true,     // URLの末尾にスラッシュを追加
+  trailingSlash: true, // URLの末尾にスラッシュを追加
 };
 ```
 
@@ -78,6 +78,7 @@ git push origin main
 ### ビルドエラーが発生する場合
 
 1. **依存関係のインストールエラー**
+
    ```bash
    # ローカルで確認
    cd apps/frontend
@@ -86,6 +87,7 @@ git push origin main
    ```
 
 2. **TypeScriptエラー**
+
    ```bash
    npm run type-check
    ```

@@ -3,6 +3,7 @@
 ## Overview
 
 ConnectiveByte is a modern web application built as a **monorepo** with clean architecture principles, featuring:
+
 - **Frontend**: Next.js 15 with React 19 and TypeScript
 - **Backend**: Express.js API server with TypeScript
 - **Shared Libraries**: Reusable components and business logic
@@ -79,11 +80,13 @@ connective-byte/
 ### Layer Structure
 
 #### 1. **Presentation Layer** (`app/`)
+
 - **Pages**: Route-specific page components
 - **Components**: Reusable UI components
 - **Purpose**: Render UI and handle user interactions
 
 **Example**: `apps/frontend/app/page.tsx`
+
 ```typescript
 'use client';
 import { useHealthCheck } from './hooks/useHealthCheck';
@@ -95,10 +98,12 @@ export default function Home() {
 ```
 
 #### 2. **State Management Layer** (`app/hooks/`)
+
 - **Custom Hooks**: Encapsulate state and side effects
 - **Purpose**: Separate state logic from UI
 
 **Example**: `apps/frontend/app/hooks/useHealthCheck.ts`
+
 ```typescript
 export function useHealthCheck() {
   const [status, setStatus] = useState('loading');
@@ -116,10 +121,12 @@ export function useHealthCheck() {
 ```
 
 #### 3. **API Service Layer** (`libs/logic/api/`)
+
 - **API Clients**: Handle HTTP communication
 - **Purpose**: Centralize API calls with error handling
 
 **Example**: `libs/logic/api/health.ts`
+
 ```typescript
 export async function fetchHealthStatus(): Promise<HealthCheckResult> {
   const response = await fetchWithRetry(API_ENDPOINTS.health);
@@ -129,15 +136,14 @@ export async function fetchHealthStatus(): Promise<HealthCheckResult> {
 ```
 
 #### 4. **Infrastructure Layer** (`libs/logic/utils/`)
+
 - **HTTP Client**: Retry logic, timeout handling
 - **Configuration**: API endpoints, retry settings
 
 **Example**: `libs/logic/utils/fetchWithRetry.ts`
+
 ```typescript
-export async function fetchWithRetry(
-  url: string,
-  options: FetchOptions = {}
-): Promise<Response> {
+export async function fetchWithRetry(url: string, options: FetchOptions = {}): Promise<Response> {
   // Retry logic with exponential backoff
 }
 ```
@@ -163,10 +169,12 @@ External API
 ### Layer Structure
 
 #### 1. **Controller Layer** (`src/controllers/`)
+
 - **HTTP Handlers**: Process requests and responses
 - **Purpose**: Handle HTTP concerns (status codes, headers, etc.)
 
 **Example**: `apps/backend/src/controllers/healthController.ts`
+
 ```typescript
 export function handleHealthCheck(req: Request, res: Response): void {
   if (!isHealthy()) {
@@ -180,10 +188,12 @@ export function handleHealthCheck(req: Request, res: Response): void {
 ```
 
 #### 2. **Service Layer** (`src/services/`)
+
 - **Business Logic**: Core application functionality
 - **Purpose**: Pure business logic, independent of HTTP
 
 **Example**: `apps/backend/src/services/healthService.ts`
+
 ```typescript
 export function getHealthStatus(): HealthStatus {
   return {
@@ -200,10 +210,12 @@ export function isHealthy(): boolean {
 ```
 
 #### 3. **Route Layer** (`src/routes/`)
+
 - **Route Definitions**: Map URLs to controllers
 - **Purpose**: Define API structure
 
 **Example**: `apps/backend/src/routes/healthRoutes.ts`
+
 ```typescript
 import { Router } from 'express';
 import { handleHealthCheck } from '../controllers/healthController';
@@ -215,17 +227,14 @@ export default router;
 ```
 
 #### 4. **Middleware Layer** (`src/middleware/`)
+
 - **Cross-cutting Concerns**: Error handling, logging, CORS
 - **Purpose**: Process all requests/responses
 
 **Example**: `apps/backend/src/middleware/errorHandler.ts`
+
 ```typescript
-export function errorHandler(
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export function errorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
   console.error(err);
   res.status(500).json({ error: 'Internal server error' });
 }
@@ -254,6 +263,7 @@ Response to Client
 **Purpose**: Centralize reusable business logic across applications
 
 **Structure**:
+
 ```
 libs/logic/
 ├── api/              # API client services
@@ -266,6 +276,7 @@ libs/logic/
 ```
 
 **Key Features**:
+
 - Type-safe API clients
 - Centralized configuration
 - Reusable utilities
@@ -276,6 +287,7 @@ libs/logic/
 **Purpose**: Share React components across frontend applications
 
 **Structure**:
+
 ```
 libs/components/
 ├── StatusIndicator.tsx
@@ -283,6 +295,7 @@ libs/components/
 ```
 
 **Key Features**:
+
 - Reusable UI components
 - Type-safe props
 - Framework-specific (React)
@@ -290,20 +303,26 @@ libs/components/
 ## Design Patterns
 
 ### 1. **Single Responsibility Principle (SRP)**
+
 Each module has one reason to change:
+
 - **Controllers**: Handle HTTP concerns only
 - **Services**: Contain business logic only
 - **Hooks**: Manage state and side effects only
 - **Components**: Render UI only
 
 ### 2. **Dependency Inversion**
+
 High-level modules don't depend on low-level modules:
+
 - Components depend on hooks (not API services directly)
 - Hooks depend on API services (not fetch directly)
 - API services depend on utilities (not implementation details)
 
 ### 3. **Interface Segregation**
+
 Clear, focused interfaces:
+
 ```typescript
 // libs/logic/api/health.ts
 export interface HealthCheckResponse {
@@ -320,7 +339,9 @@ export interface HealthCheckResult {
 ```
 
 ### 4. **Open/Closed Principle**
+
 Open for extension, closed for modification:
+
 - `fetchWithRetry` utility can be configured without changing code
 - Health service can add checks without modifying controller
 
@@ -329,6 +350,7 @@ Open for extension, closed for modification:
 ### Frontend Testing
 
 #### Unit Tests (Jest + React Testing Library)
+
 - **Location**: `apps/frontend/app/__tests__/`
 - **Purpose**: Test component behavior and hooks
 
@@ -346,6 +368,7 @@ describe('Home Page', () => {
 ```
 
 #### E2E Tests (Playwright)
+
 - **Location**: `apps/frontend/e2e/`
 - **Purpose**: Test full user workflows
 
@@ -357,12 +380,14 @@ test('health check displays correctly', async ({ page }) => {
 ```
 
 #### Mock Service Worker (MSW)
+
 - **Location**: `apps/frontend/mocks/`
 - **Purpose**: Mock API responses in tests
 
 ### Backend Testing
 
 #### Integration Tests (Jest + Supertest)
+
 - **Location**: `apps/backend/src/__tests__/`
 - **Purpose**: Test API endpoints
 
@@ -389,6 +414,7 @@ Frontend (Status Update)
 ```
 
 **Configuration**: `libs/logic/config/apiConfig.ts`
+
 ```typescript
 export const apiConfig = {
   baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
@@ -401,6 +427,7 @@ export const apiConfig = {
 ## Error Handling Strategy
 
 ### Frontend Error Handling
+
 1. **API Layer**: Catch errors, return structured result
 2. **Hook Layer**: Update state based on result
 3. **Component Layer**: Display error UI
@@ -426,6 +453,7 @@ if (result.success) {
 ```
 
 ### Backend Error Handling
+
 1. **Controller Layer**: Try-catch for errors
 2. **Middleware Layer**: Global error handler
 3. **Client Response**: Consistent error format
@@ -448,6 +476,7 @@ app.use((err, req, res, next) => {
 ## Build and Deployment
 
 ### Development Workflow
+
 ```bash
 # Frontend development
 cd apps/frontend
@@ -463,6 +492,7 @@ npm run test:e2e     # Run E2E tests
 ```
 
 ### Production Build
+
 ```bash
 # Build all applications
 npm run build        # Root: test + minify
@@ -478,6 +508,7 @@ npm run dev          # TypeScript execution (ts-node)
 ```
 
 ### Deployment Strategy
+
 - **Frontend**: Static export to Netlify/Vercel
 - **Backend**: Node.js server deployment
 - **Configuration**: Environment variables for API URLs
@@ -485,6 +516,7 @@ npm run dev          # TypeScript execution (ts-node)
 ## Key Files Reference
 
 ### Configuration Files
+
 - `package.json` - Root dependencies and scripts
 - `apps/frontend/next.config.ts` - Next.js configuration
 - `apps/backend/jest.config.js` - Backend test configuration
@@ -492,33 +524,39 @@ npm run dev          # TypeScript execution (ts-node)
 - `apps/frontend/playwright.config.ts` - E2E test configuration
 
 ### Entry Points
+
 - `apps/frontend/app/layout.tsx` - Frontend root layout
 - `apps/frontend/app/page.tsx` - Frontend homepage
 - `apps/backend/src/index.ts` - Backend server startup
 - `apps/backend/src/app.ts` - Express app configuration
 
 ### Shared Library Exports
+
 - `libs/logic/index.ts` - Business logic exports
 - `libs/components/index.ts` - Component library exports
 
 ## Architecture Benefits
 
 ### 1. **Maintainability**
+
 - Clear separation of concerns
 - Single responsibility per module
 - Easy to locate and modify code
 
 ### 2. **Testability**
+
 - Pure business logic (easy to test)
 - Mockable dependencies
 - Isolated layers
 
 ### 3. **Scalability**
+
 - Add new features without breaking existing code
 - Extend functionality through configuration
 - Shared libraries reduce duplication
 
 ### 4. **Developer Experience**
+
 - Type safety with TypeScript
 - Clear code organization
 - Comprehensive testing
@@ -526,25 +564,30 @@ npm run dev          # TypeScript execution (ts-node)
 ## Future Architecture Considerations
 
 ### 1. **State Management**
+
 - Consider adding Redux/Zustand for complex state
 - Implement global state management if needed
 
 ### 2. **API Gateway**
+
 - Add API versioning (`/api/v1/health`)
 - Implement rate limiting
 - Add authentication middleware
 
 ### 3. **Database Layer**
+
 - Add ORM (Prisma/TypeORM)
 - Implement repository pattern
 - Separate data access logic
 
 ### 4. **Design System**
+
 - Complete `libs/design/` implementation
 - Storybook for component documentation
 - Shared styling system
 
 ### 5. **Microservices**
+
 - Split backend into domain services
 - Implement event-driven architecture
 - Add message queue (RabbitMQ/Redis)
@@ -552,6 +595,7 @@ npm run dev          # TypeScript execution (ts-node)
 ## Conclusion
 
 ConnectiveByte follows **clean architecture principles** with:
+
 - Clear layered structure
 - Strong separation of concerns
 - Comprehensive testing strategy

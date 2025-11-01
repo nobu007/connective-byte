@@ -66,35 +66,30 @@ export class HealthService extends BaseService {
       const checks: HealthCheck[] = [];
 
       // Execute all registered health checks in parallel
-      const checkPromises = Array.from(this.healthChecks.entries()).map(
-        async ([name, checkFn]) => {
-          try {
-            const startTime = Date.now();
-            const result = await checkFn();
-            return {
-              ...result,
-              responseTime: Date.now() - startTime,
-            };
-          } catch (error) {
-            this.logger.error(`Health check failed: ${name}`, error as Error);
-            return {
-              name,
-              status: 'error' as const,
-              message:
-                error instanceof Error ? error.message : 'Unknown error',
-            };
-          }
+      const checkPromises = Array.from(this.healthChecks.entries()).map(async ([name, checkFn]) => {
+        try {
+          const startTime = Date.now();
+          const result = await checkFn();
+          return {
+            ...result,
+            responseTime: Date.now() - startTime,
+          };
+        } catch (error) {
+          this.logger.error(`Health check failed: ${name}`, error as Error);
+          return {
+            name,
+            status: 'error' as const,
+            message: error instanceof Error ? error.message : 'Unknown error',
+          };
         }
-      );
+      });
 
       const checkResults = await Promise.all(checkPromises);
       checks.push(...checkResults);
 
       // Determine overall status
       const hasErrors = checks.some((check) => check.status === 'error');
-      const overallStatus: HealthStatus['status'] = hasErrors
-        ? 'error'
-        : 'ok';
+      const overallStatus: HealthStatus['status'] = hasErrors ? 'error' : 'ok';
 
       return {
         status: overallStatus,
@@ -135,8 +130,7 @@ export class HealthService extends BaseService {
     const heapTotalMB = (memoryUsage.heapTotal / 1024 / 1024).toFixed(2);
 
     // Consider unhealthy if using more than 90% of heap
-    const heapUsagePercent =
-      (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;
+    const heapUsagePercent = (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;
     const status = heapUsagePercent > 90 ? 'error' : 'ok';
 
     return {

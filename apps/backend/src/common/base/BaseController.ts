@@ -28,11 +28,7 @@ export abstract class BaseController {
    * @param data - Response data
    * @param statusCode - HTTP status code (default: 200)
    */
-  protected sendSuccess<T>(
-    res: Response,
-    data: T,
-    statusCode: number = 200
-  ): void {
+  protected sendSuccess<T>(res: Response, data: T, statusCode: number = 200): void {
     const response: ApiResponse<T> = {
       status: 'success',
       data,
@@ -105,9 +101,7 @@ export abstract class BaseController {
     // Map error types to HTTP status codes
     const statusCode = this.getStatusCodeFromError(errorObj);
     const message =
-      process.env.NODE_ENV === 'production'
-        ? 'Internal server error'
-        : errorObj.message;
+      process.env.NODE_ENV === 'production' ? 'Internal server error' : errorObj.message;
 
     this.sendError(res, message, statusCode);
   }

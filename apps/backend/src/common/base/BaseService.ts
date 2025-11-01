@@ -56,11 +56,7 @@ export abstract class BaseService {
       const duration = Date.now() - startTime;
       const errorObj = error instanceof Error ? error : new Error(String(error));
 
-      this.logger.error(
-        `${this.serviceName}: ${operationContext} failed`,
-        errorObj,
-        { duration }
-      );
+      this.logger.error(`${this.serviceName}: ${operationContext} failed`, errorObj, { duration });
 
       return {
         success: false,
@@ -76,10 +72,7 @@ export abstract class BaseService {
    * @param context - Context information for logging
    * @returns Service result with success/error status
    */
-  protected executeSync<T>(
-    operation: () => T,
-    context?: string
-  ): ServiceResult<T> {
+  protected executeSync<T>(operation: () => T, context?: string): ServiceResult<T> {
     const operationContext = context || 'operation';
 
     try {
@@ -97,10 +90,7 @@ export abstract class BaseService {
     } catch (error) {
       const errorObj = error instanceof Error ? error : new Error(String(error));
 
-      this.logger.error(
-        `${this.serviceName}: ${operationContext} failed`,
-        errorObj
-      );
+      this.logger.error(`${this.serviceName}: ${operationContext} failed`, errorObj);
 
       return {
         success: false,

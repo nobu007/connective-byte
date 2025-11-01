@@ -57,14 +57,9 @@ describe('HealthController', () => {
         data: healthyStatus,
       };
 
-      (healthService.getHealthStatus as jest.Mock).mockResolvedValue(
-        successResult
-      );
+      (healthService.getHealthStatus as jest.Mock).mockResolvedValue(successResult);
 
-      await handleHealthCheck(
-        mockRequest as Request,
-        mockResponse as Response
-      );
+      await handleHealthCheck(mockRequest as Request, mockResponse as Response);
 
       expect(mockStatus).toHaveBeenCalledWith(200);
       expect(mockJson).toHaveBeenCalledWith(
@@ -95,14 +90,9 @@ describe('HealthController', () => {
         data: unhealthyStatus,
       };
 
-      (healthService.getHealthStatus as jest.Mock).mockResolvedValue(
-        successResult
-      );
+      (healthService.getHealthStatus as jest.Mock).mockResolvedValue(successResult);
 
-      await handleHealthCheck(
-        mockRequest as Request,
-        mockResponse as Response
-      );
+      await handleHealthCheck(mockRequest as Request, mockResponse as Response);
 
       expect(mockStatus).toHaveBeenCalledWith(503);
       expect(mockJson).toHaveBeenCalledWith(
@@ -119,14 +109,9 @@ describe('HealthController', () => {
         error: new Error('Service unavailable'),
       };
 
-      (healthService.getHealthStatus as jest.Mock).mockResolvedValue(
-        errorResult
-      );
+      (healthService.getHealthStatus as jest.Mock).mockResolvedValue(errorResult);
 
-      await handleHealthCheck(
-        mockRequest as Request,
-        mockResponse as Response
-      );
+      await handleHealthCheck(mockRequest as Request, mockResponse as Response);
 
       expect(mockStatus).toHaveBeenCalledWith(503);
       expect(mockJson).toHaveBeenCalledWith(
@@ -138,14 +123,9 @@ describe('HealthController', () => {
     });
 
     test('should return 500 when service throws unexpected error', async () => {
-      (healthService.getHealthStatus as jest.Mock).mockRejectedValue(
-        new Error('Unexpected error')
-      );
+      (healthService.getHealthStatus as jest.Mock).mockRejectedValue(new Error('Unexpected error'));
 
-      await handleHealthCheck(
-        mockRequest as Request,
-        mockResponse as Response
-      );
+      await handleHealthCheck(mockRequest as Request, mockResponse as Response);
 
       // BaseController handles exceptions and returns 500
       expect(mockStatus).toHaveBeenCalledWith(500);
@@ -169,10 +149,7 @@ describe('HealthController', () => {
         data: healthyStatus,
       });
 
-      await handleHealthCheck(
-        mockRequest as Request,
-        mockResponse as Response
-      );
+      await handleHealthCheck(mockRequest as Request, mockResponse as Response);
 
       expect(mockJson).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -196,10 +173,7 @@ describe('HealthController', () => {
         data: healthyStatus,
       });
 
-      await handleHealthCheck(
-        mockRequest as Request,
-        mockResponse as Response
-      );
+      await handleHealthCheck(mockRequest as Request, mockResponse as Response);
 
       const response = mockJson.mock.calls[0][0];
       expect(response.timestamp).toBeDefined();
@@ -215,10 +189,7 @@ describe('HealthController', () => {
         data: null,
       });
 
-      await handleHealthCheck(
-        mockRequest as Request,
-        mockResponse as Response
-      );
+      await handleHealthCheck(mockRequest as Request, mockResponse as Response);
 
       expect(mockStatus).toHaveBeenCalledWith(503);
       expect(mockJson).toHaveBeenCalledWith(
@@ -255,10 +226,7 @@ describe('HealthController', () => {
         data: healthyStatus,
       });
 
-      await handleHealthCheck(
-        mockRequest as Request,
-        mockResponse as Response
-      );
+      await handleHealthCheck(mockRequest as Request, mockResponse as Response);
 
       const response = mockJson.mock.calls[0][0];
       expect(response.data).toEqual(healthyStatus);
@@ -273,10 +241,7 @@ describe('HealthController', () => {
         data: { status: 'ok', timestamp: new Date().toISOString(), uptime: 1 },
       });
 
-      await handleHealthCheck(
-        mockRequest as Request,
-        mockResponse as Response
-      );
+      await handleHealthCheck(mockRequest as Request, mockResponse as Response);
 
       expect(healthService.getHealthStatus).toHaveBeenCalledTimes(1);
     });
@@ -373,10 +338,7 @@ describe('HealthController', () => {
     test('should handle service returning undefined', async () => {
       (healthService.getHealthStatus as jest.Mock).mockResolvedValue(undefined);
 
-      await handleHealthCheck(
-        mockRequest as Request,
-        mockResponse as Response
-      );
+      await handleHealthCheck(mockRequest as Request, mockResponse as Response);
 
       // Should handle gracefully
       expect(mockStatus).toHaveBeenCalled();
@@ -391,10 +353,7 @@ describe('HealthController', () => {
         error: detailedError,
       });
 
-      await handleHealthCheck(
-        mockRequest as Request,
-        mockResponse as Response
-      );
+      await handleHealthCheck(mockRequest as Request, mockResponse as Response);
 
       expect(mockStatus).toHaveBeenCalledWith(503);
       expect(mockJson).toHaveBeenCalledWith(
@@ -420,10 +379,7 @@ describe('HealthController', () => {
         data: healthyStatus,
       });
 
-      await handleHealthCheck(
-        mockRequest as Request,
-        mockResponse as Response
-      );
+      await handleHealthCheck(mockRequest as Request, mockResponse as Response);
 
       const response = mockJson.mock.calls[0][0];
 
@@ -436,14 +392,9 @@ describe('HealthController', () => {
     });
 
     test('error response should match ApiResponse error format', async () => {
-      (healthService.getHealthStatus as jest.Mock).mockRejectedValue(
-        new Error('Test error')
-      );
+      (healthService.getHealthStatus as jest.Mock).mockRejectedValue(new Error('Test error'));
 
-      await handleHealthCheck(
-        mockRequest as Request,
-        mockResponse as Response
-      );
+      await handleHealthCheck(mockRequest as Request, mockResponse as Response);
 
       const response = mockJson.mock.calls[0][0];
 

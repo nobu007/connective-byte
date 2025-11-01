@@ -319,9 +319,7 @@ describe('LoggingService', () => {
       const logger = loggingService.createLogger('TestContext');
       logger.info('Test message');
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('TestContext')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('TestContext'));
     });
   });
 

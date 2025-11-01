@@ -73,6 +73,7 @@ npm run build
 ### 環境変数が必要な場合
 
 Netlifyダッシュボードで設定：
+
 - Site settings → Environment variables
 - 必要な環境変数を追加（例: `NEXT_PUBLIC_API_URL`）
 

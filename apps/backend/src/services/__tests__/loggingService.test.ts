@@ -55,9 +55,7 @@ describe('LoggingService', () => {
       const logger = loggingService.createLogger('TestContext');
       logger.info('Test message');
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('TestContext')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('TestContext'));
     });
   });
 
@@ -90,9 +88,7 @@ describe('LoggingService', () => {
 
       logger.debug('Debug message');
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Debug message')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Debug message'));
     });
 
     it('should respect error level (only errors)', () => {
@@ -169,18 +165,14 @@ describe('LoggingService', () => {
         const logger = loggingService.createLogger('Test');
         logger.debug('Debug message');
 
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Debug message')
-        );
+        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Debug message'));
       });
 
       it('should include metadata', () => {
         const logger = loggingService.createLogger('Test');
         logger.debug('Debug message', { key: 'value' });
 
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('key')
-        );
+        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('key'));
       });
     });
 
@@ -189,9 +181,7 @@ describe('LoggingService', () => {
         const logger = loggingService.createLogger('Test');
         logger.info('Info message');
 
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Info message')
-        );
+        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Info message'));
       });
 
       it('should format metadata correctly', () => {
@@ -209,9 +199,7 @@ describe('LoggingService', () => {
         const logger = loggingService.createLogger('Test');
         logger.warn('Warning message');
 
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Warning message')
-        );
+        expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Warning message'));
       });
 
       it('should output to stderr', () => {
@@ -228,9 +216,7 @@ describe('LoggingService', () => {
         const logger = loggingService.createLogger('Test');
         logger.error('Error message');
 
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Error message')
-        );
+        expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Error message'));
       });
 
       it('should include error object', () => {
@@ -292,9 +278,7 @@ describe('LoggingService', () => {
 
       // Note: Can't easily test without changing format at runtime
       // This test verifies the method exists and doesn't throw
-      expect(() =>
-        loggingService.registerFormatter('test2', customFormatter)
-      ).not.toThrow();
+      expect(() => loggingService.registerFormatter('test2', customFormatter)).not.toThrow();
     });
   });
 
@@ -391,9 +375,7 @@ describe('LoggingService', () => {
       process.env.LOG_LEVEL = 'invalid';
       const service = new LoggingService();
 
-      expect(['debug', 'info', 'warn', 'error']).toContain(
-        service.getLogLevel()
-      );
+      expect(['debug', 'info', 'warn', 'error']).toContain(service.getLogLevel());
     });
   });
 

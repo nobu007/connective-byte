@@ -21,6 +21,7 @@ Follow the clean architecture pattern with clear layer separation:
 ```
 
 **Benefits:**
+
 - Each layer has a single responsibility
 - Business logic is independent of HTTP concerns
 - Easy to test each layer in isolation
@@ -31,6 +32,7 @@ Follow the clean architecture pattern with clear layer separation:
 Always extend the appropriate base class:
 
 **For Services:**
+
 ```typescript
 import { BaseService } from '../../common/base/BaseService';
 import { loggingService } from '../../services/loggingService';
@@ -49,6 +51,7 @@ export class MyService extends BaseService {
 ```
 
 **For Controllers:**
+
 ```typescript
 import { BaseController } from '../../common/base/BaseController';
 import { loggingService } from '../../services/loggingService';
@@ -68,6 +71,7 @@ export class MyController extends BaseController {
 ```
 
 **Benefits:**
+
 - Consistent error handling across all modules
 - Structured logging by default
 - Automatic response formatting
@@ -77,6 +81,7 @@ export class MyController extends BaseController {
 ### 3. Dependency Injection for Logger
 
 **Correct Pattern:**
+
 ```typescript
 class HealthService extends BaseService {
   constructor() {
@@ -87,12 +92,14 @@ class HealthService extends BaseService {
 ```
 
 **Why this works:**
+
 - Avoids circular import between loggingService and BaseService
 - Maintains testability (can inject mock logger)
 - Allows per-module logger configuration
 - Each service/controller has its own logger context
 
 **Anti-pattern (Don't do this):**
+
 ```typescript
 // ❌ WRONG: Creates circular dependency
 class BaseService {
@@ -206,6 +213,7 @@ describe('MyService', () => {
 ```
 
 **Coverage Targets:**
+
 - Services: > 95%
 - Controllers: 100%
 - Utilities: 100%
@@ -243,7 +251,7 @@ async performOperation() {
 this.logger.info('Operation completed', {
   duration: 123,
   recordsProcessed: 45,
-  success: true
+  success: true,
 });
 
 // ❌ WRONG: Direct console.log
@@ -251,6 +259,7 @@ console.log('Operation completed:', duration);
 ```
 
 **Log Levels:**
+
 - `debug`: Development-only detailed information
 - `info`: Normal operational messages
 - `warn`: Warning conditions that should be reviewed
@@ -296,6 +305,7 @@ export class ExtensibleService extends BaseService {
 ```
 
 **Examples:**
+
 - Health module: `registerCheck()` / `unregisterCheck()`
 - Logging module: `registerFormatter()` / `registerTransport()`
 
@@ -376,7 +386,7 @@ Execute independent operations in parallel:
 const results = await Promise.all([
   this.checkDatabase(),
   this.checkExternalAPI(),
-  this.checkMemory()
+  this.checkMemory(),
 ]);
 
 // ❌ WRONG: Sequential execution (slower)
@@ -428,9 +438,7 @@ Don't leak sensitive information in error messages:
 
 ```typescript
 // ✅ CORRECT: Generic error in production
-const message = process.env.NODE_ENV === 'production'
-  ? 'Internal server error'
-  : errorObj.message;
+const message = process.env.NODE_ENV === 'production' ? 'Internal server error' : errorObj.message;
 
 // ❌ WRONG: Detailed errors in production
 const message = errorObj.message; // May leak stack traces, paths, etc.
@@ -457,6 +465,7 @@ this.logger.info('User login', { user }); // May include password!
 ### Creating a New Module
 
 1. **Use the scaffolding tool:**
+
    ```bash
    ./scripts/create-module.sh my-module
    ```
@@ -477,6 +486,7 @@ this.logger.info('User login', { user }); // May include password!
    - Test happy path, edge cases, errors
 
 5. **Validate compliance:**
+
    ```bash
    ./scripts/check-module-compliance.sh my-module
    ```
@@ -540,6 +550,7 @@ npm test -- --coverage apps/backend/src/modules/my-module
 ### Health Module
 
 **Perfect example of:**
+
 - Clean architecture (Controller → Service pattern)
 - Extensibility (registerCheck/unregisterCheck)
 - Parallel execution (checks run concurrently)
@@ -551,6 +562,7 @@ npm test -- --coverage apps/backend/src/modules/my-module
 ### Logging Module
 
 **Perfect example of:**
+
 - Strategy pattern (formatters)
 - Registration pattern (transports)
 - Singleton service pattern
@@ -564,12 +576,14 @@ npm test -- --coverage apps/backend/src/modules/my-module
 ### Pitfall 1: Circular Dependencies
 
 **Problem:**
+
 ```typescript
 // BaseService tries to import loggingService
 import { loggingService } from '../../services/loggingService';
 ```
 
 **Solution:**
+
 ```typescript
 // Use dependency injection instead
 constructor(serviceName: string, logger?: Logger) {
@@ -580,22 +594,31 @@ constructor(serviceName: string, logger?: Logger) {
 ### Pitfall 2: Insufficient Test Coverage
 
 **Problem:**
+
 - Only testing happy path
 - Ignoring edge cases
 - Not testing error handling
 
 **Solution:**
+
 ```typescript
 describe('MyService', () => {
-  describe('Happy Path', () => { /* ... */ });
-  describe('Edge Cases', () => { /* ... */ });
-  describe('Error Handling', () => { /* ... */ });
+  describe('Happy Path', () => {
+    /* ... */
+  });
+  describe('Edge Cases', () => {
+    /* ... */
+  });
+  describe('Error Handling', () => {
+    /* ... */
+  });
 });
 ```
 
 ### Pitfall 3: Tight Coupling
 
 **Problem:**
+
 ```typescript
 // Service directly depends on specific implementation
 class MyService {
@@ -604,6 +627,7 @@ class MyService {
 ```
 
 **Solution:**
+
 ```typescript
 // Use dependency injection or registration pattern
 class MyService {

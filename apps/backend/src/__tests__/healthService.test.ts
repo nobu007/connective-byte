@@ -42,9 +42,7 @@ describe('HealthService', () => {
       expect(result.data?.status).toBe('error');
       expect(result.data?.checks).toBeDefined();
 
-      const failedCheck = result.data?.checks?.find(
-        (c) => c.name === 'failing-check'
-      );
+      const failedCheck = result.data?.checks?.find((c) => c.name === 'failing-check');
       expect(failedCheck).toBeDefined();
       expect(failedCheck?.status).toBe('error');
     });
@@ -106,17 +104,14 @@ describe('HealthService', () => {
       expect(result.data).toBeDefined();
 
       // Check should be marked as error
-      const throwingCheck = result.data?.checks?.find(
-        (c) => c.name === 'throwing-check'
-      );
+      const throwingCheck = result.data?.checks?.find((c) => c.name === 'throwing-check');
       expect(throwingCheck).toBeDefined();
       expect(throwingCheck?.status).toBe('error');
       expect(throwingCheck?.message).toContain('Simulated check failure');
     });
 
     test('should execute checks in parallel for performance', async () => {
-      const delay = (ms: number) =>
-        new Promise((resolve) => setTimeout(resolve, ms));
+      const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
       // Register slow checks
       service.registerCheck('slow-check-1', async () => {
@@ -210,9 +205,7 @@ describe('HealthService', () => {
       expect(firstCheck).not.toHaveBeenCalled();
       expect(secondCheck).toHaveBeenCalled();
 
-      const duplicateCheck = result.data?.checks?.find(
-        (c) => c.name === 'duplicate'
-      );
+      const duplicateCheck = result.data?.checks?.find((c) => c.name === 'duplicate');
       expect(duplicateCheck?.message).toBe('Second check');
     });
   });
@@ -292,9 +285,7 @@ describe('HealthService', () => {
     describe('checkUptime', () => {
       test('should return ok status', async () => {
         const result = await service.getHealthStatus();
-        const uptimeCheck = result.data?.checks?.find(
-          (c) => c.name === 'uptime'
-        );
+        const uptimeCheck = result.data?.checks?.find((c) => c.name === 'uptime');
 
         expect(uptimeCheck).toBeDefined();
         expect(uptimeCheck?.status).toBe('ok');
@@ -304,9 +295,7 @@ describe('HealthService', () => {
 
       test('should include uptime duration in message', async () => {
         const result = await service.getHealthStatus();
-        const uptimeCheck = result.data?.checks?.find(
-          (c) => c.name === 'uptime'
-        );
+        const uptimeCheck = result.data?.checks?.find((c) => c.name === 'uptime');
 
         expect(uptimeCheck?.message).toMatch(/\d+\.\d+ seconds/);
       });
@@ -316,9 +305,7 @@ describe('HealthService', () => {
       test('should return ok when usage is low', async () => {
         // Under normal test conditions, memory should be OK
         const result = await service.getHealthStatus();
-        const memoryCheck = result.data?.checks?.find(
-          (c) => c.name === 'memory'
-        );
+        const memoryCheck = result.data?.checks?.find((c) => c.name === 'memory');
 
         expect(memoryCheck).toBeDefined();
         expect(memoryCheck?.status).toBe('ok');
@@ -329,9 +316,7 @@ describe('HealthService', () => {
 
       test('should include memory usage percentage', async () => {
         const result = await service.getHealthStatus();
-        const memoryCheck = result.data?.checks?.find(
-          (c) => c.name === 'memory'
-        );
+        const memoryCheck = result.data?.checks?.find((c) => c.name === 'memory');
 
         // Message should contain percentage like "(35.3%)"
         expect(memoryCheck?.message).toMatch(/\(\d+\.\d+%\)/);
@@ -339,9 +324,7 @@ describe('HealthService', () => {
 
       test('should report heap usage in megabytes', async () => {
         const result = await service.getHealthStatus();
-        const memoryCheck = result.data?.checks?.find(
-          (c) => c.name === 'memory'
-        );
+        const memoryCheck = result.data?.checks?.find((c) => c.name === 'memory');
 
         // Should have format like "45.23MB / 128.00MB"
         expect(memoryCheck?.message).toMatch(/\d+\.\d+MB \/ \d+\.\d+MB/);
@@ -381,7 +364,10 @@ describe('HealthService', () => {
 
   describe('backwards compatibility exports', () => {
     // Import the legacy functions
-    const { getHealthStatus: legacyGetHealthStatus, isHealthy: legacyIsHealthy } = require('../services/healthService');
+    const {
+      getHealthStatus: legacyGetHealthStatus,
+      isHealthy: legacyIsHealthy,
+    } = require('../services/healthService');
 
     test('legacy getHealthStatus function should work', async () => {
       const status = await legacyGetHealthStatus();

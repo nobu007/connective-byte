@@ -45,6 +45,7 @@ npm test apps/backend/src/modules/my-module
 ## Key Patterns
 
 ### Service Pattern
+
 ```typescript
 class MyService extends BaseService {
   constructor() {
@@ -60,6 +61,7 @@ class MyService extends BaseService {
 ```
 
 ### Controller Pattern
+
 ```typescript
 class MyController extends BaseController {
   constructor(private service: MyService) {
@@ -76,6 +78,7 @@ class MyController extends BaseController {
 ```
 
 ### Extension Pattern
+
 ```typescript
 class ExtensibleService extends BaseService {
   private plugins = new Map<string, Plugin>();
@@ -120,11 +123,13 @@ npm run type-check
 ## Reference Modules
 
 **Health Module**: `apps/backend/src/modules/health`
+
 - Controller → Service pattern
 - Registration pattern (health checks)
 - Parallel execution
 
 **Logging Module**: `apps/backend/src/modules/logging`
+
 - Strategy pattern (formatters)
 - Multiple transports
 - File rotation
@@ -138,24 +143,25 @@ npm run type-check
 
 ## Quality Standards
 
-| Metric | Target | Check |
-|--------|--------|-------|
-| Test Coverage | > 95% | npm test -- --coverage |
-| .module Docs | 8/8 files | ls .module/ |
-| Base Classes | Required | grep "extends Base" |
-| Anti-patterns | 0 | ./scripts/check-module-compliance.sh |
+| Metric        | Target    | Check                                |
+| ------------- | --------- | ------------------------------------ |
+| Test Coverage | > 95%     | npm test -- --coverage               |
+| .module Docs  | 8/8 files | ls .module/                          |
+| Base Classes  | Required  | grep "extends Base"                  |
+| Anti-patterns | 0         | ./scripts/check-module-compliance.sh |
 
 ## Anti-Patterns to Avoid
 
 ```typescript
 // ❌ WRONG
 console.log('message');
-try { } catch { }
+try {
+} catch {}
 res.json(data);
 
 // ✅ CORRECT
 this.logger.info('message');
-this.executeOperation(async () => { });
+this.executeOperation(async () => {});
 this.sendSuccess(res, data);
 ```
 

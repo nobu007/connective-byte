@@ -49,10 +49,7 @@ async function fetchWithTimeout(
  * @param options - Fetch options including retry configuration
  * @returns Response object
  */
-export async function fetchWithRetry(
-  url: string,
-  options: FetchOptions = {}
-): Promise<Response> {
+export async function fetchWithRetry(url: string, options: FetchOptions = {}): Promise<Response> {
   const {
     retryAttempts = apiConfig.retryAttempts,
     retryDelay = apiConfig.retryDelay,

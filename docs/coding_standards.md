@@ -21,6 +21,7 @@
 
 - **関数コンポーネント**: クラスコンポーネントではなく、常に関数コンポーネントとHooksを使用します。
 - **Props**: PropsはTypeScriptの`interface`または`type`で型定義を明確にします。
+
   ```tsx
   interface MyComponentProps {
     title: string;
@@ -31,6 +32,7 @@
     // ...
   };
   ```
+
 - **コンポーネントの分割**: 1つのコンポーネントが大きくなりすぎないように、関心事に基づいて適切にコンポーネントを分割します。Presentational ComponentとContainer Componentの分離を意識することが推奨されます。
 
 ## 状態管理

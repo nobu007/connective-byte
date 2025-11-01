@@ -9,6 +9,7 @@
 **Extends**: `BaseService`
 
 **Responsibilities**:
+
 - Manage log level configuration
 - Create logger instances with context
 - Route log entries to formatters and transports
@@ -130,7 +131,7 @@ export class LoggingService extends BaseService {
   }
 
   private outputToTransports(formatted: string, level: LogLevel): void {
-    this.transports.forEach(transport => {
+    this.transports.forEach((transport) => {
       try {
         transport.log(formatted, level);
       } catch (error) {

@@ -31,11 +31,7 @@ class HealthController extends BaseController {
       const result = await healthService.getHealthStatus();
 
       if (!result.success || !result.data) {
-        this.sendError(
-          res,
-          'Failed to retrieve health status',
-          503
-        );
+        this.sendError(res, 'Failed to retrieve health status', 503);
         return;
       }
 
@@ -72,7 +68,5 @@ class HealthController extends BaseController {
 const healthController = new HealthController();
 
 // Export bound methods for Express route compatibility
-export const handleHealthCheck = healthController.handleHealthCheck.bind(
-  healthController
-);
+export const handleHealthCheck = healthController.handleHealthCheck.bind(healthController);
 export const handleRoot = healthController.handleRoot.bind(healthController);

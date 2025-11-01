@@ -77,15 +77,18 @@ The ConnectiveByte backend follows the **standard Express.js layered architectur
 
 **Size:** ~162 lines
 **Responsibilities:**
+
 - Business logic for health checking
 - Health check registration and management
 - Parallel execution of checks
 - Status aggregation
 
 **Key Classes:**
+
 - `HealthService extends BaseService`
 
 **Key Methods:**
+
 - `registerCheck(name, checkFn)` - Register health check
 - `unregisterCheck(name)` - Remove health check
 - `getHealthStatus()` - Execute all checks and return status
@@ -97,14 +100,17 @@ The ConnectiveByte backend follows the **standard Express.js layered architectur
 
 **Size:** ~76 lines
 **Responsibilities:**
+
 - HTTP request/response handling
 - Status code mapping (200, 503, 500)
 - Response formatting using BaseController
 
 **Key Classes:**
+
 - `HealthController extends BaseController`
 
 **Key Methods:**
+
 - `handleHealthCheck(req, res)` - Handle GET /api/health
 - `handleRoot(req, res)` - Handle GET /
 
@@ -112,10 +118,12 @@ The ConnectiveByte backend follows the **standard Express.js layered architectur
 
 **Size:** ~20 lines
 **Responsibilities:**
+
 - Express route definitions
 - Route-to-controller mapping
 
 **Routes Defined:**
+
 - `GET /api/health` → `handleHealthCheck`
 - `GET /` → `handleRoot`
 
@@ -125,6 +133,7 @@ The ConnectiveByte backend follows the **standard Express.js layered architectur
 
 **Size:** ~145 lines
 **Provides:**
+
 - `executeOperation<T>()` - Automatic error handling
 - `executeSync<T>()` - Synchronous error handling
 - Built-in logging with context
@@ -135,6 +144,7 @@ The ConnectiveByte backend follows the **standard Express.js layered architectur
 
 **Size:** ~184 lines
 **Provides:**
+
 - `sendSuccess<T>()` - Standardized success response
 - `sendError()` - Standardized error response
 - `executeAction()` - Automatic error handling
@@ -144,6 +154,7 @@ The ConnectiveByte backend follows the **standard Express.js layered architectur
 ### 5. Type Definitions (`common/types/index.ts`)
 
 **Defines:**
+
 ```typescript
 interface HealthStatus {
   status: 'ok' | 'degraded' | 'error';
@@ -184,6 +195,7 @@ type HealthCheckFunction = () => Promise<HealthCheck>;
 **Coverage:** 97.72%
 **Test Count:** 26 tests
 **Covers:**
+
 - All service methods
 - Parallel execution
 - Error handling
@@ -196,6 +208,7 @@ type HealthCheckFunction = () => Promise<HealthCheck>;
 **Coverage:** 100%
 **Test Count:** 22 tests
 **Covers:**
+
 - HTTP status codes (200, 503, 500)
 - Response formatting
 - Error scenarios
@@ -205,6 +218,7 @@ type HealthCheckFunction = () => Promise<HealthCheck>;
 
 **Test Count:** 4 tests
 **Covers:**
+
 - End-to-end API testing
 - Real HTTP requests
 - Response structure validation
@@ -226,6 +240,7 @@ Both → common/types
 ### External Dependencies
 
 From `package.json`:
+
 ```json
 {
   "express": "^4.x.x",
@@ -237,12 +252,12 @@ From `package.json`:
 
 ## Code Statistics
 
-| File | Lines | Classes | Methods | Test Coverage |
-|------|-------|---------|---------|---------------|
-| healthService.ts | 162 | 1 | 6 | 97.72% |
-| healthController.ts | 76 | 1 | 2 | 100% |
-| BaseService.ts | 145 | 1 | 4 | ~50% (shared) |
-| BaseController.ts | 184 | 1 | 6 | ~64% (shared) |
+| File                | Lines | Classes | Methods | Test Coverage |
+| ------------------- | ----- | ------- | ------- | ------------- |
+| healthService.ts    | 162   | 1       | 6       | 97.72%        |
+| healthController.ts | 76    | 1       | 2       | 100%          |
+| BaseService.ts      | 145   | 1       | 4       | ~50% (shared) |
+| BaseController.ts   | 184   | 1       | 6       | ~64% (shared) |
 
 **Total Module Lines:** ~567 (including base classes)
 **Total Tests:** 52
@@ -261,7 +276,7 @@ healthService.registerCheck('database', async () => {
   return {
     name: 'database',
     status: connected ? 'ok' : 'error',
-    message: connected ? 'Connected' : 'Connection failed'
+    message: connected ? 'Connected' : 'Connection failed',
   };
 });
 ```
@@ -296,6 +311,7 @@ router.get('/api/custom', handleCustom);
 If the module grows significantly, consider:
 
 1. **Separate check functions:**
+
    ```
    services/
    └── health/
