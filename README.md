@@ -69,16 +69,29 @@ npm run dev
 
 ## 🚀 デプロイ
 
-このプロジェクトはNetlifyにデプロイできます。
+### Netlifyへのデプロイ
 
-1. Netlifyのアカウントにログインし、「New site from Git」を選択します。
-2. リポジトリを選択します。
-3. ビルド設定は基本的に`netlify.toml`から自動で読み込まれますが、以下の点を確認してください。
-    - **Base directory**: `apps/frontend`
-    - **Build command**: `npm run build`
-    - **Publish directory**: `apps/frontend/out` (または `apps/frontend/.next`)
+このプロジェクトはNetlifyで簡単にデプロイできます。
 
-**注意:** `netlify.toml`では`publish`が`dist`に設定されていますが、Next.jsのデフォルトの出力先は`.next`です。静的サイトとしてエクスポートする場合は`out`ディレクトリになります。実際のプロジェクト構成に合わせてNetlifyのUI上で設定を上書きしてください。
+#### クイックデプロイ
+
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/nobu007/connective-byte)
+
+#### 手動デプロイ
+
+1. [Netlify](https://www.netlify.com/)にログイン
+2. 「Add new site」→「Import an existing project」を選択
+3. GitHubリポジトリを接続
+4. ビルド設定は`netlify.toml`から自動で読み込まれます
+
+詳細な手順は[NETLIFY_DEPLOY.md](./NETLIFY_DEPLOY.md)を参照してください。
+
+#### デプロイ設定（自動適用）
+
+- **Base directory**: `apps/frontend`
+- **Build command**: `npm run build`
+- **Publish directory**: `apps/frontend/out`
+- **Node.js version**: 20
 
 ## 📚 ドキュメント
 

@@ -1,15 +1,23 @@
 [build]
   base    = "apps/frontend"
-  publish = ".next"
+  publish = "out"
   command = "npm run build"
-  # 環境変数NETLIFY_SKIP_BUILDが"true"の場合のみビルド実行
-  # Netlifyダッシュボードで環境変数を設定してください
-  ignore = "[ \"$NETLIFY_SKIP_BUILD\" = \"true\" ]"
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
+  NPM_VERSION = "10"
 
+# Next.jsのルーティングをサポート
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  force = false
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

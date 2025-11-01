@@ -1,47 +1,75 @@
 {
   "name": "connective-byte",
   "version": "1.0.0",
-  "description": "ConnectiveByteは、モダンなWeb開発の基盤となる包括的なフレームワークです。",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
+  "description": "ConnectiveByte: A modern web development framework with Next.js and Express",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "libs/*"
+  ],
   "scripts": {
-    "start": "serve .",
-    "test": "start-server-and-test start http-get://localhost:3000 test:all",
-    "minify": "html-minifier --input-dir . --output-dir dist --file-ext html --remove-comments --collapse-whitespace --minify-js true --minify-css true",
-    "build": "npm test && npm run minify",
-    "test:all": "npm-run-all --parallel lint:* test:html test:a11y",
-    "test:html": "html-validate index.html",
-    "test:a11y": "axe http://localhost:3000",
-    "lint": "npm-run-all --parallel lint:*",
-    "lint:css": "stylelint '**/*.css' --ignore-path .gitignore --ignore-pattern '**/coverage/**' --fix",
-    "lint:js": "eslint .",
-    "format": "prettier --write ."
+    "start": "npm run dev",
+    "dev": "npm-run-all --parallel dev:*",
+    "dev:frontend": "npm run dev -w apps/frontend",
+    "dev:backend": "npm run dev -w apps/backend",
+    "build": "npm-run-all build:frontend build:backend",
+    "build:frontend": "npm run build -w apps/frontend",
+    "build:backend": "npm run build -w apps/backend",
+    "build:netlify": "cd apps/frontend && npm run build",
+    "preview": "cd apps/frontend && npx serve@latest out",
+    "test": "npm-run-all test:frontend test:backend",
+    "test:frontend": "npm test -w apps/frontend",
+    "test:backend": "npm test -w apps/backend",
+    "test:e2e": "npm run test:e2e -w apps/frontend",
+    "lint": "npm-run-all lint:frontend lint:backend",
+    "lint:frontend": "npm run lint -w apps/frontend",
+    "lint:backend": "npm run lint -w apps/backend",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+    "prepare": "husky install",
+    "type-check": "npm run type-check -w apps/frontend"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nobu007/connective-byte.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
+  "keywords": [
+    "nextjs",
+    "react",
+    "typescript",
+    "express",
+    "monorepo"
+  ],
+  "author": "Nobu",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/nobu007/connective-byte/issues"
   },
   "homepage": "https://github.com/nobu007/connective-byte#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "devDependencies": {
-    "@axe-core/cli": "^4.10.2",
-    "eslint": "^9.29.0",
-    "eslint-config-prettier": "^10.1.5",
-    "html-minifier": "^4.0.0",
-    "html-validate": "^9.7.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-react": "^7.33.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
     "npm-run-all": "^4.1.5",
-    "prettier": "^3.6.0",
-    "serve": "^14.2.4",
-    "start-server-and-test": "^2.0.12",
-    "stylelint": "^16.21.0",
-    "stylelint-config-standard": "^38.0.0"
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }
