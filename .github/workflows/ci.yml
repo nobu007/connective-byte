@@ -34,9 +34,13 @@ jobs:
       run: npm ci
       working-directory: ./apps/backend
 
-    - name: Run frontend tests
-      run: npm run test:all
+    - name: Run linting
+      run: npm run lint
 
-    - name: Run backend tests
-      run: npm test
+    - name: Run frontend tests
+      run: npm run test
+      working-directory: ./apps/frontend
+
+    - name: Run backend tests with coverage
+      run: npm test -- --coverage
       working-directory: ./apps/backend
