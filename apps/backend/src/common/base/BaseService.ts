@@ -15,12 +15,51 @@ import { ServiceResult, Logger } from '../types';
 export abstract class BaseService {
   protected readonly logger: Logger;
   protected readonly serviceName: string;
+  private operationCount: number = 0;
+  private totalOperationTime: number = 0;
+  private failedOperations: number = 0;
 
   constructor(serviceName: string, logger?: Logger) {
     this.serviceName = serviceName;
     // Use provided logger or create default logger
     // LoggingService will be integrated later to avoid circular dependency
     this.logger = logger || this.createDefaultLogger();
+  }
+
+  /**
+   * Get service health metrics
+   * @returns Service health information
+   */
+  public getHealthMetrics(): {
+    serviceName: string;
+    operationCount: number;
+    averageOperationTime: number;
+    failedOperations: number;
+    successRate: number;
+  } {
+    const averageOperationTime =
+      this.operationCount > 0 ? this.totalOperationTime / this.operationCount : 0;
+    const successRate =
+      this.operationCount > 0
+        ? ((this.operationCount - this.failedOperations) / this.operationCount) * 100
+        : 100;
+
+    return {
+      serviceName: this.serviceName,
+      operationCount: this.operationCount,
+      averageOperationTime: Math.round(averageOperationTime),
+      failedOperations: this.failedOperations,
+      successRate: Math.round(successRate * 100) / 100,
+    };
+  }
+
+  /**
+   * Reset service metrics (useful for testing)
+   */
+  protected resetMetrics(): void {
+    this.operationCount = 0;
+    this.totalOperationTime = 0;
+    this.failedOperations = 0;
   }
 
   /**
@@ -35,33 +74,65 @@ export abstract class BaseService {
   ): Promise<ServiceResult<T>> {
     const startTime = Date.now();
     const operationContext = context || 'operation';
+    const operationId = ++this.operationCount;
 
     try {
-      this.logger.debug(`${this.serviceName}: Starting ${operationContext}`);
+      this.logger.debug(`${this.serviceName}: Starting ${operationContext}`, {
+        operationId,
+        timestamp: new Date().toISOString(),
+      });
 
       const data = await operation();
       const duration = Date.now() - startTime;
+      this.totalOperationTime += duration;
 
       this.logger.info(`${this.serviceName}: ${operationContext} completed`, {
+        operationId,
         duration,
         success: true,
+        metrics: this.getHealthMetrics(),
       });
 
       return {
         success: true,
         data,
-        metadata: { duration },
+        metadata: {
+          duration,
+          operationId,
+          timestamp: new Date().toISOString(),
+        },
       };
     } catch (error) {
       const duration = Date.now() - startTime;
+      this.totalOperationTime += duration;
+      this.failedOperations++;
+
       const errorObj = error instanceof Error ? error : new Error(String(error));
 
-      this.logger.error(`${this.serviceName}: ${operationContext} failed`, errorObj, { duration });
+      // Enhanced error context
+      const errorContext = {
+        operationId,
+        duration,
+        errorName: errorObj.name,
+        errorMessage: errorObj.message,
+        errorStack: process.env.NODE_ENV !== 'production' ? errorObj.stack : undefined,
+        metrics: this.getHealthMetrics(),
+      };
+
+      this.logger.error(`${this.serviceName}: ${operationContext} failed`, errorObj, errorContext);
 
       return {
         success: false,
         error: errorObj,
-        metadata: { duration },
+        metadata: {
+          duration,
+          operationId,
+          timestamp: new Date().toISOString(),
+          errorContext: {
+            name: errorObj.name,
+            message: errorObj.message,
+          },
+        },
       };
     }
   }

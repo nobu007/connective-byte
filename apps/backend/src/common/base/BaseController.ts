@@ -12,14 +12,100 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { ApiResponse, ValidationError, Logger } from '../types';
+import { ValidationBuilder, ValidationResult } from '../utils/validators';
 
 export abstract class BaseController {
   protected readonly logger: Logger;
   protected readonly controllerName: string;
+  private requestCount: number = 0;
 
   constructor(controllerName: string, logger?: Logger) {
     this.controllerName = controllerName;
     this.logger = logger || this.createDefaultLogger();
+  }
+
+  /**
+   * Log incoming request with details
+   * @param req - Express request object
+   */
+  protected logRequest(req: Request): void {
+    this.requestCount++;
+    this.logger.info(`${this.controllerName}: Incoming request`, {
+      requestId: this.requestCount,
+      method: req.method,
+      path: req.path,
+      query: req.query,
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+  }
+
+  /**
+   * Validate request body with automatic error response
+   * @param req - Express request object
+   * @param res - Express response object
+   * @param validationFn - Validation function
+   * @returns true if valid, false if validation failed (response already sent)
+   */
+  protected validateBody<T>(
+    req: Request,
+    res: Response,
+    validationFn: (data: T) => ValidationResult
+  ): boolean {
+    const errors = this.validateRequest(req.body as T, validationFn);
+    if (errors) {
+      this.sendError(res, 'Validation failed', 400, errors);
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Validate request query parameters with automatic error response
+   * @param req - Express request object
+   * @param res - Express response object
+   * @param validationFn - Validation function
+   * @returns true if valid, false if validation failed (response already sent)
+   */
+  protected validateQuery<T>(
+    req: Request,
+    res: Response,
+    validationFn: (data: T) => ValidationResult
+  ): boolean {
+    const errors = this.validateRequest(req.query as T, validationFn);
+    if (errors) {
+      this.sendError(res, 'Invalid query parameters', 400, errors);
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Validate request params with automatic error response
+   * @param req - Express request object
+   * @param res - Express response object
+   * @param validationFn - Validation function
+   * @returns true if valid, false if validation failed (response already sent)
+   */
+  protected validateParams<T>(
+    req: Request,
+    res: Response,
+    validationFn: (data: T) => ValidationResult
+  ): boolean {
+    const errors = this.validateRequest(req.params as T, validationFn);
+    if (errors) {
+      this.sendError(res, 'Invalid URL parameters', 400, errors);
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Create validation builder for fluent validation
+   * @returns ValidationBuilder instance
+   */
+  protected createValidator(): ValidationBuilder {
+    return new ValidationBuilder();
   }
 
   /**
@@ -88,14 +174,23 @@ export abstract class BaseController {
   protected handleError(error: unknown, req: Request, res: Response): void {
     const errorObj = error instanceof Error ? error : new Error(String(error));
 
+    // Enhanced error context
+    const errorContext = {
+      method: req.method,
+      path: req.path,
+      query: req.query,
+      body: this.sanitizeBody(req.body),
+      params: req.params,
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+      errorName: errorObj.name,
+      errorStack: process.env.NODE_ENV !== 'production' ? errorObj.stack : undefined,
+    };
+
     this.logger.error(
       `${this.controllerName}: Error handling ${req.method} ${req.path}`,
       errorObj,
-      {
-        method: req.method,
-        path: req.path,
-        query: req.query,
-      }
+      errorContext
     );
 
     // Map error types to HTTP status codes
@@ -104,6 +199,26 @@ export abstract class BaseController {
       process.env.NODE_ENV === 'production' ? 'Internal server error' : errorObj.message;
 
     this.sendError(res, message, statusCode);
+  }
+
+  /**
+   * Sanitize request body for logging (remove sensitive data)
+   * @param body - Request body
+   * @returns Sanitized body
+   */
+  private sanitizeBody(body: unknown): unknown {
+    if (!body || typeof body !== 'object') return body;
+
+    const sensitiveFields = ['password', 'token', 'secret', 'apiKey', 'authorization'];
+    const sanitized = { ...body } as Record<string, unknown>;
+
+    for (const field of sensitiveFields) {
+      if (field in sanitized) {
+        sanitized[field] = '***REDACTED***';
+      }
+    }
+
+    return sanitized;
   }
 
   /**

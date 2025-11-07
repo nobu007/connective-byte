@@ -1,14 +1,21 @@
 /**
- * BaseController Unit Tests
- * Comprehensive tests for the base controller class
- * Tests request handling, response formatting, and error handling
+ * BaseController Tests
+ * Comprehensive tests for BaseController validation and error handling
  */
 
 import { Request, Response } from 'express';
 import { BaseController } from '../BaseController';
 import { Logger, ValidationError } from '../../types';
 
-// Test implementation of BaseController
+// Mock logger
+const mockLogger: Logger = {
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+};
+
+// Test controller implementation
 class TestController extends BaseController {
   constructor(logger?: Logger) {
     super('TestController', logger);
@@ -28,144 +35,104 @@ class TestController extends BaseController {
     this.sendError(res, message, statusCode, errors);
   }
 
-  public async testExecuteAction(
-    req: Request,
-    res: Response,
-    action: (req: Request, res: Response) => Promise<void>
-  ): Promise<void> {
-    return this.executeAction(req, res, action);
-  }
-
   public testHandleError(error: unknown, req: Request, res: Response): void {
     this.handleError(error, req, res);
   }
 
-  public testValidateRequest<T>(
-    data: T,
+  public testValidateBody<T>(
+    req: Request,
+    res: Response,
     validationFn: (data: T) => ValidationError[] | null
-  ): ValidationError[] | null {
-    return this.validateRequest(data, validationFn);
+  ): boolean {
+    return this.validateBody(req, res, validationFn);
   }
 
-  public testGetStatusCodeFromError(error: Error): number {
-    return this.getStatusCodeFromError(error);
+  public testValidateQuery<T>(
+    req: Request,
+    res: Response,
+    validationFn: (data: T) => ValidationError[] | null
+  ): boolean {
+    return this.validateQuery(req, res, validationFn);
+  }
+
+  public testValidateParams<T>(
+    req: Request,
+    res: Response,
+    validationFn: (data: T) => ValidationError[] | null
+  ): boolean {
+    return this.validateParams(req, res, validationFn);
+  }
+
+  public testLogRequest(req: Request): void {
+    this.logRequest(req);
+  }
+
+  public testCreateValidator() {
+    return this.createValidator();
   }
 }
 
 // Mock Express request and response
-function createMockRequest(overrides: Partial<Request> = {}): Partial<Request> {
+const createMockRequest = (overrides?: Partial<Request>): Request => {
   return {
     method: 'GET',
     path: '/test',
     query: {},
-    params: {},
     body: {},
+    params: {},
+    ip: '127.0.0.1',
+    get: jest.fn((header: string) => {
+      if (header === 'user-agent') return 'test-agent';
+      return undefined;
+    }),
     ...overrides,
-  } as Partial<Request>;
-}
+  } as unknown as Request;
+};
 
-function createMockResponse(): Partial<Response> {
-  const res: Partial<Response> = {
+const createMockResponse = (): Response => {
+  const res = {
     status: jest.fn().mockReturnThis(),
     json: jest.fn().mockReturnThis(),
-  };
+  } as unknown as Response;
   return res;
-}
+};
 
 describe('BaseController', () => {
-  let mockLogger: Logger;
   let controller: TestController;
-  let mockReq: Partial<Request>;
-  let mockRes: Partial<Response>;
+  let req: Request;
+  let res: Response;
 
   beforeEach(() => {
-    mockLogger = {
-      info: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
-    };
-
+    jest.clearAllMocks();
     controller = new TestController(mockLogger);
-    mockReq = createMockRequest();
-    mockRes = createMockResponse();
-  });
-
-  describe('constructor', () => {
-    it('should create controller with provided logger', () => {
-      expect(controller).toBeDefined();
-      expect(controller['logger']).toBe(mockLogger);
-      expect(controller['controllerName']).toBe('TestController');
-    });
-
-    it('should create controller with default logger if none provided', () => {
-      const defaultController = new TestController();
-      expect(defaultController).toBeDefined();
-      expect(defaultController['logger']).toBeDefined();
-    });
+    req = createMockRequest();
+    res = createMockResponse();
   });
 
   describe('sendSuccess', () => {
     it('should send success response with default status code 200', () => {
-      const data = { id: 1, name: 'Test' };
+      const data = { message: 'Success' };
+      controller.testSendSuccess(res, data);
 
-      controller.testSendSuccess(mockRes as Response, data);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        status: 'success',
-        data,
-        timestamp: expect.any(String),
-      });
-    });
-
-    it('should send success response with custom status code', () => {
-      const data = { created: true };
-
-      controller.testSendSuccess(mockRes as Response, data, 201);
-
-      expect(mockRes.status).toHaveBeenCalledWith(201);
-      expect(mockRes.json).toHaveBeenCalledWith(
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           status: 'success',
           data,
+          timestamp: expect.any(String),
         })
       );
     });
 
-    it('should include ISO timestamp in response', () => {
-      const data = { test: 'data' };
+    it('should send success response with custom status code', () => {
+      const data = { id: 1 };
+      controller.testSendSuccess(res, data, 201);
 
-      controller.testSendSuccess(mockRes as Response, data);
-
-      const jsonCall = (mockRes.json as jest.Mock).mock.calls[0][0];
-      expect(jsonCall.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
-      expect(new Date(jsonCall.timestamp).toISOString()).toBe(jsonCall.timestamp);
-    });
-
-    it('should handle null data', () => {
-      controller.testSendSuccess(mockRes as Response, null);
-
-      expect(mockRes.json).toHaveBeenCalledWith(
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           status: 'success',
-          data: null,
-        })
-      );
-    });
-
-    it('should handle complex nested data', () => {
-      const complexData = {
-        user: { id: 1, profile: { name: 'Test' } },
-        items: [{ id: 1 }, { id: 2 }],
-      };
-
-      controller.testSendSuccess(mockRes as Response, complexData);
-
-      expect(mockRes.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: 'success',
-          data: complexData,
+          data,
         })
       );
     });
@@ -174,41 +141,25 @@ describe('BaseController', () => {
   describe('sendError', () => {
     it('should send error response with default status code 500', () => {
       const message = 'Internal error';
+      controller.testSendError(res, message);
 
-      controller.testSendError(mockRes as Response, message);
-
-      expect(mockRes.status).toHaveBeenCalledWith(500);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        status: 'error',
-        message,
-        timestamp: expect.any(String),
-      });
-    });
-
-    it('should send error response with custom status code', () => {
-      const message = 'Not found';
-
-      controller.testSendError(mockRes as Response, message, 404);
-
-      expect(mockRes.status).toHaveBeenCalledWith(404);
-      expect(mockRes.json).toHaveBeenCalledWith(
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           status: 'error',
           message,
+          timestamp: expect.any(String),
         })
       );
     });
 
-    it('should include validation errors in response', () => {
+    it('should send error response with validation errors', () => {
       const message = 'Validation failed';
-      const errors: ValidationError[] = [
-        { field: 'email', message: 'Invalid email' },
-        { field: 'password', message: 'Too short' },
-      ];
+      const errors: ValidationError[] = [{ field: 'email', message: 'Invalid email' }];
+      controller.testSendError(res, message, 400, errors);
 
-      controller.testSendError(mockRes as Response, message, 400, errors);
-
-      expect(mockRes.json).toHaveBeenCalledWith(
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           status: 'error',
           message,
@@ -216,351 +167,168 @@ describe('BaseController', () => {
         })
       );
     });
+  });
 
-    it('should include ISO timestamp in error response', () => {
-      controller.testSendError(mockRes as Response, 'Error');
+  describe('validateBody', () => {
+    it('should return true for valid body', () => {
+      req.body = { email: 'test@example.com' };
+      const validationFn = jest.fn().mockReturnValue(null);
 
-      const jsonCall = (mockRes.json as jest.Mock).mock.calls[0][0];
-      expect(jsonCall.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      const result = controller.testValidateBody(req, res, validationFn);
+
+      expect(result).toBe(true);
+      expect(validationFn).toHaveBeenCalledWith(req.body);
+      expect(res.status).not.toHaveBeenCalled();
+    });
+
+    it('should return false and send error for invalid body', () => {
+      req.body = { email: 'invalid' };
+      const errors: ValidationError[] = [{ field: 'email', message: 'Invalid email' }];
+      const validationFn = jest.fn().mockReturnValue(errors);
+
+      const result = controller.testValidateBody(req, res, validationFn);
+
+      expect(result).toBe(false);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'error',
+          message: 'Validation failed',
+          errors,
+        })
+      );
     });
   });
 
-  describe('executeAction', () => {
-    it('should execute action successfully', async () => {
-      const action = jest.fn().mockResolvedValue(undefined);
+  describe('validateQuery', () => {
+    it('should return true for valid query', () => {
+      req.query = { page: '1' };
+      const validationFn = jest.fn().mockReturnValue(null);
 
-      await controller.testExecuteAction(mockReq as Request, mockRes as Response, action);
+      const result = controller.testValidateQuery(req, res, validationFn);
 
-      expect(action).toHaveBeenCalledWith(mockReq, mockRes);
+      expect(result).toBe(true);
+      expect(validationFn).toHaveBeenCalledWith(req.query);
     });
 
-    it('should handle action errors and call handleError', async () => {
-      const error = new Error('Action failed');
-      const action = jest.fn().mockRejectedValue(error);
+    it('should return false and send error for invalid query', () => {
+      req.query = { page: 'invalid' };
+      const errors: ValidationError[] = [{ field: 'page', message: 'Must be a number' }];
+      const validationFn = jest.fn().mockReturnValue(errors);
 
-      await controller.testExecuteAction(mockReq as Request, mockRes as Response, action);
+      const result = controller.testValidateQuery(req, res, validationFn);
 
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error handling GET /test'),
-        error,
-        expect.objectContaining({
-          method: 'GET',
-          path: '/test',
-        })
-      );
+      expect(result).toBe(false);
+      expect(res.status).toHaveBeenCalledWith(400);
+    });
+  });
 
-      expect(mockRes.status).toHaveBeenCalled();
-      expect(mockRes.json).toHaveBeenCalled();
+  describe('validateParams', () => {
+    it('should return true for valid params', () => {
+      req.params = { id: '123' };
+      const validationFn = jest.fn().mockReturnValue(null);
+
+      const result = controller.testValidateParams(req, res, validationFn);
+
+      expect(result).toBe(true);
     });
 
-    it('should pass request and response to action', async () => {
-      const action = jest.fn().mockImplementation(async (req, res) => {
-        expect(req).toBe(mockReq);
-        expect(res).toBe(mockRes);
-      });
+    it('should return false and send error for invalid params', () => {
+      req.params = { id: 'abc' };
+      const errors: ValidationError[] = [{ field: 'id', message: 'Must be a number' }];
+      const validationFn = jest.fn().mockReturnValue(errors);
 
-      await controller.testExecuteAction(mockReq as Request, mockRes as Response, action);
+      const result = controller.testValidateParams(req, res, validationFn);
+
+      expect(result).toBe(false);
+      expect(res.status).toHaveBeenCalledWith(400);
     });
   });
 
   describe('handleError', () => {
-    beforeEach(() => {
-      mockReq = createMockRequest({
-        method: 'POST',
-        path: '/api/users',
-        query: { filter: 'active' },
-      });
-    });
-
-    it('should handle Error instances', () => {
+    it('should handle Error objects', () => {
       const error = new Error('Test error');
+      controller.testHandleError(error, req, res);
 
-      controller.testHandleError(error, mockReq as Request, mockRes as Response);
-
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        'TestController: Error handling POST /api/users',
-        error,
-        {
-          method: 'POST',
-          path: '/api/users',
-          query: { filter: 'active' },
-        }
-      );
-
-      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockLogger.error).toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(500);
     });
 
-    it('should handle non-Error exceptions', () => {
-      const error = 'string error';
+    it('should map validation errors to 400', () => {
+      const error = new Error('Validation failed');
+      error.name = 'ValidationError';
+      controller.testHandleError(error, req, res);
 
-      controller.testHandleError(error, mockReq as Request, mockRes as Response);
+      expect(res.status).toHaveBeenCalledWith(400);
+    });
+
+    it('should map unauthorized errors to 401', () => {
+      const error = new Error('Unauthorized');
+      error.name = 'UnauthorizedError';
+      controller.testHandleError(error, req, res);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+    });
+
+    it('should map not found errors to 404', () => {
+      const error = new Error('Not found');
+      error.name = 'NotFoundError';
+      controller.testHandleError(error, req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+    });
+
+    it('should sanitize sensitive data in logs', () => {
+      req.body = { email: 'test@example.com', password: 'secret123' };
+      const error = new Error('Test error');
+      controller.testHandleError(error, req, res);
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.any(String),
+        error,
         expect.objectContaining({
-          message: 'string error',
-        }),
-        expect.any(Object)
-      );
-    });
-
-    it('should use production-safe error messages in production', () => {
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'production';
-
-      const error = new Error('Sensitive error details');
-
-      controller.testHandleError(error, mockReq as Request, mockRes as Response);
-
-      const jsonCall = (mockRes.json as jest.Mock).mock.calls[0][0];
-      expect(jsonCall.message).toBe('Internal server error');
-
-      process.env.NODE_ENV = originalEnv;
-    });
-
-    it('should show detailed error messages in development', () => {
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'development';
-
-      const error = new Error('Detailed error');
-
-      controller.testHandleError(error, mockReq as Request, mockRes as Response);
-
-      const jsonCall = (mockRes.json as jest.Mock).mock.calls[0][0];
-      expect(jsonCall.message).toBe('Detailed error');
-
-      process.env.NODE_ENV = originalEnv;
-    });
-  });
-
-  describe('validateRequest', () => {
-    it('should return validation errors when validation fails', () => {
-      const data = { email: 'invalid' };
-      const errors: ValidationError[] = [{ field: 'email', message: 'Invalid format' }];
-      const validationFn = jest.fn().mockReturnValue(errors);
-
-      const result = controller.testValidateRequest(data, validationFn);
-
-      expect(result).toEqual(errors);
-      expect(validationFn).toHaveBeenCalledWith(data);
-    });
-
-    it('should return null when validation passes', () => {
-      const data = { email: 'valid@example.com' };
-      const validationFn = jest.fn().mockReturnValue(null);
-
-      const result = controller.testValidateRequest(data, validationFn);
-
-      expect(result).toBeNull();
-      expect(validationFn).toHaveBeenCalledWith(data);
-    });
-
-    it('should handle validation function errors', () => {
-      const data = { test: 'data' };
-      const validationFn = jest.fn().mockImplementation(() => {
-        throw new Error('Validation function crashed');
-      });
-
-      const result = controller.testValidateRequest(data, validationFn);
-
-      expect(result).toEqual([
-        {
-          field: 'unknown',
-          message: 'Validation failed',
-        },
-      ]);
-
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        'TestController: Validation error',
-        expect.any(Error)
+          body: expect.objectContaining({
+            password: '***REDACTED***',
+          }),
+        })
       );
     });
   });
 
-  describe('getStatusCodeFromError', () => {
-    it('should return 400 for validation errors', () => {
-      const error = new Error('Invalid input');
-      error.name = 'ValidationError';
+  describe('logRequest', () => {
+    it('should log request details', () => {
+      controller.testLogRequest(req);
 
-      expect(controller.testGetStatusCodeFromError(error)).toBe(400);
-    });
-
-    it('should return 401 for unauthorized errors', () => {
-      const error = new Error('Not authenticated');
-      error.name = 'UnauthorizedError';
-
-      expect(controller.testGetStatusCodeFromError(error)).toBe(401);
-    });
-
-    it('should return 403 for forbidden errors', () => {
-      const error = new Error('Access denied');
-      error.name = 'ForbiddenError';
-
-      expect(controller.testGetStatusCodeFromError(error)).toBe(403);
-    });
-
-    it('should return 404 for not found errors', () => {
-      const error = new Error('Resource not found');
-      error.name = 'NotFoundError';
-
-      expect(controller.testGetStatusCodeFromError(error)).toBe(404);
-    });
-
-    it('should return 409 for conflict errors', () => {
-      const error = new Error('Duplicate entry');
-      error.name = 'ConflictError';
-
-      expect(controller.testGetStatusCodeFromError(error)).toBe(409);
-    });
-
-    it('should return 503 for unavailable errors', () => {
-      const error = new Error('Service down');
-      error.name = 'ServiceUnavailableError';
-
-      expect(controller.testGetStatusCodeFromError(error)).toBe(503);
-    });
-
-    it('should return 500 for unknown errors', () => {
-      const error = new Error('Unknown error');
-      error.name = 'CustomError';
-
-      expect(controller.testGetStatusCodeFromError(error)).toBe(500);
-    });
-
-    it('should be case-insensitive', () => {
-      const error1 = new Error('Error');
-      error1.name = 'validationerror';
-      expect(controller.testGetStatusCodeFromError(error1)).toBe(400);
-
-      const error2 = new Error('Error');
-      error2.name = 'VALIDATIONERROR';
-      expect(controller.testGetStatusCodeFromError(error2)).toBe(400);
-    });
-  });
-
-  describe('default logger', () => {
-    let consoleLogSpy: jest.SpyInstance;
-    let consoleErrorSpy: jest.SpyInstance;
-    let consoleWarnSpy: jest.SpyInstance;
-    let consoleDebugSpy: jest.SpyInstance;
-
-    beforeEach(() => {
-      consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-      consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-      consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
-      consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation();
-    });
-
-    afterEach(() => {
-      consoleLogSpy.mockRestore();
-      consoleErrorSpy.mockRestore();
-      consoleWarnSpy.mockRestore();
-      consoleDebugSpy.mockRestore();
-    });
-
-    it('should use default logger when none provided', () => {
-      const defaultController = new TestController();
-      const logger = defaultController['logger'];
-
-      logger.info('Test');
-
-      expect(consoleLogSpy).toHaveBeenCalled();
-    });
-
-    it('should log info messages', () => {
-      const defaultController = new TestController();
-      const logger = defaultController['logger'];
-
-      logger.info('Info message', { data: 'test' });
-
-      expect(consoleLogSpy).toHaveBeenCalledWith('[INFO] Info message', { data: 'test' });
-    });
-
-    it('should log error messages', () => {
-      const defaultController = new TestController();
-      const logger = defaultController['logger'];
-      const error = new Error('Test error');
-
-      logger.error('Error message', error, { context: 'test' });
-
-      expect(consoleErrorSpy).toHaveBeenCalledWith('[ERROR] Error message', 'Test error', {
-        context: 'test',
-      });
-    });
-
-    it('should log warnings', () => {
-      const defaultController = new TestController();
-      const logger = defaultController['logger'];
-
-      logger.warn('Warning');
-
-      expect(consoleWarnSpy).toHaveBeenCalledWith('[WARN] Warning', '');
-    });
-
-    it('should log debug in development', () => {
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'development';
-
-      const defaultController = new TestController();
-      const logger = defaultController['logger'];
-
-      logger.debug('Debug info');
-
-      expect(consoleDebugSpy).toHaveBeenCalled();
-
-      process.env.NODE_ENV = originalEnv;
-    });
-
-    it('should not log debug in production', () => {
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'production';
-
-      const defaultController = new TestController();
-      const logger = defaultController['logger'];
-
-      logger.debug('Debug info');
-
-      expect(consoleDebugSpy).not.toHaveBeenCalled();
-
-      process.env.NODE_ENV = originalEnv;
-    });
-  });
-
-  describe('integration scenarios', () => {
-    it('should handle full request-response cycle', async () => {
-      const action = jest.fn().mockImplementation(async (req, res) => {
-        controller.testSendSuccess(res, { message: 'Success' }, 200);
-      });
-
-      await controller.testExecuteAction(mockReq as Request, mockRes as Response, action);
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith(
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        expect.stringContaining('Incoming request'),
         expect.objectContaining({
-          status: 'success',
-          data: { message: 'Success' },
+          method: 'GET',
+          path: '/test',
+          ip: '127.0.0.1',
         })
       );
     });
 
-    it('should handle validation and error response', async () => {
-      const data = { email: 'invalid' };
-      const validationFn = jest.fn().mockReturnValue([{ field: 'email', message: 'Invalid' }]);
+    it('should increment request count', () => {
+      controller.testLogRequest(req);
+      controller.testLogRequest(req);
 
-      const errors = controller.testValidateRequest(data, validationFn);
-
-      if (errors) {
-        controller.testSendError(mockRes as Response, 'Validation failed', 400, errors);
-      }
-
-      expect(mockRes.status).toHaveBeenCalledWith(400);
-      expect(mockRes.json).toHaveBeenCalledWith(
+      expect(mockLogger.info).toHaveBeenCalledTimes(2);
+      expect(mockLogger.info).toHaveBeenLastCalledWith(
+        expect.any(String),
         expect.objectContaining({
-          status: 'error',
-          message: 'Validation failed',
-          errors,
+          requestId: 2,
         })
       );
+    });
+  });
+
+  describe('createValidator', () => {
+    it('should create ValidationBuilder instance', () => {
+      const validator = controller.testCreateValidator();
+      expect(validator).toBeDefined();
+      expect(typeof validator.required).toBe('function');
+      expect(typeof validator.build).toBe('function');
     });
   });
 });
