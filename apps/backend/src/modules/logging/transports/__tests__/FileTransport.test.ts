@@ -35,10 +35,13 @@ describe('FileTransport', () => {
     jest.clearAllMocks();
 
     // Ensure log directory is clean before each test using the actual fs.rm
-    await jest.requireActual('fs/promises').rm(TEST_LOG_DIR, { recursive: true, force: true }).catch(() => {});
+    await jest
+      .requireActual('fs/promises')
+      .rm(TEST_LOG_DIR, { recursive: true, force: true })
+      .catch(() => {});
 
     // Set default mock implementations for fs/promises functions
-  mockedFs.appendFile.mockResolvedValue(undefined);
+    mockedFs.appendFile.mockResolvedValue(undefined);
     mockedFs.stat.mockResolvedValue({ size: 0 } as any); // Cast to any to resolve type issue
     mockedFs.unlink.mockResolvedValue(undefined);
     mockedFs.rename.mockResolvedValue(undefined);
@@ -56,7 +59,10 @@ describe('FileTransport', () => {
     // Restore all mocks and spies after each test
     jest.restoreAllMocks();
     // Ensure log directory is clean after each test using the actual fs.rm
-    await jest.requireActual('fs/promises').rm(TEST_LOG_DIR, { recursive: true, force: true }).catch(() => {});
+    await jest
+      .requireActual('fs/promises')
+      .rm(TEST_LOG_DIR, { recursive: true, force: true })
+      .catch(() => {});
   });
 
   describe('Initialization', () => {
@@ -109,7 +115,9 @@ describe('FileTransport', () => {
         throw new Error('Failed to create directory');
       });
 
-      expect(() => new FileTransport({ logDirectory: TEST_LOG_DIR })).toThrow('Failed to create directory');
+      expect(() => new FileTransport({ logDirectory: TEST_LOG_DIR })).toThrow(
+        'Failed to create directory'
+      );
       expect(console.error).toHaveBeenCalledWith(
         '[FileTransport] Failed to create log directory:',
         expect.any(Error)
@@ -339,238 +347,240 @@ describe('FileTransport', () => {
       }
 
       // After 5 writes, we should have app.log, app.log.1, app.log.2
-            // The oldest (app.log.2) should have been unlinked
-            expect(mockedFs.unlink).toHaveBeenCalledWith(path.join(TEST_LOG_DIR, 'app.log.2'));
-            expect(mockedFs.rename).toHaveBeenCalledWith(
-              path.join(TEST_LOG_DIR, 'app.log.1'),
-              path.join(TEST_LOG_DIR, 'app.log.2')
-            );
-            expect(mockedFs.rename).toHaveBeenCalledWith(
-              path.join(TEST_LOG_DIR, 'app.log'),
-              path.join(TEST_LOG_DIR, 'app.log.1')
-            );
-          });
-        });
-      
-        describe('Error Handling', () => {
-          it('should gracefully handle errors when unlinking oldest file during rotation', async () => {
-            const transport = new FileTransport({
-              logDirectory: TEST_LOG_DIR,
-              filename: 'app',
-              maxSize: 100, // Small size to trigger rotation
-              maxFiles: 2,
-            });
-      
-            // Mock fs.stat to always trigger rotation
-            mockedFs.stat.mockResolvedValue({ size: 150 } as any);
-            // Mock fs.unlink to throw an error when trying to delete the oldest file
-            mockedFs.unlink.mockRejectedValueOnce(new Error('Mock unlink error'));
-      
-            // Write enough data to trigger rotation and attempt to delete oldest file
-            await transport.log('X'.repeat(100), 'info'); // app.log
-            await transport.log('X'.repeat(100), 'info'); // app.log.1
-            await transport.log('X'.repeat(100), 'info'); // app.log.2 (oldest should be deleted)
-            await transport.flush();
-      
-            // Expect no unhandled errors and no console.error from queueWrite for this specific error
-            // The error is intentionally ignored in rotateFile's catch block
-            expect(console.error).not.toHaveBeenCalled();
-          });
-      
-          it('should gracefully handle errors when renaming files during rotation', async () => {
-            const transport = new FileTransport({
-              logDirectory: TEST_LOG_DIR,
-              filename: 'app',
-              maxSize: 100, // Small size to trigger rotation
-              maxFiles: 2,
-            });
-      
-            // Mock fs.stat to always trigger rotation
-            mockedFs.stat.mockResolvedValue({ size: 150 } as any);
-            // Mock fs.rename to throw an error when trying to rename files
-            mockedFs.rename.mockRejectedValueOnce(new Error('Mock rename error'));
-      
-            // Write enough data to trigger rotation and attempt to rename files
-            await transport.log('X'.repeat(100), 'info'); // app.log
-            await transport.log('X'.repeat(100), 'info'); // app.log.1
-            await transport.log('X'.repeat(100), 'info'); // app.log.2 (rename should fail)
-            await transport.flush();
-      
-            // Expect no unhandled errors and no console.error from queueWrite for this specific error
-            // The error is intentionally ignored in rotateFile's catch block
-            expect(console.error).not.toHaveBeenCalled();
-          });
-      
-          it('should re-throw errors from writeToFile to queueWrite', async () => {
-            const transport = new FileTransport({
-              logDirectory: TEST_LOG_DIR,
-              filename: 'app',
-            });
-      
-            mockedFs.stat.mockRejectedValueOnce(new Error('Mock stat error'));
-      
-            await transport.log('This write should fail due to stat error', 'info');
-            await transport.flush();
-      
-            expect(console.error).toHaveBeenCalledWith(
-              expect.stringContaining('[FileTransport] Failed to write to'),
-              expect.any(Error)
-            );
-          });
-      
-          it('should log write errors from the log method', async () => {
-            const transport = new FileTransport({
-              logDirectory: TEST_LOG_DIR,
-              filename: 'app',
-            });
-      
-            mockedFs.appendFile.mockRejectedValueOnce(new Error('Mock appendFile error'));
-      
-            await transport.log('This write should fail', 'info');
-            await transport.flush();
-      
-            expect(console.error).toHaveBeenCalledWith('[FileTransport] Write error:', expect.any(Error));
-          });
-      
-          it('should continue logging after errors', async () => {
-            const transport = new FileTransport({
-              logDirectory: TEST_LOG_DIR,
-              filename: 'app',
-            });
-      
-            // Mock appendFile to fail once, then succeed
-            mockedFs.appendFile.mockRejectedValueOnce(new Error('Temporary write error'));
-            mockedFs.appendFile.mockResolvedValue(undefined);
-      
-            // Try to log (will fail)
-            await transport.log('This should fail', 'info');
-            await transport.flush();
-      
-            // Should be able to log again
-            await transport.log('This should succeed', 'info');
-            await transport.flush();
-      
-            expect(mockedFs.appendFile).toHaveBeenCalledWith(
-              expect.any(String),
-              'This should succeed\n',
-              'utf8'
-            );
-            expect(console.error).toHaveBeenCalledWith(
-              expect.stringContaining('[FileTransport] Write error:'),
-              expect.any(Error)
-            );
-          });
-        });
-      
-        describe('Performance', () => {
-          it('should handle concurrent writes without data loss', async () => {
-            const transport = new FileTransport({
-              logDirectory: TEST_LOG_DIR,
-              filename: 'app',
-            });
-      
-            // Write many logs concurrently
-            const promises = [];
-            for (let i = 0; i < 100; i++) {
-              promises.push(transport.log(`Message ${i}`, 'info'));
-            }
-      
-            await Promise.all(promises);
-            await transport.flush();
-      
-            expect(mockedFs.appendFile).toHaveBeenCalledTimes(100);
-          });
-      
-          it('should not block on log calls', async () => {
-            const transport = new FileTransport({
-              logDirectory: TEST_LOG_DIR,
-              filename: 'app',
-            });
-      
-            const startTime = Date.now();
-      
-            // Log without awaiting
-            transport.log('Message 1', 'info');
-            transport.log('Message 2', 'info');
-            transport.log('Message 3', 'info');
-      
-            const duration = Date.now() - startTime;
-      
-            // Should complete very quickly (< 10ms) since we're not awaiting
-            expect(duration).toBeLessThan(10);
-      
-            // Flush to ensure writes complete
-            await transport.flush();
-          });
-        });
-      
-        describe('Flush', () => {
-          it('should wait for all pending writes to complete', async () => {
-            const transport = new FileTransport({
-              logDirectory: TEST_LOG_DIR,
-              filename: 'app',
-            });
-      
-            // Queue multiple writes
-            transport.log('Message 1', 'info');
-            transport.log('Message 2', 'info');
-            transport.log('Message 3', 'info');
-      
-            // Flush should wait for all writes
-            await transport.flush();
-      
-            expect(mockedFs.appendFile).toHaveBeenCalledWith(
-              path.join(TEST_LOG_DIR, 'app.log'),
-              'Message 1\n',
-              'utf8'
-            );
-            expect(mockedFs.appendFile).toHaveBeenCalledWith(
-              path.join(TEST_LOG_DIR, 'app.log'),
-              'Message 2\n',
-              'utf8'
-            );
-            expect(mockedFs.appendFile).toHaveBeenCalledWith(
-              path.join(TEST_LOG_DIR, 'app.log'),
-              'Message 3\n',
-              'utf8'
-            );
-          });
-      
-          it('should clear write queue after flushing', async () => {
-            const transport = new FileTransport({
-              logDirectory: TEST_LOG_DIR,
-              filename: 'app',
-            });
-      
-            await transport.log('Message 1', 'info');
-            await transport.flush();
-      
-            // After flush, queue should be clear
-            // Writing new message should work
-            await transport.log('Message 2', 'info');
-            await transport.flush();
-      
-            expect(mockedFs.appendFile).toHaveBeenCalledWith(
-              path.join(TEST_LOG_DIR, 'app.log'),
-              'Message 1\n',
-              'utf8'
-            );
-            expect(mockedFs.appendFile).toHaveBeenCalledWith(
-              path.join(TEST_LOG_DIR, 'app.log'),
-              'Message 2\n',
-              'utf8'
-            );
-          });
-        });
+      // The oldest (app.log.2) should have been unlinked
+      expect(mockedFs.unlink).toHaveBeenCalledWith(path.join(TEST_LOG_DIR, 'app.log.2'));
+      expect(mockedFs.rename).toHaveBeenCalledWith(
+        path.join(TEST_LOG_DIR, 'app.log.1'),
+        path.join(TEST_LOG_DIR, 'app.log.2')
+      );
+      expect(mockedFs.rename).toHaveBeenCalledWith(
+        path.join(TEST_LOG_DIR, 'app.log'),
+        path.join(TEST_LOG_DIR, 'app.log.1')
+      );
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should gracefully handle errors when unlinking oldest file during rotation', async () => {
+      const transport = new FileTransport({
+        logDirectory: TEST_LOG_DIR,
+        filename: 'app',
+        maxSize: 100, // Small size to trigger rotation
+        maxFiles: 2,
       });
-      
-      // Helper function to clean up test logs
-      async function cleanupTestLogs(): Promise<void> {
-        try {
-          // Use the actual fs.rm for cleanup
-          await jest.requireActual('fs/promises').rm(TEST_LOG_DIR, { recursive: true, force: true });
-        } catch {
-          // Ignore errors if directory doesn't exist
-        }
+
+      // Mock fs.stat to always trigger rotation
+      mockedFs.stat.mockResolvedValue({ size: 150 } as any);
+      // Mock fs.unlink to throw an error when trying to delete the oldest file
+      mockedFs.unlink.mockRejectedValueOnce(new Error('Mock unlink error'));
+
+      // Write enough data to trigger rotation and attempt to delete oldest file
+      await transport.log('X'.repeat(100), 'info'); // app.log
+      await transport.log('X'.repeat(100), 'info'); // app.log.1
+      await transport.log('X'.repeat(100), 'info'); // app.log.2 (oldest should be deleted)
+      await transport.flush();
+
+      // Expect no unhandled errors and no console.error from queueWrite for this specific error
+      // The error is intentionally ignored in rotateFile's catch block
+      expect(console.error).not.toHaveBeenCalled();
+    });
+
+    it('should gracefully handle errors when renaming files during rotation', async () => {
+      const transport = new FileTransport({
+        logDirectory: TEST_LOG_DIR,
+        filename: 'app',
+        maxSize: 100, // Small size to trigger rotation
+        maxFiles: 2,
+      });
+
+      // Mock fs.stat to always trigger rotation
+      mockedFs.stat.mockResolvedValue({ size: 150 } as any);
+      // Mock fs.rename to throw an error when trying to rename files
+      mockedFs.rename.mockRejectedValueOnce(new Error('Mock rename error'));
+
+      // Write enough data to trigger rotation and attempt to rename files
+      await transport.log('X'.repeat(100), 'info'); // app.log
+      await transport.log('X'.repeat(100), 'info'); // app.log.1
+      await transport.log('X'.repeat(100), 'info'); // app.log.2 (rename should fail)
+      await transport.flush();
+
+      // Expect no unhandled errors and no console.error from queueWrite for this specific error
+      // The error is intentionally ignored in rotateFile's catch block
+      expect(console.error).not.toHaveBeenCalled();
+    });
+
+    it('should re-throw errors from writeToFile to queueWrite', async () => {
+      const transport = new FileTransport({
+        logDirectory: TEST_LOG_DIR,
+        filename: 'app',
+      });
+
+      mockedFs.stat.mockRejectedValueOnce(new Error('Mock stat error'));
+
+      await transport.log('This write should fail due to stat error', 'info');
+      await transport.flush();
+
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('[FileTransport] Failed to write to'),
+        expect.any(Error)
+      );
+    });
+
+    it('should log write errors from the log method', async () => {
+      const transport = new FileTransport({
+        logDirectory: TEST_LOG_DIR,
+        filename: 'app',
+      });
+
+      mockedFs.appendFile.mockRejectedValueOnce(new Error('Mock appendFile error'));
+
+      await transport.log('This write should fail', 'info');
+      await transport.flush();
+
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('[FileTransport] Failed to write to'),
+        expect.any(Error)
+      );
+    });
+
+    it('should continue logging after errors', async () => {
+      const transport = new FileTransport({
+        logDirectory: TEST_LOG_DIR,
+        filename: 'app',
+      });
+
+      // Mock appendFile to fail once, then succeed
+      mockedFs.appendFile.mockRejectedValueOnce(new Error('Temporary write error'));
+      mockedFs.appendFile.mockResolvedValue(undefined);
+
+      // Try to log (will fail)
+      await transport.log('This should fail', 'info');
+      await transport.flush();
+
+      // Should be able to log again
+      await transport.log('This should succeed', 'info');
+      await transport.flush();
+
+      expect(mockedFs.appendFile).toHaveBeenCalledWith(
+        expect.any(String),
+        'This should succeed\n',
+        'utf8'
+      );
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('[FileTransport] Failed to write to'),
+        expect.any(Error)
+      );
+    });
+  });
+
+  describe('Performance', () => {
+    it('should handle concurrent writes without data loss', async () => {
+      const transport = new FileTransport({
+        logDirectory: TEST_LOG_DIR,
+        filename: 'app',
+      });
+
+      // Write many logs concurrently
+      const promises = [];
+      for (let i = 0; i < 100; i++) {
+        promises.push(transport.log(`Message ${i}`, 'info'));
       }
-      
+
+      await Promise.all(promises);
+      await transport.flush();
+
+      expect(mockedFs.appendFile).toHaveBeenCalledTimes(100);
+    });
+
+    it('should not block on log calls', async () => {
+      const transport = new FileTransport({
+        logDirectory: TEST_LOG_DIR,
+        filename: 'app',
+      });
+
+      const startTime = Date.now();
+
+      // Log without awaiting
+      transport.log('Message 1', 'info');
+      transport.log('Message 2', 'info');
+      transport.log('Message 3', 'info');
+
+      const duration = Date.now() - startTime;
+
+      // Should complete very quickly (< 10ms) since we're not awaiting
+      expect(duration).toBeLessThan(10);
+
+      // Flush to ensure writes complete
+      await transport.flush();
+    });
+  });
+
+  describe('Flush', () => {
+    it('should wait for all pending writes to complete', async () => {
+      const transport = new FileTransport({
+        logDirectory: TEST_LOG_DIR,
+        filename: 'app',
+      });
+
+      // Queue multiple writes
+      transport.log('Message 1', 'info');
+      transport.log('Message 2', 'info');
+      transport.log('Message 3', 'info');
+
+      // Flush should wait for all writes
+      await transport.flush();
+
+      expect(mockedFs.appendFile).toHaveBeenCalledWith(
+        path.join(TEST_LOG_DIR, 'app.log'),
+        'Message 1\n',
+        'utf8'
+      );
+      expect(mockedFs.appendFile).toHaveBeenCalledWith(
+        path.join(TEST_LOG_DIR, 'app.log'),
+        'Message 2\n',
+        'utf8'
+      );
+      expect(mockedFs.appendFile).toHaveBeenCalledWith(
+        path.join(TEST_LOG_DIR, 'app.log'),
+        'Message 3\n',
+        'utf8'
+      );
+    });
+
+    it('should clear write queue after flushing', async () => {
+      const transport = new FileTransport({
+        logDirectory: TEST_LOG_DIR,
+        filename: 'app',
+      });
+
+      await transport.log('Message 1', 'info');
+      await transport.flush();
+
+      // After flush, queue should be clear
+      // Writing new message should work
+      await transport.log('Message 2', 'info');
+      await transport.flush();
+
+      expect(mockedFs.appendFile).toHaveBeenCalledWith(
+        path.join(TEST_LOG_DIR, 'app.log'),
+        'Message 1\n',
+        'utf8'
+      );
+      expect(mockedFs.appendFile).toHaveBeenCalledWith(
+        path.join(TEST_LOG_DIR, 'app.log'),
+        'Message 2\n',
+        'utf8'
+      );
+    });
+  });
+});
+
+// Helper function to clean up test logs
+async function cleanupTestLogs(): Promise<void> {
+  try {
+    // Use the actual fs.rm for cleanup
+    await jest.requireActual('fs/promises').rm(TEST_LOG_DIR, { recursive: true, force: true });
+  } catch {
+    // Ignore errors if directory doesn't exist
+  }
+}
