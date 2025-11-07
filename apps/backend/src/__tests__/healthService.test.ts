@@ -69,13 +69,14 @@ describe('HealthService', () => {
       // Should include default checks
       expect(checkNames).toContain('uptime');
       expect(checkNames).toContain('memory');
+      expect(checkNames).toContain('diskSpace');
 
       // Should include custom checks
       expect(checkNames).toContain('custom-check-1');
       expect(checkNames).toContain('custom-check-2');
 
-      // Should have exactly 4 checks
-      expect(checkNames.length).toBe(4);
+      // Should have exactly 5 checks (3 default + 2 custom)
+      expect(checkNames.length).toBe(5);
     });
 
     test('should measure response time for each check', async () => {
