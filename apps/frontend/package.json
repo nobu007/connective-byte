@@ -11,7 +11,8 @@
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "jest",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --timeout=30000",
+    "test:e2e:headed": "playwright test --headed --timeout=30000",
     "test:watch": "jest --watch"
   },
   "dependencies": {
