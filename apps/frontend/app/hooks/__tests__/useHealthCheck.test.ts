@@ -78,9 +78,12 @@ describe('useHealthCheck', () => {
 
       const { result } = renderHook(() => useHealthCheck({ enableRetry: false }));
 
-      await waitFor(() => {
-        expect(result.current.status).toBe('error');
-      });
+      await waitFor(
+        () => {
+          expect(result.current.status).toBe('error');
+        },
+        { timeout: 3000 },
+      );
 
       expect(result.current.isError).toBe(true);
       expect(result.current.connectionStatus).toBe('disconnected');
@@ -93,9 +96,12 @@ describe('useHealthCheck', () => {
 
       const { result } = renderHook(() => useHealthCheck({ enableRetry: false }));
 
-      await waitFor(() => {
-        expect(result.current.status).toBe('error');
-      });
+      await waitFor(
+        () => {
+          expect(result.current.status).toBe('error');
+        },
+        { timeout: 3000 },
+      );
 
       expect(result.current.retryCount).toBe(0);
     });

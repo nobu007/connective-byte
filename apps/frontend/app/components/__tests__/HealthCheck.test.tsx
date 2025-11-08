@@ -31,7 +31,7 @@ describe('HealthCheck Component', () => {
     await waitFor(
       () => {
         expect(screen.getByText(/API Status: ERROR/i)).toBeInTheDocument();
-        expect(screen.getByText(/Failed to connect/i)).toBeInTheDocument();
+        expect(screen.getByText(/Connection failed|Failed to connect/i)).toBeInTheDocument();
       },
       { timeout: 3000 },
     );

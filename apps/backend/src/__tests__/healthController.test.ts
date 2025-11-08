@@ -30,7 +30,19 @@ describe('HealthController', () => {
     mockJson = jest.fn().mockReturnThis();
     mockStatus = jest.fn().mockReturnThis();
 
-    mockRequest = {};
+    mockRequest = {
+      get: jest.fn((header: string) => {
+        if (header === 'set-cookie') return ['test-cookie'];
+        if (header === 'user-agent') return 'test-agent';
+        return undefined;
+      }) as any,
+      ip: '127.0.0.1',
+      method: 'GET',
+      path: '/api/health',
+      params: {},
+      query: {},
+      body: {},
+    };
     mockResponse = {
       status: mockStatus,
       json: mockJson,
