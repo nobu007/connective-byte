@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useHealthCheck, ConnectionStatus as Status } from '../hooks/useHealthCheck';
+import { useHealthCheck, type ConnectionStatus as ConnectionStatusType } from '../hooks/useHealthCheck';
 import { StatusIndicator } from './StatusIndicator';
 
 export interface ConnectionStatusProps {
@@ -32,7 +32,7 @@ export function ConnectionStatus({
     pollingInterval,
   });
 
-  const getConnectionMessage = (connStatus: Status): string => {
+  const getConnectionMessage = (connStatus: ConnectionStatusType): string => {
     switch (connStatus) {
       case 'connected':
         return 'Connected to backend';

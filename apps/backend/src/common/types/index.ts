@@ -117,3 +117,42 @@ export interface LoggingConfig {
   format: 'json' | 'pretty';
   transports: string[];
 }
+
+/**
+ * Plugin system types
+ */
+export type {
+  Plugin,
+  PluginState,
+  PluginMetadata,
+  PluginConfig,
+  PluginRegistryConfig,
+  PluginRegistrationResult,
+} from './plugin';
+
+/**
+ * Event system types
+ */
+export type {
+  EventListener,
+  EventMiddleware,
+  EventSubscription,
+  EventMetadata,
+  Event,
+  EventFilter,
+  EventEmitterConfig,
+  EventStats,
+} from './events';
+
+/**
+ * Feature toggle types
+ */
+export type {
+  FeatureState,
+  FeatureContext,
+  FeatureCondition,
+  FeatureConfig,
+  FeatureEvaluationResult,
+  FeatureStats,
+  FeatureToggleConfig,
+} from './features';

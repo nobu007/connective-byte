@@ -1,0 +1,11 @@
+{
+  "plugins": {
+    "logging-plugin": {
+      "enabled": true,
+      "options": {
+        "logInterval": 60000,
+        "logLevel": "debug"
+      }
+    }
+  }
+}

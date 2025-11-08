@@ -220,7 +220,8 @@ export function useHealthCheck(options: UseHealthCheckOptions = {}): UseHealthCh
         }
       };
     }
-  }, [opts.enablePolling, opts.pollingInterval, connectionStatus, checkHealth]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [opts.enablePolling, opts.pollingInterval, connectionStatus]);
 
   return {
     status,

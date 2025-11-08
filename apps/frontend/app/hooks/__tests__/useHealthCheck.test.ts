@@ -9,7 +9,7 @@ import { server } from '../../../mocks/server';
 import { rest } from 'msw';
 
 // Helper to setup mock responses
-const setupMockResponse = (response: any, status: number = 200) => {
+const setupMockResponse = (response: Record<string, unknown>, status: number = 200) => {
   server.use(
     rest.get('**/api/health', (req, res, ctx) => {
       return res(ctx.status(status), ctx.json(response));
