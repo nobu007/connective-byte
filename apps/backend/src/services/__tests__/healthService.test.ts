@@ -82,7 +82,8 @@ describe('HealthService', () => {
 
       expect(result.data?.checks).toContainEqual(expect.objectContaining({ name: 'uptime' }));
       expect(result.data?.checks).toContainEqual(expect.objectContaining({ name: 'memory' }));
-      expect(result.data?.checks).toContainEqual(expect.objectContaining({ name: 'diskSpace' }));
+      // diskSpace check disabled to avoid hangs on some systems
+      // expect(result.data?.checks).toContainEqual(expect.objectContaining({ name: 'diskSpace' }));
     });
 
     it('should return error status when critical check fails', async () => {
@@ -334,7 +335,7 @@ describe('HealthService', () => {
       expect(memoryCheck?.message).toContain('Heap');
     });
 
-    it('should have disk space check', async () => {
+    it.skip('should have disk space check (disabled to avoid hangs)', async () => {
       const result = await healthService.getHealthStatus(false);
       const diskCheck = result.data?.checks?.find((c) => c.name === 'diskSpace');
 

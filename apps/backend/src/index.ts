@@ -9,9 +9,18 @@ import { config } from './config';
 
 // Start server only if not in test environment
 if (!config.isTest) {
-  app.listen(config.port, () => {
+  const server = app.listen(config.port, () => {
     console.log(`Server is running on http://localhost:${config.port}`);
     console.log(`Environment: ${config.environment}`);
+    console.log(`Server listening: ${server.listening}`);
+  });
+
+  server.on('error', (error) => {
+    console.error('Server error:', error);
+  });
+
+  server.on('request', (req) => {
+    console.log(`Received request: ${req.method} ${req.url}`);
   });
 }
 

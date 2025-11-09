@@ -12,7 +12,14 @@ import { rest } from 'msw';
 const setupMockResponse = (response: Record<string, unknown>, status: number = 200) => {
   server.use(
     rest.get('**/api/health', (req, res, ctx) => {
-      return res(ctx.status(status), ctx.json(response));
+      return res(
+        ctx.status(status),
+        ctx.json({
+          status: 'success',
+          data: response,
+          timestamp: new Date().toISOString(),
+        }),
+      );
     }),
   );
 };

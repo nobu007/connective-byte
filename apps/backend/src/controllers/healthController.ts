@@ -8,7 +8,6 @@
 import { Request, Response } from 'express';
 import { BaseController } from '../common/base/BaseController';
 import { healthService } from '../services/healthService';
-import { loggingService } from '../services/loggingService';
 
 /**
  * Enhanced Health Controller using BaseController
@@ -17,8 +16,8 @@ import { loggingService } from '../services/loggingService';
  */
 class HealthController extends BaseController {
   constructor() {
-    // Use centralized logging service
-    super('HealthController', loggingService.createLogger('HealthController'));
+    // Use default logger to avoid circular dependency
+    super('HealthController');
   }
 
   /**

@@ -205,7 +205,7 @@ export function useHealthCheck(options: UseHealthCheckOptions = {}): UseHealthCh
         clearInterval(pollingIntervalRef.current);
       }
     };
-  }, []);
+  }, [checkHealth]);
 
   // Polling effect
   useEffect(() => {

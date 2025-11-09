@@ -2,6 +2,7 @@
 mode: agent
 description: Review a pull request
 ---
+
 target_pr = $ARGUMENTS
 
 If target_pr is not provided, use the PR of the current branch.

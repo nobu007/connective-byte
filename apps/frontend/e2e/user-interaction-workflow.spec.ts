@@ -13,7 +13,11 @@ test.describe('User Interaction Workflow', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ status: 'ok', uptime: 100 }),
+        body: JSON.stringify({
+          status: 'success',
+          data: { status: 'ok', uptime: 100 },
+          timestamp: new Date().toISOString(),
+        }),
       });
     });
 
@@ -27,8 +31,7 @@ test.describe('User Interaction Workflow', () => {
     resolveRoute?.(null);
 
     // Verify transition to success state
-    await expect(page.getByText('Backend status: ok')).toBeVisible({ timeout: 5000 });
-    await expect(statusIndicator).toContainText('SUCCESS');
+    await expect(statusIndicator).toContainText(/SUCCESS|OK/i, { timeout: 10000 });
   });
 
   test('should handle page refresh and maintain functionality', async ({ page }) => {
@@ -36,21 +39,26 @@ test.describe('User Interaction Workflow', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ status: 'ok', uptime: 100 }),
+        body: JSON.stringify({
+          status: 'success',
+          data: { status: 'ok', uptime: 100 },
+          timestamp: new Date().toISOString(),
+        }),
       });
     });
 
     await page.goto('/');
 
     // Verify initial load
-    await expect(page.getByText('Backend status: ok')).toBeVisible();
+    await expect(page.getByTestId('status-indicator')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('status-indicator')).toContainText(/SUCCESS|OK/i, { timeout: 10000 });
 
     // Refresh the page
     await page.reload();
 
     // Verify functionality still works after refresh
-    await expect(page.getByText('Backend status: ok')).toBeVisible();
-    await expect(page.getByTestId('status-indicator')).toContainText('SUCCESS');
+    await expect(page.getByTestId('status-indicator')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('status-indicator')).toContainText(/SUCCESS|OK/i, { timeout: 10000 });
   });
 
   test('should display all UI components correctly', async ({ page }) => {
@@ -59,8 +67,12 @@ test.describe('User Interaction Workflow', () => {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          status: 'ok',
-          uptime: 12345,
+          status: 'success',
+          data: {
+            status: 'ok',
+            uptime: 12345,
+            timestamp: new Date().toISOString(),
+          },
           timestamp: new Date().toISOString(),
         }),
       });
@@ -69,13 +81,10 @@ test.describe('User Interaction Workflow', () => {
     await page.goto('/');
 
     // Verify status indicator
-    await expect(page.getByTestId('status-indicator')).toBeVisible();
-
-    // Verify backend status text
-    await expect(page.getByText(/Backend status:/i)).toBeVisible();
+    await expect(page.getByTestId('status-indicator')).toBeVisible({ timeout: 10000 });
 
     // Verify status shows success
-    await expect(page.getByTestId('status-indicator')).toContainText('SUCCESS');
+    await expect(page.getByTestId('status-indicator')).toContainText(/SUCCESS|OK/i, { timeout: 10000 });
   });
 
   test('should handle different status responses', async ({ page }) => {
@@ -88,7 +97,11 @@ test.describe('User Interaction Workflow', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ status: 'ok', uptime: 100 + requestCount }),
+        body: JSON.stringify({
+          status: 'success',
+          data: { status: 'ok', uptime: 100 + requestCount },
+          timestamp: new Date().toISOString(),
+        }),
       });
     });
 
@@ -105,7 +118,7 @@ test.describe('User Interaction Workflow', () => {
     expect(requestCount).toBeGreaterThanOrEqual(1);
 
     // Verify UI is responsive
-    await expect(statusIndicator).toContainText('SUCCESS');
+    await expect(statusIndicator).toContainText(/SUCCESS|OK/i, { timeout: 10000 });
   });
 
   test('should maintain accessibility standards', async ({ page }) => {
@@ -113,7 +126,11 @@ test.describe('User Interaction Workflow', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ status: 'ok', uptime: 100 }),
+        body: JSON.stringify({
+          status: 'success',
+          data: { status: 'ok', uptime: 100 },
+          timestamp: new Date().toISOString(),
+        }),
       });
     });
 

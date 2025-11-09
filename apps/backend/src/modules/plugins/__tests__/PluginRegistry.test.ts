@@ -342,7 +342,7 @@ describe('PluginRegistry', () => {
 
   describe('timeout handling', () => {
     test('should timeout slow initialization', async () => {
-      registry = new PluginRegistry(mockLogger, { initializationTimeout: 50 });
+      registry = new PluginRegistry(mockLogger, { initializationTimeout: 20 });
 
       const plugin = new SlowPlugin({ name: 'slow-plugin', version: '1.0.0' }, mockLogger, 100);
 
@@ -353,7 +353,7 @@ describe('PluginRegistry', () => {
     });
 
     test('should timeout slow cleanup', async () => {
-      registry = new PluginRegistry(mockLogger, { cleanupTimeout: 50 });
+      registry = new PluginRegistry(mockLogger, { cleanupTimeout: 20 });
 
       const plugin = new SlowPlugin({ name: 'slow-plugin', version: '1.0.0' }, mockLogger, 100);
 

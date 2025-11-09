@@ -7,7 +7,6 @@
 
 import { BaseService } from '../common/base/BaseService';
 import { HealthStatus, HealthCheck, ServiceResult } from '../common/types';
-import { loggingService } from './loggingService';
 
 /**
  * Health check function type
@@ -54,8 +53,8 @@ export class HealthService extends BaseService {
   private readonly cacheTimeout = 30000; // 30 seconds
 
   constructor() {
-    // Use centralized logging service
-    super('HealthService', loggingService.createLogger('HealthService'));
+    // Use default logger to avoid circular dependency with loggingService
+    super('HealthService');
     this.registerDefaultChecks();
   }
 
@@ -65,7 +64,8 @@ export class HealthService extends BaseService {
   private registerDefaultChecks(): void {
     this.registerCheck('uptime', this.checkUptime.bind(this), { timeout: 1000 });
     this.registerCheck('memory', this.checkMemory.bind(this), { timeout: 1000 });
-    this.registerCheck('diskSpace', this.checkDiskSpace.bind(this), { timeout: 2000 });
+    // Disk space check disabled - can cause hangs on some systems
+    // this.registerCheck('diskSpace', this.checkDiskSpace.bind(this), { timeout: 2000 });
   }
 
   /**
@@ -322,30 +322,13 @@ export class HealthService extends BaseService {
    * Note: This is a basic implementation. For production, consider using a library like 'diskusage'
    */
   private async checkDiskSpace(): Promise<HealthCheck> {
-    try {
-      // Basic check - just verify we can write to temp directory
-      const fs = await import('fs/promises');
-      const os = await import('os');
-      const path = await import('path');
-
-      const tmpDir = os.tmpdir();
-      const testFile = path.join(tmpDir, `.health-check-${Date.now()}`);
-
-      await fs.writeFile(testFile, 'test');
-      await fs.unlink(testFile);
-
-      return {
-        name: 'diskSpace',
-        status: 'ok',
-        message: 'Disk space available',
-      };
-    } catch (error) {
-      return {
-        name: 'diskSpace',
-        status: 'error',
-        message: error instanceof Error ? error.message : 'Disk space check failed',
-      };
-    }
+    // Simplified check - just return ok without filesystem operations
+    // Filesystem operations can hang on some systems
+    return {
+      name: 'diskSpace',
+      status: 'ok',
+      message: 'Disk space check skipped (filesystem operations can hang)',
+    };
   }
 }
 

@@ -4,6 +4,7 @@
   "scripts": {
     "liquid-to-html": "node src/liquid-to-html.js",
     "dev": "ts-node src/index.ts",
+    "build": "tsc",
     "test": "jest",
     "lint": "echo 'Backend linting not configured - skipping'"
   },

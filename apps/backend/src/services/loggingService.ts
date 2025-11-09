@@ -37,7 +37,9 @@ export class LoggingService extends BaseService {
   };
 
   constructor() {
-    super('LoggingService');
+    // Don't pass logger to avoid circular dependency
+    // LoggingService creates its own simple logger
+    super('LoggingService', undefined);
 
     // Initialize configuration from environment
     this.logLevel = this.getLogLevelFromEnv();

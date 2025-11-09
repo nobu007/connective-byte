@@ -8,9 +8,13 @@ import { fetchWithRetry } from '../utils/fetchWithRetry';
 import { API_ENDPOINTS } from '../config/apiConfig';
 
 export interface HealthCheckResponse {
-  status: string;
+  status: 'success' | 'error';
+  data: {
+    status: string;
+    timestamp?: string;
+    uptime?: number;
+  };
   timestamp?: string;
-  uptime?: number;
 }
 
 export interface HealthCheckResult {
@@ -36,13 +40,13 @@ export async function fetchHealthStatus(): Promise<HealthCheckResult> {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data: HealthCheckResponse = await response.json();
+    const apiResponse: HealthCheckResponse = await response.json();
 
     return {
       success: true,
-      status: data.status,
-      timestamp: data.timestamp,
-      uptime: data.uptime,
+      status: apiResponse.data.status,
+      timestamp: apiResponse.data.timestamp,
+      uptime: apiResponse.data.uptime,
     };
   } catch (error) {
     console.error('Error fetching health:', error);

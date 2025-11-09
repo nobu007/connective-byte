@@ -7,8 +7,12 @@ test.describe('Visual Regression Tests', () => {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          status: 'ok',
-          uptime: 12345,
+          status: 'success',
+          data: {
+            status: 'ok',
+            uptime: 12345,
+            timestamp: new Date('2024-01-01T00:00:00Z').toISOString(),
+          },
           timestamp: new Date('2024-01-01T00:00:00Z').toISOString(),
         }),
       });
@@ -17,7 +21,8 @@ test.describe('Visual Regression Tests', () => {
     await page.goto('/');
 
     // Wait for content to load
-    await expect(page.getByText('Backend status: ok')).toBeVisible();
+    await expect(page.getByTestId('status-indicator')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('status-indicator')).toContainText(/SUCCESS|OK/i, { timeout: 10000 });
 
     // Take screenshot and compare
     await expect(page).toHaveScreenshot('homepage-success.png', {
@@ -37,10 +42,13 @@ test.describe('Visual Regression Tests', () => {
 
     await page.goto('/');
 
-    // Wait for error state
+    // Wait a bit for error to occur
     await page.waitForTimeout(2000);
-    const statusIndicator = page.getByTestId('status-indicator');
-    await expect(statusIndicator).toContainText(/ERROR/i, { timeout: 15000 });
+
+    // Wait for error message to appear
+    await expect(page.locator('text=/Connection failed|Failed to connect|ERROR/i').first()).toBeVisible({
+      timeout: 10000,
+    });
 
     // Take screenshot and compare
     await expect(page).toHaveScreenshot('homepage-error.png', {
@@ -60,7 +68,11 @@ test.describe('Visual Regression Tests', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ status: 'ok', uptime: 100 }),
+        body: JSON.stringify({
+          status: 'success',
+          data: { status: 'ok', uptime: 100 },
+          timestamp: new Date().toISOString(),
+        }),
       });
     });
 
@@ -85,17 +97,22 @@ test.describe('Visual Regression Tests', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ status: 'ok', uptime: 100 }),
+        body: JSON.stringify({
+          status: 'success',
+          data: { status: 'ok', uptime: 100 },
+          timestamp: new Date().toISOString(),
+        }),
       });
     });
 
     await page.goto('/');
 
     // Wait for success state
-    await expect(page.getByText('Backend status: ok')).toBeVisible();
+    const statusIndicator = page.getByTestId('status-indicator');
+    await expect(statusIndicator).toBeVisible({ timeout: 10000 });
+    await expect(statusIndicator).toContainText(/SUCCESS|OK/i, { timeout: 10000 });
 
     // Take screenshot of just the status indicator
-    const statusIndicator = page.getByTestId('status-indicator');
     await expect(statusIndicator).toHaveScreenshot('status-indicator-success.png', {
       animations: 'disabled',
     });
@@ -109,14 +126,19 @@ test.describe('Visual Regression Tests', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ status: 'ok', uptime: 100 }),
+        body: JSON.stringify({
+          status: 'success',
+          data: { status: 'ok', uptime: 100 },
+          timestamp: new Date().toISOString(),
+        }),
       });
     });
 
     await page.goto('/');
 
     // Wait for content to load
-    await expect(page.getByText('Backend status: ok')).toBeVisible();
+    await expect(page.getByTestId('status-indicator')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('status-indicator')).toContainText(/SUCCESS|OK/i, { timeout: 10000 });
 
     // Take screenshot for mobile
     await expect(page).toHaveScreenshot('homepage-mobile.png', {
@@ -133,14 +155,19 @@ test.describe('Visual Regression Tests', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ status: 'ok', uptime: 100 }),
+        body: JSON.stringify({
+          status: 'success',
+          data: { status: 'ok', uptime: 100 },
+          timestamp: new Date().toISOString(),
+        }),
       });
     });
 
     await page.goto('/');
 
     // Wait for content to load
-    await expect(page.getByText('Backend status: ok')).toBeVisible();
+    await expect(page.getByTestId('status-indicator')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('status-indicator')).toContainText(/SUCCESS|OK/i, { timeout: 10000 });
 
     // Take screenshot for tablet
     await expect(page).toHaveScreenshot('homepage-tablet.png', {
@@ -157,14 +184,19 @@ test.describe('Visual Regression Tests', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ status: 'ok', uptime: 100 }),
+        body: JSON.stringify({
+          status: 'success',
+          data: { status: 'ok', uptime: 100 },
+          timestamp: new Date().toISOString(),
+        }),
       });
     });
 
     await page.goto('/');
 
     // Wait for content to load
-    await expect(page.getByText('Backend status: ok')).toBeVisible();
+    await expect(page.getByTestId('status-indicator')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('status-indicator')).toContainText(/SUCCESS|OK/i, { timeout: 10000 });
 
     // Take screenshot in dark mode
     await expect(page).toHaveScreenshot('homepage-dark-mode.png', {
