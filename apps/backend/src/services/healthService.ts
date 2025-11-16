@@ -63,7 +63,8 @@ export class HealthService extends BaseService {
    */
   private registerDefaultChecks(): void {
     this.registerCheck('uptime', this.checkUptime.bind(this), { timeout: 1000 });
-    this.registerCheck('memory', this.checkMemory.bind(this), { timeout: 1000 });
+    // Memory check is non-critical - high memory usage shouldn't fail health checks
+    this.registerCheck('memory', this.checkMemory.bind(this), { timeout: 1000, critical: false });
     // Disk space check disabled - can cause hangs on some systems
     // this.registerCheck('diskSpace', this.checkDiskSpace.bind(this), { timeout: 2000 });
   }
@@ -306,9 +307,10 @@ export class HealthService extends BaseService {
     const heapUsedMB = (memoryUsage.heapUsed / 1024 / 1024).toFixed(2);
     const heapTotalMB = (memoryUsage.heapTotal / 1024 / 1024).toFixed(2);
 
-    // Consider unhealthy if using more than 90% of heap
+    // Consider unhealthy if using more than 95% of heap (adjusted for long-running processes)
+    // Warning at 90%, error at 95%
     const heapUsagePercent = (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;
-    const status = heapUsagePercent > 90 ? 'error' : 'ok';
+    const status = heapUsagePercent > 95 ? 'error' : heapUsagePercent > 90 ? 'warn' : 'ok';
 
     return {
       name: 'memory',

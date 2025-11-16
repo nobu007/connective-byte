@@ -50,7 +50,7 @@ export interface HealthStatus {
  */
 export interface HealthCheck {
   name: string;
-  status: 'ok' | 'error';
+  status: 'ok' | 'warn' | 'error';
   message?: string;
   responseTime?: number;
 }

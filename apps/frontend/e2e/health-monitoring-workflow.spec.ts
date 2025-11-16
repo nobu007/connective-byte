@@ -8,8 +8,10 @@ test.describe('Health Monitoring Workflow', () => {
     // Verify initial status loads
     await expect(page.getByTestId('status-indicator')).toBeVisible({ timeout: 10000 });
 
-    // Verify status is displayed correctly (either SUCCESS or ERROR depending on backend)
-    await expect(page.getByTestId('status-indicator')).toContainText(/SUCCESS|OK|ERROR|LOADING/i, { timeout: 10000 });
+    // Verify status is displayed correctly (SUCCESS, OK, ERROR, LOADING, or DEGRADED)
+    await expect(page.getByTestId('status-indicator')).toContainText(/SUCCESS|OK|ERROR|LOADING|DEGRADED/i, {
+      timeout: 10000,
+    });
   });
 
   test('should handle error status from backend', async ({ page }) => {

@@ -2,14 +2,18 @@ import { test, expect } from '@playwright/test';
 
 test.describe('API Interaction with page.route()', () => {
   test('should display success message when API call is successful', async ({ page }) => {
-    // Mock the API call to return a success response.
-    await page.route('**/api/health', async (route) => {
+    // Mock the API call to return a success response - match the full URL pattern
+    await page.route('**/api/health**', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
           status: 'success',
-          data: { status: 'ok' },
+          data: {
+            status: 'ok',
+            timestamp: new Date().toISOString(),
+            uptime: 100,
+          },
           timestamp: new Date().toISOString(),
         }),
       });
@@ -23,8 +27,8 @@ test.describe('API Interaction with page.route()', () => {
   });
 
   test('should display error message when API call fails', async ({ page }) => {
-    // Mock the API call to return an error response.
-    await page.route('**/api/health', async (route) => {
+    // Mock the API call to return an error response - match the full URL pattern
+    await page.route('**/api/health**', async (route) => {
       await route.fulfill({
         status: 500,
         contentType: 'application/json',

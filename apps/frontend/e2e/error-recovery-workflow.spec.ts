@@ -4,8 +4,8 @@ test.describe('Error Recovery Workflow', () => {
   test('should retry failed requests and eventually succeed', async ({ page }) => {
     let requestCount = 0;
 
-    // Mock the backend API endpoint - use wildcard to catch all variations
-    await page.route('**/api/health', async (route) => {
+    // Mock the backend API endpoint - match the full URL pattern
+    await page.route('**/api/health**', async (route) => {
       requestCount++;
 
       // Fail first 2 requests, succeed on 3rd
@@ -46,7 +46,7 @@ test.describe('Error Recovery Workflow', () => {
   test('should show appropriate error messages during retry attempts', async ({ page }) => {
     let requestCount = 0;
 
-    await page.route('**/api/health', async (route) => {
+    await page.route('**/api/health**', async (route) => {
       requestCount++;
 
       // Always fail to test persistent error state
@@ -77,7 +77,7 @@ test.describe('Error Recovery Workflow', () => {
   test('should recover from network errors', async ({ page }) => {
     let requestCount = 0;
 
-    await page.route('**/api/health', async (route) => {
+    await page.route('**/api/health**', async (route) => {
       requestCount++;
 
       // Simulate network error on first request
@@ -109,7 +109,7 @@ test.describe('Error Recovery Workflow', () => {
   });
 
   test('should handle timeout scenarios gracefully', async ({ page }) => {
-    await page.route('**/api/health', async (route) => {
+    await page.route('**/api/health**', async (route) => {
       // Simulate slow response that times out
       await new Promise((resolve) => setTimeout(resolve, 35000));
       await route.fulfill({
