@@ -109,6 +109,23 @@ export abstract class BaseController {
   }
 
   /**
+   * Simple input validation helper
+   * @param data - Data to validate
+   * @returns Array of validation error messages
+   */
+  protected validateInput(data: Record<string, any>): string[] {
+    const errors: string[] = [];
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === '') {
+        errors.push(`${key} is required`);
+      }
+    });
+
+    return errors;
+  }
+
+  /**
    * Send success response with consistent formatting
    * @param res - Express response object
    * @param data - Response data
