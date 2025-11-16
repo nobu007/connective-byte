@@ -7,6 +7,14 @@
 import express, { Application } from 'express';
 import routes from './routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import {
+  securityHeaders,
+  corsConfig,
+  sanitizeInput,
+  validateRequest,
+  securityLogger,
+} from './middleware/security';
+import { apiLimiter } from './middleware/rateLimiter';
 
 /**
  * Create and configure Express application
@@ -15,9 +23,21 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 export function createApp(): Application {
   const app = express();
 
-  // Middlewares
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  // Security middleware (applied first)
+  app.use(securityHeaders);
+  app.use(corsConfig);
+  app.use(securityLogger);
+  app.use(validateRequest);
+
+  // Rate limiting (applied before parsing body)
+  app.use('/api', apiLimiter);
+
+  // Body parsing middleware
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+  // Input sanitization (applied after parsing)
+  app.use(sanitizeInput);
 
   // Routes
   app.use(routes);

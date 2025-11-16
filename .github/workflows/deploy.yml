@@ -1,0 +1,142 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy-frontend:
+    name: Deploy Frontend to Netlify
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build:frontend
+        env:
+          NODE_ENV: production
+          NEXT_PUBLIC_API_URL: ${{ secrets.PRODUCTION_API_URL || 'https://api.connectivebyte.com' }}
+
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v3.0
+        with:
+          publish-dir: './apps/frontend/out'
+          production-branch: main
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: 'Deploy from GitHub Actions - ${{ github.event.head_commit.message }}'
+          enable-pull-request-comment: true
+          enable-commit-comment: true
+          overwrites-pull-request-comment: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 10
+
+  deploy-backend:
+    name: Deploy Backend (Manual)
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build backend
+        run: npm run build:backend
+        env:
+          NODE_ENV: production
+
+      - name: Create deployment package
+        run: |
+          cd apps/backend
+          tar -czf ../../backend-deployment.tar.gz dist/ package.json package-lock.json
+
+      - name: Upload deployment package
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-deployment
+          path: backend-deployment.tar.gz
+          retention-days: 30
+
+      - name: Deployment instructions
+        run: |
+          echo "Backend deployment package created successfully!"
+          echo "To deploy the backend:"
+          echo "1. Download the backend-deployment.tar.gz artifact"
+          echo "2. Extract it on your production server"
+          echo "3. Run 'npm ci --production' to install dependencies"
+          echo "4. Set environment variables (NODE_ENV, PORT, DATABASE_URL, etc.)"
+          echo "5. Start the server with 'node dist/index.js'"
+          echo ""
+          echo "Or configure automatic deployment to your preferred platform:"
+          echo "- AWS Elastic Beanstalk"
+          echo "- Google Cloud Run"
+          echo "- Azure App Service"
+          echo "- Heroku"
+          echo "- DigitalOcean App Platform"
+
+  health-check:
+    name: Production Health Check
+    runs-on: ubuntu-latest
+    needs: [deploy-frontend]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Wait for deployment to stabilize
+        run: sleep 30
+
+      - name: Check frontend health
+        run: |
+          FRONTEND_URL="${{ secrets.PRODUCTION_FRONTEND_URL || 'https://connectivebyte.netlify.app' }}"
+          echo "Checking frontend at: $FRONTEND_URL"
+
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$FRONTEND_URL")
+
+          if [ "$STATUS_CODE" -eq 200 ]; then
+            echo "✅ Frontend is healthy (HTTP $STATUS_CODE)"
+          else
+            echo "❌ Frontend health check failed (HTTP $STATUS_CODE)"
+            exit 1
+          fi
+
+      - name: Check backend health (if configured)
+        if: secrets.PRODUCTION_API_URL != ''
+        run: |
+          API_URL="${{ secrets.PRODUCTION_API_URL }}"
+          echo "Checking backend at: $API_URL/api/health"
+
+          RESPONSE=$(curl -s "$API_URL/api/health")
+          STATUS=$(echo "$RESPONSE" | jq -r '.status')
+
+          if [ "$STATUS" = "ok" ] || [ "$STATUS" = "degraded" ]; then
+            echo "✅ Backend is healthy (status: $STATUS)"
+            echo "$RESPONSE" | jq '.'
+          else
+            echo "❌ Backend health check failed"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "🎉 Deployment completed successfully!"
+          echo "Frontend: ${{ secrets.PRODUCTION_FRONTEND_URL || 'https://connectivebyte.netlify.app' }}"
+          echo "Backend: ${{ secrets.PRODUCTION_API_URL || 'Not configured' }}"
