@@ -6,6 +6,56 @@ ConnectiveByte is designed as a modern, scalable web development platform follow
 
 ## Architecture
 
+### Monorepo Workspace Management (Requirement 1.4)
+
+#### Workspace Structure
+
+```
+ConnectiveByte/
+├── apps/
+│   ├── frontend/          # Next.js application
+│   ├── backend/           # Express.js API
+│   └── bot/              # Future: Chat bot application
+├── libs/
+│   ├── components/        # Shared React components
+│   ├── logic/            # Business logic and utilities
+│   └── design/           # Design system definitions
+├── package.json          # Root workspace configuration
+└── node_modules/         # Shared dependencies
+```
+
+#### Workspace Configuration
+
+```json
+// Root package.json
+{
+  "name": "connective-byte-platform",
+  "private": true,
+  "workspaces": ["apps/*", "libs/*"],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=apps/frontend\" \"npm run dev --workspace=apps/backend\"",
+    "test": "npm run test --workspaces",
+    "build": "npm run build --workspaces"
+  }
+}
+```
+
+**Design Rationale**: NPM workspaces enable efficient dependency management across multiple packages, allowing shared dependencies to be hoisted to the root while maintaining package isolation. This reduces disk space usage and ensures consistent dependency versions across the monorepo.
+
+#### Dependency Management Strategy
+
+- **Shared Dependencies**: Common packages (TypeScript, Jest, ESLint) installed at root
+- **Package-Specific Dependencies**: Framework-specific packages (Next.js, Express) in respective apps
+- **Version Consistency**: Single source of truth for shared dependency versions
+- **Workspace Scripts**: Execute commands across all workspaces or target specific packages
+
+**Benefits**:
+
+- Simplified dependency updates across all packages
+- Reduced installation time and disk space
+- Easier code sharing between packages
+- Consistent tooling configuration
+
 ### High-Level System Architecture
 
 ```mermaid
@@ -82,6 +132,51 @@ graph TD
     LOGGING --> CONFIG_SVC
 ```
 
+### Single Responsibility Principle (Requirement 4.4)
+
+Each module in the architecture has a single, well-defined responsibility:
+
+#### Backend Layer Responsibilities
+
+- **Controllers**: Handle HTTP request/response, input validation, and response formatting
+  - Single responsibility: HTTP communication layer
+  - No business logic or data access
+  - Delegates to services for operations
+
+- **Services**: Implement business logic and orchestrate operations
+  - Single responsibility: Business rule implementation
+  - No HTTP concerns or data persistence details
+  - Uses repositories for data access
+
+- **Middleware**: Handle cross-cutting concerns (logging, error handling, authentication)
+  - Single responsibility: Request/response processing
+  - Each middleware handles one concern
+  - Composable and reusable
+
+- **Repositories**: Manage data access and persistence
+  - Single responsibility: Data layer abstraction
+  - No business logic
+  - Provides clean interface for data operations
+
+#### Frontend Layer Responsibilities
+
+- **Components**: Render UI and handle user interactions
+  - Single responsibility: Visual presentation
+  - No business logic or API calls
+  - Receives data via props
+
+- **Hooks**: Manage state and side effects
+  - Single responsibility: State management for specific concern
+  - Encapsulates API communication
+  - Reusable across components
+
+- **API Services**: Handle HTTP communication with backend
+  - Single responsibility: API communication
+  - No UI concerns or state management
+  - Returns typed data structures
+
+**Design Rationale**: Strict adherence to SRP makes the codebase easier to understand, test, and modify. Each module can be changed independently without affecting others, and responsibilities are clear from the module's name and location in the architecture.
+
 ## Components and Interfaces
 
 ### Frontend Components
@@ -136,6 +231,53 @@ interface ServiceResult<T> {
 }
 ```
 
+**Dependency Injection Pattern (Requirement 4.3)**
+
+```typescript
+// Base service with logger dependency injection
+abstract class BaseService {
+  protected logger: Logger;
+
+  constructor(logger: Logger) {
+    this.logger = logger;
+  }
+
+  protected async executeOperation<T>(
+    operation: () => Promise<T>,
+    operationName: string
+  ): Promise<ServiceResult<T>> {
+    this.logger.info(`Starting operation: ${operationName}`);
+    try {
+      const data = await operation();
+      this.logger.info(`Operation ${operationName} completed successfully`);
+      return { success: true, data };
+    } catch (error) {
+      this.logger.error(`Operation ${operationName} failed`, error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+}
+
+// Concrete service implementation
+class HealthService extends BaseService {
+  constructor(logger: Logger) {
+    super(logger); // Logger injected via constructor
+  }
+
+  async getHealthStatus(): Promise<ServiceResult<HealthStatus>> {
+    return this.executeOperation(async () => {
+      // Health check logic
+      return { status: 'ok', timestamp: new Date().toISOString() };
+    }, 'getHealthStatus');
+  }
+}
+```
+
+**Design Rationale**: Constructor-based dependency injection prevents circular dependencies by making dependencies explicit and allowing for easy mocking in tests. Logger instances are created by the logging service and injected into services and controllers, ensuring consistent logging configuration across the application.
+
 #### 3. Infrastructure Layer
 
 ```typescript
@@ -154,7 +296,18 @@ interface HealthService {
 
 ### Shared Libraries
 
+#### Design Philosophy: Framework-Agnostic Architecture (Requirement 4.5)
+
+The shared libraries are designed to be framework-agnostic, containing pure business logic and utilities that can be used across different applications and frameworks. This separation ensures:
+
+- **Portability**: Logic can be reused in different contexts (web, mobile, CLI)
+- **Testability**: Pure functions are easier to test in isolation
+- **Maintainability**: Business logic changes don't require framework-specific updates
+- **Flexibility**: Easy migration to different frameworks if needed
+
 #### 1. Component Library (`libs/components/`)
+
+**Purpose**: Reusable UI components that can be imported across applications (Requirement 8.2)
 
 ```typescript
 interface StatusIndicatorProps {
@@ -169,6 +322,8 @@ interface StatusConfig {
   icon?: string;
 }
 ```
+
+**Design Rationale**: Component library provides consistent UI elements across applications, reducing duplication and ensuring visual consistency. Components are designed with composition in mind, allowing flexible customization through props.
 
 #### 2. Business Logic Library (`libs/logic/`)
 
@@ -256,6 +411,74 @@ interface Logger {
   error(message: string, error?: Error, metadata?: Record<string, any>): void;
 }
 ```
+
+### Strategy Pattern for Configurable Algorithms (Requirement 8.3)
+
+#### Log Formatter Strategy
+
+```typescript
+interface LogFormatter {
+  format(entry: LogEntry): string;
+}
+
+class JsonFormatter implements LogFormatter {
+  format(entry: LogEntry): string {
+    return JSON.stringify(entry);
+  }
+}
+
+class PrettyFormatter implements LogFormatter {
+  format(entry: LogEntry): string {
+    return `[${entry.timestamp}] ${entry.level.toUpperCase()}: ${entry.message}`;
+  }
+}
+
+// Logging service uses strategy pattern
+class LoggingService {
+  private formatter: LogFormatter;
+
+  setFormatter(formatter: LogFormatter): void {
+    this.formatter = formatter;
+  }
+
+  log(entry: LogEntry): void {
+    const formatted = this.formatter.format(entry);
+    console.log(formatted);
+  }
+}
+```
+
+#### Transport Strategy
+
+```typescript
+interface LogTransport {
+  send(formattedLog: string): Promise<void>;
+}
+
+class ConsoleTransport implements LogTransport {
+  async send(formattedLog: string): Promise<void> {
+    console.log(formattedLog);
+  }
+}
+
+class FileTransport implements LogTransport {
+  constructor(private filePath: string) {}
+
+  async send(formattedLog: string): Promise<void> {
+    // Write to file
+  }
+}
+
+class RemoteTransport implements LogTransport {
+  constructor(private endpoint: string) {}
+
+  async send(formattedLog: string): Promise<void> {
+    // Send to remote logging service
+  }
+}
+```
+
+**Design Rationale**: Strategy pattern allows runtime selection of algorithms (formatters, transports) without modifying the core logging service. New formatters or transports can be added without changing existing code, adhering to the Open/Closed Principle. This makes the system highly configurable and extensible.
 
 ## Error Handling
 
@@ -457,6 +680,135 @@ interface TestDataFactory {
 - **Security Headers**: Implement security headers for production
 - **Environment Variables**: Secure configuration management
 
+## Development Workflow and Automation
+
+### Code Quality Automation
+
+#### Automated Formatting (Requirement 5.1)
+
+```typescript
+// .prettierrc configuration
+{
+  "semi": true,
+  "trailingComma": "es5",
+  "singleQuote": true,
+  "printWidth": 100,
+  "tabWidth": 2
+}
+```
+
+**Design Rationale**: Prettier ensures consistent code formatting across the entire codebase, eliminating style debates and reducing cognitive load during code reviews. Automatic formatting on save improves developer productivity.
+
+#### Code Quality Checks (Requirement 5.2)
+
+```typescript
+// ESLint configuration with TypeScript
+{
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-explicit-any": "warn"
+  }
+}
+```
+
+**Design Rationale**: ESLint with TypeScript integration catches potential bugs and enforces best practices at development time, preventing issues before they reach production.
+
+#### Git Hooks and Pre-commit Validation (Requirement 5.4)
+
+```bash
+# .husky/pre-commit
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+npm run lint
+npm run type-check
+```
+
+**Design Rationale**: Git hooks enforce quality gates before code is committed, ensuring that only properly formatted and validated code enters the repository. This prevents broken code from being shared with the team.
+
+#### Conventional Commit Validation (Requirement 5.5)
+
+```javascript
+// commitlint.config.js
+module.exports = {
+  extends: ['@commitlint/config-conventional'],
+  rules: {
+    'type-enum': [
+      2,
+      'always',
+      ['feat', 'fix', 'docs', 'style', 'refactor', 'test', 'chore', 'perf', 'ci', 'build'],
+    ],
+  },
+};
+```
+
+**Design Rationale**: Conventional commits enable automatic changelog generation, semantic versioning, and clear communication of changes. This standardization improves team collaboration and release management.
+
+### Development Environment Configuration
+
+#### Hot Reloading (Requirement 7.3)
+
+**Frontend Hot Reloading**:
+
+- Next.js Fast Refresh for instant component updates
+- Preserves component state during edits
+- Automatic error recovery and display
+
+**Backend Hot Reloading**:
+
+- ts-node-dev for automatic server restart on file changes
+- Preserves process state where possible
+- Fast compilation with TypeScript incremental builds
+
+**Design Rationale**: Hot reloading dramatically improves developer productivity by providing instant feedback on code changes without manual server restarts or page refreshes.
+
+#### IntelliSense and Type Safety (Requirement 7.4)
+
+```json
+// tsconfig.json - Strict TypeScript configuration
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@/components/*": ["./app/components/*"],
+      "@/lib/*": ["../../libs/*"]
+    }
+  }
+}
+```
+
+**Design Rationale**: Strict TypeScript configuration with path mapping provides comprehensive IntelliSense support, catching errors at compile time and enabling powerful IDE features like auto-completion, refactoring, and inline documentation.
+
+### Concurrent Development Scripts (Requirement 1.5)
+
+```json
+// package.json scripts
+{
+  "scripts": {
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "cd apps/frontend && npm run dev",
+    "dev:backend": "cd apps/backend && npm run dev",
+    "test": "npm run test:frontend && npm run test:backend",
+    "build": "npm run build:frontend && npm run build:backend"
+  }
+}
+```
+
+**Design Rationale**: Concurrent script execution allows developers to start both frontend and backend servers with a single command, simplifying the development workflow and reducing setup friction.
+
 ## Deployment Architecture
 
 ### Development Environment
@@ -485,12 +837,52 @@ graph LR
     FE_PROD --> BE_PROD
 ```
 
-### Deployment Strategy
+### Independent Deployment Strategy (Requirement 8.4)
 
-- **Frontend**: Static export deployed to Netlify/Vercel
-- **Backend**: Node.js server deployment (containerized)
-- **Environment Configuration**: Environment-specific configuration
-- **CI/CD Pipeline**: Automated testing and deployment
+#### Frontend Deployment
+
+- **Build Process**: Static export via `next build && next export`
+- **Deployment Target**: Netlify, Vercel, or any static hosting
+- **Configuration**: Environment variables for API endpoints
+- **Rollback**: Git-based rollback via deployment platform
+- **Independence**: Can be deployed without backend changes
+
+#### Backend Deployment
+
+- **Build Process**: TypeScript compilation to JavaScript
+- **Deployment Target**: Node.js server (containerized or serverless)
+- **Configuration**: Environment-specific configuration files
+- **Rollback**: Container image versioning or process manager restart
+- **Independence**: Can be deployed without frontend changes
+
+**Design Rationale**: Independent deployment allows teams to release frontend and backend changes separately, reducing deployment risk and enabling faster iteration. API versioning ensures backward compatibility during independent deployments.
+
+### Netlify Deployment Configuration (Requirement 5.3)
+
+```toml
+# netlify.toml
+[build]
+  command = "npm run build"
+  publish = "apps/frontend/out"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://api.connectivebyte.com/:splat"
+  status = 200
+```
+
+**Design Rationale**: Netlify configuration enables automatic deployment on git push, with proper routing for API requests to the backend server. This simplifies the deployment process and enables continuous delivery.
+
+### CI/CD Pipeline
+
+- **Automated Testing**: Run all tests on pull requests
+- **Code Quality Gates**: ESLint and TypeScript checks must pass
+- **Automated Deployment**: Deploy on merge to main branch
+- **Environment Promotion**: Dev → Staging → Production
+- **Rollback Strategy**: Automatic rollback on health check failure
 
 ## Extension Points
 
@@ -530,5 +922,83 @@ interface EventEmitter {
   off(event: string, listener: (...args: any[]) => void): void;
 }
 ```
+
+## Backward Compatibility Strategy (Requirement 8.5)
+
+### Interface Versioning
+
+```typescript
+// Version 1 interface
+interface HealthStatusV1 {
+  status: 'ok' | 'error';
+  timestamp: string;
+}
+
+// Version 2 interface (backward compatible)
+interface HealthStatusV2 extends HealthStatusV1 {
+  uptime?: number; // Optional field maintains compatibility
+  checks?: HealthCheckResult[]; // Optional field maintains compatibility
+}
+
+// Type alias for current version
+type HealthStatus = HealthStatusV2;
+```
+
+**Design Rationale**: New fields are added as optional properties, ensuring existing code continues to work. Type aliases allow gradual migration to new versions.
+
+### API Versioning Strategy
+
+```typescript
+// Route versioning
+app.use('/api/v1/health', healthControllerV1);
+app.use('/api/v2/health', healthControllerV2);
+
+// Default to latest version
+app.use('/api/health', healthControllerV2);
+```
+
+**Design Rationale**: URL-based versioning allows multiple API versions to coexist, enabling gradual client migration without breaking existing integrations.
+
+### Deprecation Process
+
+1. **Announce**: Document deprecated features with migration guide
+2. **Warn**: Add runtime warnings for deprecated API usage
+3. **Support**: Maintain deprecated features for at least 2 major versions
+4. **Remove**: Remove only after sufficient migration period
+
+```typescript
+// Deprecation warning example
+function deprecatedMethod() {
+  console.warn('deprecatedMethod is deprecated. Use newMethod instead.');
+  // Still functional
+}
+```
+
+### Module Extension Guidelines
+
+When adding new modules:
+
+- Use optional parameters for new features
+- Provide default implementations for new interfaces
+- Maintain existing method signatures
+- Add new methods instead of modifying existing ones
+- Use feature flags for experimental features
+
+**Design Rationale**: Backward compatibility ensures that updates don't break existing applications, reducing upgrade friction and maintaining trust with developers using the platform.
+
+## Design Principles Summary
+
+This design adheres to the following key principles:
+
+1. **Separation of Concerns**: Clear boundaries between layers and modules
+2. **Dependency Inversion**: High-level modules don't depend on low-level modules
+3. **Open/Closed Principle**: Open for extension, closed for modification
+4. **Single Responsibility**: Each module has one reason to change
+5. **Interface Segregation**: Clients depend only on interfaces they use
+6. **Don't Repeat Yourself**: Shared libraries eliminate code duplication
+7. **Convention Over Configuration**: Sensible defaults with configuration options
+8. **Fail Fast**: Early validation and clear error messages
+9. **Progressive Enhancement**: Core functionality works, enhancements are optional
+10. **Developer Experience First**: Tools and patterns that improve productivity
 
 This design provides a solid foundation for building scalable, maintainable web applications while maintaining flexibility for future enhancements and extensions.
