@@ -11,9 +11,31 @@ import { healthCheckLimiter } from '../middleware/rateLimiter';
 const router = Router();
 
 /**
- * GET /api/health
- * Returns the current health status of the application
- * Rate limited to prevent abuse
+ * @swagger
+ * /api/health:
+ *   get:
+ *     summary: Get system health status
+ *     description: Returns the current health status of the application including uptime, memory usage, and registered health checks
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: Health status retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/HealthStatus'
+ *       429:
+ *         description: Too many requests
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/api/health', healthCheckLimiter, handleHealthCheck);
 

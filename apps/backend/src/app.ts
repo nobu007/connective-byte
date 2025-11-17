@@ -5,6 +5,7 @@
  */
 
 import express, { Application } from 'express';
+import swaggerUi from 'swagger-ui-express';
 import routes from './routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import {
@@ -15,6 +16,7 @@ import {
   securityLogger,
 } from './middleware/security';
 import { apiLimiter } from './middleware/rateLimiter';
+import { swaggerSpec } from './config/swagger';
 
 /**
  * Create and configure Express application
@@ -38,6 +40,22 @@ export function createApp(): Application {
 
   // Input sanitization (applied after parsing)
   app.use(sanitizeInput);
+
+  // API Documentation
+  app.use(
+    '/api-docs',
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec, {
+      customCss: '.swagger-ui .topbar { display: none }',
+      customSiteTitle: 'ConnectiveByte API Documentation',
+    })
+  );
+
+  // Swagger JSON endpoint
+  app.get('/api-docs.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+  });
 
   // Routes
   app.use(routes);
