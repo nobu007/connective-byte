@@ -10,10 +10,10 @@ import { FormError } from './FormError';
 import { Button } from '@/components/ui/Button';
 
 interface ContactFormProps {
-  variant?: 'inline' | 'page';
+  // variant?: 'inline' | 'page'; // Reserved for future use
 }
 
-export function ContactForm({ variant = 'page' }: ContactFormProps) {
+export function ContactForm({}: ContactFormProps) {
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
