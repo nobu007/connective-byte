@@ -22,7 +22,7 @@ export interface ValueCard {
   subtitle: string;
   description: string;
   benefits: string[];
-  color: 'blue' | 'green' | 'orange';
+  color: string; // 'blue' | 'green' | 'orange'
 }
 
 export interface SocialProof {

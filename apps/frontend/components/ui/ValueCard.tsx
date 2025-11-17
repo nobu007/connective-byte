@@ -11,7 +11,7 @@ interface ValueCardProps extends ValueCardType {
   index: number;
 }
 
-const colorClasses = {
+const colorClasses: Record<string, { bg: string; icon: string; border: string; text: string }> = {
   blue: {
     bg: 'bg-[#1e3a8a]/10',
     icon: 'text-[#1e3a8a]',
