@@ -1,28 +1,41 @@
 # ConnectiveByte
 
-ConnectiveByteは、モダンなWeb開発の基盤となる包括的なフレームワークです。
+**個を超え、知が立ち上がる場所 - AI時代の知的共創圏**
+
+ConnectiveByteは、「理解されない孤独を吹き飛ばして、AI活用と思考連携で協創リーダーになる」をビジョンに掲げる、次世代の学びと協創の場を提供するプラットフォームです。
+
+## 🎯 核心的価値
+
+- **Connect（接続）**: 知識・人・AI・時代をつなぐ結節点
+- **Active（主体性）**: 情報判断力と能動的アウトプット力
+- **Collective（協創）**: 個人成長→他者貢献→集合知社会
 
 ## ✨ 特徴
 
 - **接続性**: あらゆるコンポーネントが緊密に連携し、シームレスな統合を実現
 - **拡張性**: モジュラー設計による容易な機能拡張
 - **保守性**: クリーンアーキテクチャと明確な責務分離による高い保守性
+- **アクセシビリティ**: WCAG 2.1 Level AA準拠の包括的なアクセシビリティ
 
 ## 🛠️ 技術スタック
 
 ### フロントエンド (apps/frontend)
 
-- **Framework**: [Next.js](https://nextjs.org/) (with React 19)
+- **Framework**: [Next.js 15](https://nextjs.org/) (with React 19)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **Testing**: [Jest](https://jestjs.io/), [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **Forms**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Testing**: [Jest](https://jestjs.io/), [Playwright](https://playwright.dev/)
 - **Lint/Format**: [ESLint](https://eslint.org/), [Prettier](https://prettier.io/)
 
 ### バックエンド (apps/backend)
 
-- **Framework**: [Express.js](https://expressjs.com/) (推定)
+- **Framework**: [Express.js](https://expressjs.com/)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **Runtime**: [Node.js](https://nodejs.org/)
+- **Template Engine**: [LiquidJS](https://liquidjs.com/)
 
 ## 🎯 プロジェクトの哲学
 
