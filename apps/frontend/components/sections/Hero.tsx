@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Container } from '@/components/layout/Container';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { HeroContent } from '@/types/content';
 
 interface HeroProps extends HeroContent {
@@ -11,8 +12,10 @@ interface HeroProps extends HeroContent {
 }
 
 export function Hero({ headline, subheadline, ctaText, ctaLink, variant = 'gradient' }: HeroProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   const fadeInUp = {
-    initial: { opacity: 0, y: 20 },
+    initial: prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
   };
 
