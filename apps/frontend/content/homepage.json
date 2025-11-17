@@ -1,0 +1,67 @@
+{
+  "hero": {
+    "headline": "個を超え、知が立ち上がる場所",
+    "subheadline": "AI時代の知的共創圏 ConnectiveByte",
+    "ctaText": "無料相談に申し込む",
+    "ctaLink": "/contact"
+  },
+  "problems": [
+    {
+      "icon": "user-x",
+      "title": "個人完結型では疲弊するだけ",
+      "description": "一人で全てを抱え込む働き方は限界に達しています。AI時代において、個人の能力だけでは対応しきれない複雑な課題が増え続けています。"
+    },
+    {
+      "icon": "message-circle-x",
+      "title": "思考プロセスを言語化できない",
+      "description": "自分の考えを他者に伝えることができず、協働の機会を逃しています。思考の可視化と共有ができなければ、チームの力を引き出すことはできません。"
+    },
+    {
+      "icon": "users-x",
+      "title": "協働による成果拡大ができない",
+      "description": "個人の成果に留まり、チームや組織全体の創造性を引き出せていません。接続可能な人材になることで、集合知を生み出す力が必要です。"
+    }
+  ],
+  "values": [
+    {
+      "id": "connect",
+      "icon": "link",
+      "title": "Connect",
+      "subtitle": "思考を言語化し、他者と接続する",
+      "description": "思考プロセスを可視化し、他者と共有可能な形に言語化する能力を身につけます。",
+      "benefits": ["思考プロセスの可視化", "効果的なコミュニケーション", "知識の共有と蓄積"],
+      "color": "blue"
+    },
+    {
+      "id": "active",
+      "icon": "zap",
+      "title": "Active",
+      "subtitle": "AIと協働し、創造性を拡張する",
+      "description": "AIを単なるツールではなく、協働パートナーとして活用し、個人の創造性を拡張します。",
+      "benefits": ["AI協働スキルの習得", "創造性の拡張", "効率的な問題解決"],
+      "color": "green"
+    },
+    {
+      "id": "collective",
+      "icon": "users",
+      "title": "Collective",
+      "subtitle": "集合知を生み出し、価値を創造する",
+      "description": "個人の成長を超えて、チームや組織全体の集合知を生み出し、新しい価値を創造します。",
+      "benefits": ["集合知の創出", "組織の創造性向上", "持続的な価値創造"],
+      "color": "orange"
+    }
+  ],
+  "socialProof": {
+    "participantCount": 10,
+    "programName": "Version 0",
+    "badge": "参加者募集中",
+    "description": "初期プログラム参加者として、無料で体系的なAI協働スキルを学び、接続可能な人材への第一歩を踏み出しましょう。"
+  },
+  "finalCTA": {
+    "headline": "まずは無料相談から",
+    "description": "あなたの課題をお聞かせください。AI時代の協創リーダーへの道をサポートします。",
+    "steps": ["フォームから申し込み", "オンライン面談（30分）", "プログラム参加"],
+    "ctaText": "無料相談に申し込む",
+    "ctaLink": "/contact"
+  }
+}

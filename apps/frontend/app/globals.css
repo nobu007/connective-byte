@@ -1,23 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-primary-deep-blue: #1e3a8a;
+  --color-primary-tech-green: #10b981;
+  --color-accent-bright-orange: #f97316;
+  --color-accent-vivid-purple: #a855f7;
+
+  /* Typography */
+  --font-family-heading: 'Inter', 'Noto Sans JP', sans-serif;
+  --font-family-body: 'Inter', 'Noto Sans JP', sans-serif;
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  --spacing-2xl: 4rem;
+  --spacing-3xl: 6rem;
+}
+
+:root {
+  /* Additional CSS variables for dynamic theming */
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f9fafb;
+  --color-border: #e5e7eb;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
+  font-family: var(--font-family-body);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.container {
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgb(0 0 0 / 10%);
+/* Focus visible styles for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--color-primary-tech-green);
+  outline-offset: 2px;
 }
 
-h1 {
-    color: #333;
+/* Skip to content link for accessibility */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--color-primary-deep-blue);
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  z-index: 100;
 }
 
-p {
-    color: #666;
+.skip-link:focus {
+  top: 0;
 }
