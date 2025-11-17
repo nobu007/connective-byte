@@ -1,159 +1,215 @@
-# Contributing to ConnectiveByte
+# コントリビューションガイド
 
-Thank you for your interest in contributing to ConnectiveByte! We appreciate your time and effort in making this project better.
+ConnectiveByteプロジェクトへのコントリビューションに興味を持っていただき、ありがとうございます！
 
-## Table of Contents
+## 🤝 コントリビューション方法
 
-- [Code of Conduct](#code-of-conduct)
-- [Getting Started](#getting-started)
-- [Development Workflow](#development-workflow)
-- [Commit Message Guidelines](#commit-message-guidelines)
-- [Pull Request Process](#pull-request-process)
-- [Code Style](#code-style)
-- [Testing](#testing)
-- [Reporting Issues](#reporting-issues)
-- [License](#license)
+### 1. イシューの作成
 
-## Code of Conduct
+バグ報告や機能提案は、GitHubのIssuesで受け付けています。
 
-By participating in this project, you are expected to uphold our [Code of Conduct](CODE_OF_CONDUCT.md).
+**バグ報告の場合：**
 
-## Getting Started
+- 問題の詳細な説明
+- 再現手順
+- 期待される動作
+- 実際の動作
+- 環境情報（OS、ブラウザ、Node.jsバージョン等）
 
-1. **Fork** the repository on GitHub
-2. **Clone** your fork locally
+**機能提案の場合：**
+
+- 機能の詳細な説明
+- ユースケース
+- 期待される効果
+
+### 2. プルリクエストの作成
+
+1. リポジトリをフォーク
+2. 新しいブランチを作成
    ```bash
-   git clone https://github.com/your-username/connective-byte.git
-   cd connective-byte
+   git checkout -b feature/amazing-feature
    ```
-3. **Install** dependencies
+3. 変更を実装
+4. テストを追加/更新
+5. コミット
    ```bash
-   npm install
+   git commit -m "feat: add amazing feature"
    ```
-4. **Set up** environment variables
+6. プッシュ
    ```bash
-   cp .env.example .env.local
-   # Edit .env.local with your configuration
+   git push origin feature/amazing-feature
    ```
-5. **Start** the development servers
-   ```bash
-   # Start frontend and backend in separate terminals
-   npm run dev:frontend
-   npm run dev:backend
-   ```
+7. プルリクエストを作成
 
-## Development Workflow
+## 📝 コミットメッセージ規約
 
-1. Create a new branch for your feature or bugfix:
-
-   ```bash
-   git checkout -b feature/your-feature-name
-   # or
-   git checkout -b fix/issue-number-description
-   ```
-
-2. Make your changes following the code style guidelines
-
-3. Run tests and ensure they pass:
-
-   ```bash
-   npm test
-   ```
-
-4. Commit your changes following the [commit message guidelines](#commit-message-guidelines)
-
-5. Push your branch and create a pull request
-
-## Commit Message Guidelines
-
-We follow [Conventional Commits](https://www.conventionalcommits.org/) for our commit messages. Here's an example:
+Conventional Commitsに従ってください：
 
 ```
-<type>[optional scope]: <description>
+<type>(<scope>): <subject>
 
-[optional body]
+<body>
 
-[optional footer(s)]
+<footer>
 ```
 
-### Types
+### Type
 
-- **feat**: A new feature
-- **fix**: A bug fix
-- **docs**: Documentation only changes
-- **style**: Changes that do not affect the meaning of the code (white-space, formatting, etc.)
-- **refactor**: A code change that neither fixes a bug nor adds a feature
-- **perf**: A code change that improves performance
-- **test**: Adding missing tests or correcting existing tests
-- **build**: Changes that affect the build system or external dependencies
-- **ci**: Changes to CI configuration files and scripts
-- **chore**: Other changes that don't modify src or test files
-- **revert**: Reverts a previous commit
+- `feat`: 新機能
+- `fix`: バグ修正
+- `docs`: ドキュメントのみの変更
+- `style`: コードの意味に影響しない変更（空白、フォーマット等）
+- `refactor`: バグ修正や機能追加を伴わないコード変更
+- `perf`: パフォーマンス改善
+- `test`: テストの追加や修正
+- `chore`: ビルドプロセスやツールの変更
 
-### Examples
-
-```
-feat: add user authentication
-
-- Add login/logout functionality
-- Implement JWT authentication
-
-Closes #123
-```
-
-## Pull Request Process
-
-1. Ensure any install or build dependencies are removed before the end of the layer when doing a build.
-2. Update the README.md with details of changes to the interface, this includes new environment variables, exposed ports, useful file locations, and container parameters.
-3. Increase the version numbers in any examples files and the README.md to the new version that this Pull Request would represent. The versioning scheme we use is [SemVer](http://semver.org/).
-4. You may merge the Pull Request in once you have the sign-off of two other developers, or if you do not have permission to do that, you may request the second reviewer to merge it for you.
-
-## Code Style
-
-- We use [Prettier](https://prettier.io/) for code formatting
-- We use [ESLint](https://eslint.org/) for code quality
-- Run the following commands to format and lint your code:
-  ```bash
-  npm run format
-  npm run lint
-  ```
-
-## Testing
-
-### Running Tests
+### 例
 
 ```bash
-# Run all tests
-npm test
+feat: add newsletter signup component
+fix: resolve mobile navigation menu issue
+docs: update deployment guide
+style: format code with prettier
+refactor: simplify form validation logic
+perf: optimize image loading
+test: add unit tests for button component
+chore: update dependencies
+```
 
-# Run frontend tests
-npm run test:frontend
+## 🎨 コーディング規約
 
-# Run backend tests
-npm run test:backend
+### TypeScript
 
-# Run E2E tests
+- 型を明示的に定義
+- `any`の使用を避ける
+- インターフェースを優先（typeよりも）
+
+### React
+
+- 関数コンポーネントを使用
+- カスタムフックで状態ロジックを分離
+- propsの型を明示的に定義
+
+### CSS/Tailwind
+
+- Tailwindユーティリティクラスを優先
+- カスタムCSSは最小限に
+- レスポンシブデザインを考慮
+
+### ファイル構造
+
+```
+components/
+├── layout/      # レイアウトコンポーネント
+├── sections/    # ページセクション
+├── ui/          # 再利用可能なUIコンポーネント
+└── forms/       # フォーム関連コンポーネント
+```
+
+## ✅ プルリクエストチェックリスト
+
+- [ ] コードがビルドエラーなく動作する
+- [ ] 型チェックが通る（`npm run type-check`）
+- [ ] リントエラーがない（`npm run lint`）
+- [ ] テストが通る（`npm run test`）
+- [ ] 新機能にテストを追加した
+- [ ] ドキュメントを更新した
+- [ ] コミットメッセージが規約に従っている
+- [ ] レスポンシブデザインを確認した
+- [ ] アクセシビリティを考慮した
+
+## 🧪 テスト
+
+### ユニットテスト
+
+```bash
+npm run test
+```
+
+### E2Eテスト
+
+```bash
 npm run test:e2e
 ```
 
-### Writing Tests
+### カバレッジ
 
-- Write unit tests for all new features and bug fixes
-- Ensure the test suite passes before submitting a pull request
-- When fixing a bug, add a test that would have caught the bug
+```bash
+npm run test -- --coverage
+```
 
-## Reporting Issues
+## 🔍 コードレビュー
 
-When reporting issues, please include:
+プルリクエストは以下の観点でレビューされます：
 
-1. A clear, descriptive title
-2. A description of the issue
-3. Steps to reproduce the issue
-4. Expected vs. actual behavior
-5. Screenshots (if applicable)
-6. Browser/OS version (if applicable)
-7. Any error messages in the console
+- **機能性**: 意図した通りに動作するか
+- **コード品質**: 読みやすく保守しやすいか
+- **パフォーマンス**: 不要な処理がないか
+- **セキュリティ**: 脆弱性がないか
+- **アクセシビリティ**: WCAG 2.1 Level AAに準拠しているか
+- **テスト**: 適切なテストが含まれているか
 
-## License
+## 📚 開発環境のセットアップ
 
-By contributing, you agree that your contributions will be licensed under the [MIT License](LICENSE).
+### 前提条件
+
+- Node.js 18以上
+- npm
+
+### セットアップ手順
+
+```bash
+# リポジトリのクローン
+git clone https://github.com/your-username/connective-byte.git
+cd connective-byte
+
+# 依存関係のインストール
+npm install
+
+# 開発サーバーの起動
+cd apps/frontend
+npm run dev
+```
+
+## 🐛 バグ報告
+
+バグを見つけた場合は、以下の情報を含めてIssueを作成してください：
+
+1. **タイトル**: 簡潔な問題の説明
+2. **説明**: 詳細な問題の説明
+3. **再現手順**: 問題を再現する手順
+4. **期待される動作**: 本来どう動作すべきか
+5. **実際の動作**: 実際にどう動作したか
+6. **環境情報**:
+   - OS
+   - ブラウザとバージョン
+   - Node.jsバージョン
+   - その他関連する情報
+
+## 💡 機能提案
+
+新機能の提案は大歓迎です！以下の情報を含めてIssueを作成してください：
+
+1. **タイトル**: 機能の簡潔な説明
+2. **動機**: なぜこの機能が必要か
+3. **詳細**: 機能の詳細な説明
+4. **ユースケース**: 具体的な使用例
+5. **代替案**: 他に考えられる実装方法
+
+## 📞 質問・サポート
+
+質問がある場合は：
+
+1. まず[ドキュメント](./README.md)を確認
+2. [既存のIssues](https://github.com/nobu007/connective-byte/issues)を検索
+3. 見つからない場合は新しいIssueを作成
+4. または info@connectivebyte.com までお問い合わせ
+
+## 🎉 コントリビューターへの感謝
+
+すべてのコントリビューターに感謝します！あなたの貢献がConnectiveByteをより良いものにします。
+
+## 📄 ライセンス
+
+コントリビューションすることで、あなたの貢献がプロジェクトと同じライセンス（MIT）の下で公開されることに同意したものとみなされます。
