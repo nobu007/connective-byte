@@ -8,9 +8,11 @@ import { CTASection } from '@/components/sections/CTASection';
 import homepageContent from '@/content/homepage.json';
 import { getOrganizationSchema } from '@/lib/seo/structured-data';
 import { useOutboundLinkTracking } from '@/lib/analytics/useOutboundLinkTracking';
+import { useWebVitals } from '@/lib/analytics/useWebVitals';
 
 export default function Home() {
   useOutboundLinkTracking();
+  useWebVitals();
   const organizationSchema = getOrganizationSchema();
 
   return (

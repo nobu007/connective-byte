@@ -50,7 +50,7 @@
   - Add tracking for privacy policy link clicks
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [-] 8. Implement error tracking system
+- [x] 8. Implement error tracking system
   - Create ErrorTracker component with error event listeners
   - Track JavaScript errors with error message and page URL
   - Track unhandled promise rejections
@@ -59,7 +59,7 @@
   - Add tracking for 404 page views
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-- [ ] 9. Implement Core Web Vitals tracking
+- [-] 9. Implement Core Web Vitals tracking
   - Create useWebVitals hook
   - Track Largest Contentful Paint (LCP)
   - Track First Input Delay (FID)
