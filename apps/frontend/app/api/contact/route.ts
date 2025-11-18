@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { contactSchema } from '@/lib/validation/contact-schema';
 
-// Initialize Resend with API key from environment variables
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend only if API key is available
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     const { name, email, message } = result.data;
 
     // Check if Resend API key is configured
-    if (!process.env.RESEND_API_KEY) {
+    if (!resend) {
       console.warn('RESEND_API_KEY not configured. Email will not be sent.');
       console.log('Contact form submission:', { name, email, message });
       return NextResponse.json(

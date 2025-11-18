@@ -6,8 +6,8 @@ import { Button } from '../Button';
 // Mock framer-motion to avoid animation issues in tests
 jest.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, variants, initial, whileHover, whileTap, ...props }: any) => <div {...props}>{children}</div>,
-    button: ({ children, variants, initial, whileHover, whileTap, ...props }: any) => (
+    div: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => <div {...props}>{children}</div>,
+    button: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => (
       <button {...props}>{children}</button>
     ),
   },

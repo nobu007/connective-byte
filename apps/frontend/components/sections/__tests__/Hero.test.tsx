@@ -5,11 +5,9 @@ import { Hero } from '../Hero';
 // Mock framer-motion
 jest.mock('framer-motion', () => ({
   motion: {
-    h1: ({ children, variants, initial, animate, transition, ...props }: any) => <h1 {...props}>{children}</h1>,
-    p: ({ children, variants, initial, animate, transition, ...props }: any) => <p {...props}>{children}</p>,
-    div: ({ children, variants, initial, animate, transition, whileHover, whileTap, ...props }: any) => (
-      <div {...props}>{children}</div>
-    ),
+    h1: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => <h1 {...props}>{children}</h1>,
+    p: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => <p {...props}>{children}</p>,
+    div: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => <div {...props}>{children}</div>,
   },
 }));
 

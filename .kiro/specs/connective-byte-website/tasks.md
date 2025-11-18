@@ -73,7 +73,7 @@ All core features have been successfully implemented:
   - _Requirements: 10.1_
   - _Note: Test infrastructure exists, component tests can be added_
 
-- [-]\* 7. Write form validation tests
+- [x]\* 7. Write form validation tests
   - Test ContactForm validation with valid and invalid inputs
   - Test form submission success and error states
   - Test loading states and disabled buttons
@@ -96,7 +96,7 @@ All core features have been successfully implemented:
   - _Requirements: 7.3, 9.5_
   - _Note: Using Lucide React icons, ready for custom images when available_
 
-- [ ]\* 10. Content review and polish
+- [-]\* 10. Content review and polish
   - Review all pages for consistency and quality
   - Verify all links work correctly
   - Check Japanese text for accuracy and tone
