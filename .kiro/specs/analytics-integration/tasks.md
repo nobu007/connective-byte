@@ -7,14 +7,14 @@
   - Add environment variables to .env.local and document in README
   - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
 
-- [-] 2. Implement core Plausible provider and hooks
+- [x] 2. Implement core Plausible provider and hooks
   - Create PlausibleProvider context component with script injection
   - Implement usePlausible hook for accessing analytics functions
   - Create useTrackEvent hook with type-safe event names
   - Add graceful error handling for failed script loads
   - _Requirements: 1.1, 1.2, 8.1, 8.2, 8.5_
 
-- [ ] 3. Integrate analytics provider into Next.js app
+- [-] 3. Integrate analytics provider into Next.js app
   - Add PlausibleProvider to root layout.tsx
   - Configure provider with analytics config
   - Verify automatic page view tracking works

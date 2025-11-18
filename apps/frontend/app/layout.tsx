@@ -4,6 +4,8 @@ import './globals.css';
 import { Navigation } from '@/components/layout/Navigation';
 import { Footer } from '@/components/layout/Footer';
 import { siteConfig } from '@/content/site-config';
+import { PlausibleProvider } from '@/lib/analytics/PlausibleProvider';
+import { getAnalyticsConfig } from '@/lib/analytics/config';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -59,12 +61,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const analyticsConfig = getAnalyticsConfig();
+
   return (
     <html lang="ja" className={`${inter.variable} ${notoSansJP.variable}`}>
       <body>
-        <Navigation />
-        {children}
-        <Footer />
+        <PlausibleProvider config={analyticsConfig.plausible}>
+          <Navigation />
+          {children}
+          <Footer />
+        </PlausibleProvider>
       </body>
     </html>
   );
