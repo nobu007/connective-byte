@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Container } from '@/components/layout/Container';
+import { useTrackEvent } from '@/lib/analytics/useTrackEvent';
 import type { CTASection as CTASectionType } from '@/types/content';
 
 interface CTASectionProps extends CTASectionType {
@@ -11,6 +12,12 @@ interface CTASectionProps extends CTASectionType {
 }
 
 export function CTASection({ headline, description, steps, ctaText, ctaLink, variant = 'gradient' }: CTASectionProps) {
+  const trackEvent = useTrackEvent();
+
+  const handleCTAClick = () => {
+    trackEvent('CTA Click', { location: 'final-cta' });
+  };
+
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
@@ -83,6 +90,7 @@ export function CTASection({ headline, description, steps, ctaText, ctaLink, var
               variant={variant === 'minimal' ? 'primary' : 'secondary'}
               size="lg"
               className={variant === 'minimal' ? '' : 'bg-white text-[#f97316] hover:bg-white/90'}
+              onClick={handleCTAClick}
             >
               {ctaText}
             </Button>

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Container } from '@/components/layout/Container';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { useTrackEvent } from '@/lib/analytics/useTrackEvent';
 import type { HeroContent } from '@/types/content';
 
 interface HeroProps extends HeroContent {
@@ -13,6 +14,11 @@ interface HeroProps extends HeroContent {
 
 export function Hero({ headline, subheadline, ctaText, ctaLink, variant = 'gradient' }: HeroProps) {
   const prefersReducedMotion = useReducedMotion();
+  const trackEvent = useTrackEvent();
+
+  const handleCTAClick = () => {
+    trackEvent('CTA Click', { location: 'hero' });
+  };
 
   const fadeInUp = {
     initial: prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 },
@@ -66,7 +72,7 @@ export function Hero({ headline, subheadline, ctaText, ctaLink, variant = 'gradi
             animate="animate"
             transition={{ duration: 0.6, delay: 0.6 }}
           >
-            <Button href={ctaLink} size="lg">
+            <Button href={ctaLink} size="lg" onClick={handleCTAClick}>
               {ctaText}
             </Button>
           </motion.div>

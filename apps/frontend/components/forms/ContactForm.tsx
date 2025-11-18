@@ -8,6 +8,7 @@ import { contactSchema, type ContactFormData } from '@/lib/validation/contact-sc
 import { FormField } from './FormField';
 import { FormError } from './FormError';
 import { Button } from '@/components/ui/Button';
+import { ConversionTracker } from '@/components/analytics/ConversionTracker';
 
 interface ContactFormProps {
   // variant?: 'inline' | 'page'; // Reserved for future use
@@ -57,18 +58,21 @@ export function ContactForm({}: ContactFormProps) {
 
   if (submitStatus === 'success') {
     return (
-      <div className="p-8 bg-[#10b981]/10 border border-[#10b981]/20 rounded-lg text-center">
-        <CheckCircle className="text-[#10b981] mx-auto mb-4" size={48} />
-        <h3 className="text-2xl font-bold text-[#111827] mb-2">送信完了</h3>
-        <p className="text-[#4b5563] mb-6">
-          お問い合わせありがとうございます。
-          <br />
-          2営業日以内にご連絡させていただきます。
-        </p>
-        <Button onClick={() => setSubmitStatus('idle')} variant="secondary">
-          別のメッセージを送信
-        </Button>
-      </div>
+      <>
+        <ConversionTracker event="Contact Form Submission" />
+        <div className="p-8 bg-[#10b981]/10 border border-[#10b981]/20 rounded-lg text-center">
+          <CheckCircle className="text-[#10b981] mx-auto mb-4" size={48} />
+          <h3 className="text-2xl font-bold text-[#111827] mb-2">送信完了</h3>
+          <p className="text-[#4b5563] mb-6">
+            お問い合わせありがとうございます。
+            <br />
+            2営業日以内にご連絡させていただきます。
+          </p>
+          <Button onClick={() => setSubmitStatus('idle')} variant="secondary">
+            別のメッセージを送信
+          </Button>
+        </div>
+      </>
     );
   }
 
