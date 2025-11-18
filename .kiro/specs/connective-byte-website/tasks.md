@@ -81,7 +81,7 @@ All core features have been successfully implemented:
   - _Requirements: 4.3, 4.4_
   - _Note: Form validation schema exists, needs test coverage_
 
-- [ ]\* 8. Enhance E2E test coverage
+- [-]\* 8. Enhance E2E test coverage
   - Add Playwright test for contact form submission flow
   - Add test for navigation across all pages
   - Add visual regression tests for About and Contact pages
@@ -96,7 +96,7 @@ All core features have been successfully implemented:
   - _Requirements: 7.3, 9.5_
   - _Note: Using Lucide React icons, ready for custom images when available_
 
-- [-]\* 10. Content review and polish
+- [x]\* 10. Content review and polish
   - Review all pages for consistency and quality
   - Verify all links work correctly
   - Check Japanese text for accuracy and tone
