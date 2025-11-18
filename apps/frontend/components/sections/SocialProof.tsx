@@ -3,11 +3,13 @@
 import React, { useEffect, useState } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { Container } from '@/components/layout/Container';
+import { useScrollTracking } from '@/lib/analytics/useScrollTracking';
 import type { SocialProof as SocialProofType } from '@/types/content';
 
 interface SocialProofProps extends SocialProofType {}
 
 export function SocialProof({ participantCount, programName, badge, description }: SocialProofProps) {
+  const sectionRef = useScrollTracking({ eventName: 'Social Proof Viewed' });
   const count = useMotionValue(0);
   const rounded = useTransform(count, (latest) => Math.round(latest));
   const [displayCount, setDisplayCount] = useState(0);
@@ -34,7 +36,7 @@ export function SocialProof({ participantCount, programName, badge, description 
   };
 
   return (
-    <section className="py-16 bg-white" aria-labelledby="social-proof-heading">
+    <section ref={sectionRef} className="py-16 bg-white" aria-labelledby="social-proof-heading">
       <Container maxWidth="md">
         <motion.div
           initial="initial"

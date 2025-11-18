@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Container } from '@/components/layout/Container';
 import { ValueCard } from '@/components/ui/ValueCard';
+import { useScrollTracking } from '@/lib/analytics/useScrollTracking';
 import type { ValueCard as ValueCardType } from '@/types/content';
 
 interface ValuePropositionsProps {
@@ -12,13 +13,15 @@ interface ValuePropositionsProps {
 }
 
 export function ValuePropositions({ title, values }: ValuePropositionsProps) {
+  const sectionRef = useScrollTracking({ eventName: 'Value Props Viewed' });
+
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
   };
 
   return (
-    <section className="py-20 bg-white" aria-labelledby="values-heading">
+    <section ref={sectionRef} className="py-20 bg-white" aria-labelledby="values-heading">
       <Container>
         <motion.h2
           id="values-heading"

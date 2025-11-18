@@ -21,14 +21,14 @@
   - Test in development and production modes
   - _Requirements: 1.1, 1.3, 1.4, 8.3, 8.4_
 
-- [-] 4. Implement conversion tracking for contact form
+- [x] 4. Implement conversion tracking for contact form
   - Create ConversionTracker component
   - Add tracking to contact form submission success
   - Add tracking to contact form CTA button clicks with location property
   - Test events appear in Plausible dashboard
   - _Requirements: 2.1, 2.2, 2.4_
 
-- [ ] 5. Implement scroll-based engagement tracking
+- [-] 5. Implement scroll-based engagement tracking
   - Create useScrollTracking hook with IntersectionObserver
   - Add tracking to Value Propositions section view
   - Add tracking to Social Proof section view
