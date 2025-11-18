@@ -65,7 +65,7 @@ All core features have been successfully implemented:
   - _Requirements: 7.1, 7.2_
   - _Note: Requires deployment to test in production environment_
 
-- [-]\* 6. Write component unit tests
+- [x]\* 6. Write component unit tests
   - Create tests for Hero, ValueCard, ProblemCard components
   - Create tests for Button, Navigation, Footer components
   - Test component rendering with different props
@@ -73,7 +73,7 @@ All core features have been successfully implemented:
   - _Requirements: 10.1_
   - _Note: Test infrastructure exists, component tests can be added_
 
-- [ ]\* 7. Write form validation tests
+- [-]\* 7. Write form validation tests
   - Test ContactForm validation with valid and invalid inputs
   - Test form submission success and error states
   - Test loading states and disabled buttons
