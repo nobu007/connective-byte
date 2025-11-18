@@ -6,6 +6,10 @@
 [build.environment]
   NODE_VERSION = "18"
   NEXT_PUBLIC_SITE_URL = "https://connectivebyte.com"
+  # Analytics - Plausible
+  # Note: Set NEXT_PUBLIC_PLAUSIBLE_DOMAIN in Netlify UI environment variables
+  # NEXT_PUBLIC_PLAUSIBLE_DOMAIN = "connectivebyte.com"
+  NEXT_PUBLIC_PLAUSIBLE_API_HOST = "https://plausible.io"
 
 # Redirect all requests to index.html for client-side routing
 [[redirects]]

@@ -23,14 +23,42 @@
 - **Publish directory**: `apps/frontend/out`
 - **Node.js version**: 20
 
-### 4. 環境変数の設定（必要に応じて）
+### 4. 環境変数の設定
 
-Netlifyダッシュボードの「Site settings」→「Environment variables」で設定：
+Netlifyダッシュボードの「Site settings」→「Environment variables」で以下を設定：
+
+#### 必須の環境変数
 
 ```bash
-# 例：バックエンドAPIのURL
-NEXT_PUBLIC_API_URL=https://your-api-endpoint.com
+# サイトURL
+NEXT_PUBLIC_SITE_URL=https://connectivebyte.com
+
+# お問い合わせメールアドレス
+NEXT_PUBLIC_CONTACT_EMAIL=info@connectivebyte.com
+
+# メール送信サービス（Resend）
+RESEND_API_KEY=re_your_api_key_here
 ```
+
+#### アナリティクス設定（推奨）
+
+```bash
+# Plausible Analytics
+NEXT_PUBLIC_PLAUSIBLE_DOMAIN=connectivebyte.com
+NEXT_PUBLIC_PLAUSIBLE_API_HOST=https://plausible.io
+```
+
+**注意**: `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`を設定しない場合、アナリティクスは無効化されます。
+
+#### 環境変数の設定手順
+
+1. Netlifyダッシュボードで「Site settings」を開く
+2. 左メニューから「Environment variables」を選択
+3. 「Add a variable」をクリック
+4. 変数名と値を入力
+5. 「Create variable」をクリック
+
+詳細な設定方法は[Plausible Setup Guide](apps/frontend/docs/plausible-setup.md)を参照してください。
 
 ### 5. デプロイの実行
 
@@ -143,10 +171,16 @@ GitHubの private リポジトリの場合：
 - [ ] `netlify.toml`の設定確認
 - [ ] `next.config.ts`の静的エクスポート設定確認
 - [ ] ローカルで`npm run build`が成功することを確認
-- [ ] 環境変数の設定（必要な場合）
+- [ ] 環境変数の設定
+  - [ ] `NEXT_PUBLIC_SITE_URL`
+  - [ ] `NEXT_PUBLIC_CONTACT_EMAIL`
+  - [ ] `RESEND_API_KEY`（メール送信用）
+  - [ ] `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`（アナリティクス用）
+- [ ] Plausible Analyticsアカウントの設定（アナリティクスを使用する場合）
 - [ ] カスタムドメインの設定（必要な場合）
 - [ ] デプロイ後の動作確認
 - [ ] セキュリティヘッダーの確認
+- [ ] アナリティクスの動作確認（Plausibleダッシュボードでイベント確認）
 
 ## 🎉 デプロイ完了後
 
@@ -157,5 +191,7 @@ GitHubの private リポジトリの場合：
 3. ✅ 画像やアセットが正しく読み込まれるか
 4. ✅ レスポンシブデザインが機能しているか
 5. ✅ SEO設定（メタタグなど）が正しいか
+6. ✅ お問い合わせフォームが動作するか
+7. ✅ アナリティクスが正しく動作しているか（Plausibleダッシュボードで確認）
 
 Happy Deploying! 🚀

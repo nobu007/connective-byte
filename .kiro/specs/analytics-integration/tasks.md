@@ -76,14 +76,14 @@
   - Configure custom properties (location, card, url, filename, platform, error, page, metric, value)
   - _Requirements: 2.4, 2.5_
 
-- [-] 11. Update privacy policy with analytics disclosure
+- [x] 11. Update privacy policy with analytics disclosure
   - Add analytics section to privacy policy page
   - Explain Plausible usage and data collection
   - Link to Plausible's data policy
   - Confirm GDPR/CCPA compliance statements
   - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
 
-- [ ] 12. Add analytics integration to homepage sections
+- [x] 12. Add analytics integration to homepage sections
   - Integrate scroll tracking for value propositions section
   - Integrate scroll tracking for social proof section
   - Add outbound link tracking hook to homepage
@@ -91,7 +91,7 @@
   - Test all tracking events fire correctly
   - _Requirements: 3.1, 3.2, 3.4, 3.5, 6.1, 6.2, 6.3_
 
-- [ ] 13. Configure deployment environment variables
+- [-] 13. Configure deployment environment variables
   - Add NEXT_PUBLIC_PLAUSIBLE_DOMAIN to Netlify environment variables
   - Add NEXT_PUBLIC_PLAUSIBLE_API_HOST to Netlify environment variables
   - Update netlify.toml with environment configuration
