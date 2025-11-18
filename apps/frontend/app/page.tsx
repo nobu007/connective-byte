@@ -1,3 +1,5 @@
+'use client';
+
 import { Hero } from '@/components/sections/Hero';
 import { ProblemStatement } from '@/components/sections/ProblemStatement';
 import { ValuePropositions } from '@/components/sections/ValuePropositions';
@@ -5,8 +7,10 @@ import { SocialProof } from '@/components/sections/SocialProof';
 import { CTASection } from '@/components/sections/CTASection';
 import homepageContent from '@/content/homepage.json';
 import { getOrganizationSchema } from '@/lib/seo/structured-data';
+import { useOutboundLinkTracking } from '@/lib/analytics/useOutboundLinkTracking';
 
 export default function Home() {
+  useOutboundLinkTracking();
   const organizationSchema = getOrganizationSchema();
 
   return (

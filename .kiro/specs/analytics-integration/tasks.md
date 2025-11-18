@@ -35,13 +35,13 @@
   - Implement scroll depth tracking
   - _Requirements: 3.1, 3.2, 3.4, 3.5_
 
-- [-] 6. Implement click tracking for value proposition cards
+- [x] 6. Implement click tracking for value proposition cards
   - Add click event handlers to value card components
   - Track which card was clicked with event properties
   - Test card click events in dashboard
   - _Requirements: 3.3_
 
-- [ ] 7. Implement outbound link and download tracking
+- [-] 7. Implement outbound link and download tracking
   - Create useOutboundLinkTracking hook with global click handler
   - Add tracking for outbound links with destination URL
   - Add tracking for file downloads with filename
