@@ -27,6 +27,7 @@ ConnectiveByteは、「理解されない孤独を吹き飛ばして、AI活用�
 - **Animations**: [Framer Motion](https://www.framer.com/motion/)
 - **Forms**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
 - **Icons**: [Lucide React](https://lucide.dev/)
+- **Analytics**: [Plausible Analytics](https://plausible.io/) (Privacy-friendly)
 - **Testing**: [Jest](https://jestjs.io/), [Playwright](https://playwright.dev/)
 - **Lint/Format**: [ESLint](https://eslint.org/), [Prettier](https://prettier.io/)
 
@@ -67,21 +68,46 @@ git clone https://github.com/nobu007/connective-byte.git
 cd connective-byte
 ```
 
-2. フロントエンドの起動:
+2. 環境変数の設定:
 
 ```bash
 cd apps/frontend
+cp .env.example .env.local
+# .env.localを編集して必要な環境変数を設定
+```
+
+3. フロントエンドの起動:
+
+```bash
 npm install
 npm run dev
 ```
 
-3. バックエンドの起動:
+4. バックエンドの起動:
 
 ```bash
 cd apps/backend
 npm install
 npm run dev
 ```
+
+### 環境変数の設定
+
+フロントエンドアプリケーションでは以下の環境変数を設定できます：
+
+#### 必須設定
+
+- `NEXT_PUBLIC_SITE_URL`: サイトのURL（本番環境で必須）
+- `NEXT_PUBLIC_CONTACT_EMAIL`: お問い合わせ先メールアドレス
+
+#### オプション設定
+
+- `RESEND_API_KEY`: メール送信サービス（Resend）のAPIキー
+- `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`: Plausible Analyticsのドメイン
+- `NEXT_PUBLIC_PLAUSIBLE_API_HOST`: Plausible AnalyticsのAPIホスト（デフォルト: https://plausible.io）
+- `NEXT_PUBLIC_PLAUSIBLE_TRACK_LOCALHOST`: ローカル環境でのトラッキング有効化（開発時のみ）
+
+詳細は `apps/frontend/.env.example` を参照してください。
 
 ## 🚀 デプロイ
 

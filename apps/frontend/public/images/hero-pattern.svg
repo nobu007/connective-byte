@@ -1,0 +1,47 @@
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradient background -->
+    <linearGradient id="heroGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1e3a8a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Dot pattern -->
+    <pattern id="heroDots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="white" opacity="0.1"/>
+    </pattern>
+
+    <!-- Network pattern -->
+    <pattern id="heroNetwork" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
+      <!-- Small nodes -->
+      <circle cx="20" cy="20" r="2" fill="white" opacity="0.15"/>
+      <circle cx="100" cy="50" r="2" fill="white" opacity="0.15"/>
+      <circle cx="180" cy="80" r="2" fill="white" opacity="0.15"/>
+      <circle cx="60" cy="120" r="2" fill="white" opacity="0.15"/>
+      <circle cx="140" cy="160" r="2" fill="white" opacity="0.15"/>
+
+      <!-- Connection lines -->
+      <line x1="20" y1="20" x2="100" y2="50" stroke="white" stroke-width="0.5" opacity="0.1"/>
+      <line x1="100" y1="50" x2="180" y2="80" stroke="white" stroke-width="0.5" opacity="0.1"/>
+      <line x1="60" y1="120" x2="140" y2="160" stroke="white" stroke-width="0.5" opacity="0.1"/>
+      <line x1="100" y1="50" x2="60" y2="120" stroke="white" stroke-width="0.5" opacity="0.1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background gradient -->
+  <rect width="1920" height="1080" fill="url(#heroGradient)"/>
+
+  <!-- Dot pattern overlay -->
+  <rect width="1920" height="1080" fill="url(#heroDots)"/>
+
+  <!-- Network pattern overlay -->
+  <rect width="1920" height="1080" fill="url(#heroNetwork)"/>
+
+  <!-- Subtle geometric shapes for depth -->
+  <g opacity="0.05">
+    <circle cx="300" cy="200" r="150" fill="white"/>
+    <circle cx="1600" cy="800" r="200" fill="white"/>
+    <rect x="800" y="100" width="300" height="300" fill="white" transform="rotate(45 950 250)"/>
+  </g>
+</svg>

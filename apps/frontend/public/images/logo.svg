@@ -1,0 +1,31 @@
+<svg width="180" height="40" viewBox="0 0 180 40" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Icon: Connected nodes representing collective intelligence -->
+  <g>
+    <!-- Central node -->
+    <circle cx="20" cy="20" r="4" fill="url(#logoGradient)"/>
+
+    <!-- Surrounding nodes -->
+    <circle cx="10" cy="12" r="3" fill="#1e3a8a"/>
+    <circle cx="30" cy="12" r="3" fill="#10b981"/>
+    <circle cx="10" cy="28" r="3" fill="#10b981"/>
+    <circle cx="30" cy="28" r="3" fill="#1e3a8a"/>
+
+    <!-- Connection lines -->
+    <line x1="20" y1="20" x2="10" y2="12" stroke="#1e3a8a" stroke-width="1.5" opacity="0.6"/>
+    <line x1="20" y1="20" x2="30" y2="12" stroke="#10b981" stroke-width="1.5" opacity="0.6"/>
+    <line x1="20" y1="20" x2="10" y2="28" stroke="#10b981" stroke-width="1.5" opacity="0.6"/>
+    <line x1="20" y1="20" x2="30" y2="28" stroke="#1e3a8a" stroke-width="1.5" opacity="0.6"/>
+  </g>
+
+  <!-- Text: ConnectiveByte -->
+  <text x="45" y="26" font-family="'Inter', sans-serif" font-size="18" font-weight="700" fill="#1e3a8a">
+    ConnectiveByte
+  </text>
+</svg>

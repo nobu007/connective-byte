@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -40,8 +41,15 @@ export function Navigation() {
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="text-xl font-bold text-[#1e3a8a] hover:text-[#10b981] transition-colors">
-            {siteConfig.name}
+          <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
+            <Image
+              src="/images/logo.svg"
+              alt={siteConfig.name}
+              width={180}
+              height={40}
+              priority
+              className="h-8 w-auto"
+            />
           </Link>
 
           {/* Desktop Navigation */}

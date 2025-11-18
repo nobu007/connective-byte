@@ -21,21 +21,21 @@ export function Hero({ headline, subheadline, ctaText, ctaLink, variant = 'gradi
 
   return (
     <section
-      className={`relative min-h-[90vh] flex items-center justify-center pt-16 ${
+      className={`relative min-h-[90vh] flex items-center justify-center pt-16 overflow-hidden ${
         variant === 'gradient' ? 'bg-gradient-to-br from-[#1e3a8a] via-[#1e3a8a] to-[#10b981]' : 'bg-[#1e3a8a]'
       }`}
       aria-labelledby="hero-heading"
     >
       {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-            backgroundSize: '40px 40px',
-          }}
-        />
-      </div>
+      <div
+        className="absolute inset-0 opacity-100"
+        style={{
+          backgroundImage: 'url(/images/hero-pattern.svg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      />
 
       <Container className="relative z-10">
         <div className="text-center max-w-4xl mx-auto">

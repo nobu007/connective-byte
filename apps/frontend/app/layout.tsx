@@ -22,6 +22,13 @@ export const metadata: Metadata = {
   description: siteConfig.description,
   keywords: ['AI協働', '知的共創', 'コラボレーション', 'スキル開発', 'ConnectiveByte'],
   authors: [{ name: siteConfig.name }],
+  icons: {
+    icon: [
+      { url: '/images/logo-icon.svg', type: 'image/svg+xml' },
+      { url: '/images/logo-icon.svg', sizes: '32x32', type: 'image/svg+xml' },
+    ],
+    apple: [{ url: '/images/logo-icon.svg', sizes: '180x180', type: 'image/svg+xml' }],
+  },
   openGraph: {
     type: 'website',
     locale: 'ja_JP',
@@ -35,6 +42,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: siteConfig.name,
+        type: 'image/jpeg',
       },
     ],
   },
