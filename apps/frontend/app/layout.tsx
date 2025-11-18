@@ -5,6 +5,7 @@ import { Navigation } from '@/components/layout/Navigation';
 import { Footer } from '@/components/layout/Footer';
 import { siteConfig } from '@/content/site-config';
 import { PlausibleProvider } from '@/lib/analytics/PlausibleProvider';
+import { ErrorTracker } from '@/lib/analytics/ErrorTracker';
 import { getAnalyticsConfig } from '@/lib/analytics/config';
 
 const inter = Inter({
@@ -67,6 +68,7 @@ export default function RootLayout({
     <html lang="ja" className={`${inter.variable} ${notoSansJP.variable}`}>
       <body>
         <PlausibleProvider config={analyticsConfig.plausible}>
+          <ErrorTracker />
           <Navigation />
           {children}
           <Footer />

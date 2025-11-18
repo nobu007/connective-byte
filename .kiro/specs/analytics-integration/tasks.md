@@ -41,7 +41,7 @@
   - Test card click events in dashboard
   - _Requirements: 3.3_
 
-- [-] 7. Implement outbound link and download tracking
+- [x] 7. Implement outbound link and download tracking
   - Create useOutboundLinkTracking hook with global click handler
   - Add tracking for outbound links with destination URL
   - Add tracking for file downloads with filename
@@ -50,7 +50,7 @@
   - Add tracking for privacy policy link clicks
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 8. Implement error tracking system
+- [-] 8. Implement error tracking system
   - Create ErrorTracker component with error event listeners
   - Track JavaScript errors with error message and page URL
   - Track unhandled promise rejections
