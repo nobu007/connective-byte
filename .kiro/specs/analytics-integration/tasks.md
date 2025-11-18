@@ -91,14 +91,14 @@
   - Test all tracking events fire correctly
   - _Requirements: 3.1, 3.2, 3.4, 3.5, 6.1, 6.2, 6.3_
 
-- [-] 13. Configure deployment environment variables
+- [x] 13. Configure deployment environment variables
   - Add NEXT_PUBLIC_PLAUSIBLE_DOMAIN to Netlify environment variables
   - Add NEXT_PUBLIC_PLAUSIBLE_API_HOST to Netlify environment variables
   - Update netlify.toml with environment configuration
   - Verify analytics disabled in development, enabled in production
   - _Requirements: 10.1, 10.2, 10.3, 10.4_
 
-- [ ] 14. Create analytics developer documentation
+- [-] 14. Create analytics developer documentation
   - Create docs/analytics.md file
   - Document how to track custom events
   - List available event names and properties
