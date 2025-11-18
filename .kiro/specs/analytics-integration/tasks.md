@@ -98,7 +98,7 @@
   - Verify analytics disabled in development, enabled in production
   - _Requirements: 10.1, 10.2, 10.3, 10.4_
 
-- [-] 14. Create analytics developer documentation
+- [x] 14. Create analytics developer documentation
   - Create docs/analytics.md file
   - Document how to track custom events
   - List available event names and properties
@@ -107,7 +107,7 @@
   - Add troubleshooting section
   - _Requirements: 10.5_
 
-- [ ] 15. Verify analytics implementation
+- [-] 15. Verify analytics implementation
   - Deploy to staging/production environment
   - Verify page views appear in Plausible dashboard within 5 minutes
   - Test contact form submission tracking end-to-end
