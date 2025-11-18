@@ -21,7 +21,7 @@ All core features have been successfully implemented:
 
 ## Remaining Implementation Tasks
 
-- [-] 1. Integrate email service for contact form
+- [x] 1. Integrate email service for contact form
   - Sign up for email service (Resend recommended, or SendGrid)
   - Add RESEND_API_KEY to environment variables
   - Update `/apps/frontend/app/api/contact/route.ts` to send actual emails
@@ -32,7 +32,7 @@ All core features have been successfully implemented:
 
 ## Optional Enhancement Tasks
 
-- [ ]\* 2. Add OG image
+- [x]\* 2. Add OG image
   - Create or design Open Graph image (1200x630px)
   - Save as `/apps/frontend/public/images/og-image.jpg`
   - Verify OG tags display correctly when sharing on social media
@@ -65,7 +65,7 @@ All core features have been successfully implemented:
   - _Requirements: 7.1, 7.2_
   - _Note: Requires deployment to test in production environment_
 
-- [ ]\* 6. Write component unit tests
+- [-]\* 6. Write component unit tests
   - Create tests for Hero, ValueCard, ProblemCard components
   - Create tests for Button, Navigation, Footer components
   - Test component rendering with different props
