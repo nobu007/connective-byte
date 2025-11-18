@@ -59,7 +59,7 @@
   - Add tracking for 404 page views
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-- [-] 9. Implement Core Web Vitals tracking
+- [x] 9. Implement Core Web Vitals tracking
   - Create useWebVitals hook
   - Track Largest Contentful Paint (LCP)
   - Track First Input Delay (FID)
@@ -67,7 +67,7 @@
   - Send performance metrics with page URL and device type
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
 
-- [ ] 10. Configure Plausible dashboard goals and properties
+- [x] 10. Configure Plausible dashboard goals and properties
   - Set up "Contact Form Submission" conversion goal
   - Set up "CTA Click" engagement goal
   - Set up "Newsletter Signup Click" conversion goal (for future use)
@@ -76,7 +76,7 @@
   - Configure custom properties (location, card, url, filename, platform, error, page, metric, value)
   - _Requirements: 2.4, 2.5_
 
-- [ ] 11. Update privacy policy with analytics disclosure
+- [-] 11. Update privacy policy with analytics disclosure
   - Add analytics section to privacy policy page
   - Explain Plausible usage and data collection
   - Link to Plausible's data policy

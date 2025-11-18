@@ -63,16 +63,21 @@ export default function PrivacyPage() {
                 </li>
                 <li>
                   <a href="#section-7" className="hover:underline">
-                    Cookie等の使用
+                    アクセス解析ツール
                   </a>
                 </li>
                 <li>
                   <a href="#section-8" className="hover:underline">
-                    プライバシーポリシーの変更
+                    Cookie等の使用
                   </a>
                 </li>
                 <li>
                   <a href="#section-9" className="hover:underline">
+                    プライバシーポリシーの変更
+                  </a>
+                </li>
+                <li>
+                  <a href="#section-10" className="hover:underline">
                     お問い合わせ
                   </a>
                 </li>
@@ -154,7 +159,55 @@ export default function PrivacyPage() {
 
             {/* Section 7 */}
             <section id="section-7" className="mb-12">
-              <h2 className="text-2xl font-bold text-[#111827] mb-4">7. Cookie等の使用</h2>
+              <h2 className="text-2xl font-bold text-[#111827] mb-4">7. アクセス解析ツール</h2>
+              <p className="text-[#4b5563] leading-relaxed mb-4">
+                当社のウェブサイトでは、サービスの改善とユーザー体験の向上のため、 Plausible
+                Analyticsを使用してアクセス解析を行っています。
+              </p>
+
+              <h3 className="text-xl font-semibold text-[#111827] mb-3 mt-6">Plausible Analyticsについて</h3>
+              <p className="text-[#4b5563] leading-relaxed mb-4">
+                Plausible Analyticsは、プライバシーを重視したアクセス解析ツールです。以下の特徴があります：
+              </p>
+              <ul className="list-disc list-inside space-y-2 text-[#4b5563] ml-4 mb-4">
+                <li>Cookieを使用しません</li>
+                <li>個人を特定できる情報を収集しません</li>
+                <li>ウェブサイトをまたいだトラッキングを行いません</li>
+                <li>IPアドレスは保存前にハッシュ化されます</li>
+                <li>GDPR、CCPA、PECRに準拠しています</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-[#111827] mb-3 mt-6">収集される情報</h3>
+              <p className="text-[#4b5563] leading-relaxed mb-4">以下の情報が匿名化された形で収集されます：</p>
+              <ul className="list-disc list-inside space-y-2 text-[#4b5563] ml-4 mb-4">
+                <li>ページビューとナビゲーションパターン</li>
+                <li>参照元（どこから訪問したか）</li>
+                <li>デバイスタイプとブラウザ</li>
+                <li>地理的位置（国レベルのみ）</li>
+                <li>ページの表示時間とパフォーマンス指標</li>
+              </ul>
+
+              <p className="text-[#4b5563] leading-relaxed mb-4">
+                すべてのデータは匿名化され、集計されます。個々の訪問者を特定することはできません。
+              </p>
+
+              <p className="text-[#4b5563] leading-relaxed">
+                詳細については、
+                <a
+                  href="https://plausible.io/data-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#1e3a8a] hover:underline"
+                >
+                  Plausibleのデータポリシー
+                </a>
+                をご覧ください。
+              </p>
+            </section>
+
+            {/* Section 8 */}
+            <section id="section-8" className="mb-12">
+              <h2 className="text-2xl font-bold text-[#111827] mb-4">8. Cookie等の使用</h2>
               <p className="text-[#4b5563] leading-relaxed">
                 当社のウェブサイトでは、サービスの利便性向上のためCookieを使用することがあります。
                 Cookieの使用を希望されない場合は、ブラウザの設定でCookieを無効にすることができます。
@@ -162,18 +215,18 @@ export default function PrivacyPage() {
               </p>
             </section>
 
-            {/* Section 8 */}
-            <section id="section-8" className="mb-12">
-              <h2 className="text-2xl font-bold text-[#111827] mb-4">8. プライバシーポリシーの変更</h2>
+            {/* Section 9 */}
+            <section id="section-9" className="mb-12">
+              <h2 className="text-2xl font-bold text-[#111827] mb-4">9. プライバシーポリシーの変更</h2>
               <p className="text-[#4b5563] leading-relaxed">
                 当社は、法令の変更や事業内容の変更に伴い、本プライバシーポリシーを変更することがあります。
                 変更後のプライバシーポリシーは、本ページに掲載した時点で効力を生じるものとします。
               </p>
             </section>
 
-            {/* Section 9 */}
-            <section id="section-9" className="mb-12">
-              <h2 className="text-2xl font-bold text-[#111827] mb-4">9. お問い合わせ</h2>
+            {/* Section 10 */}
+            <section id="section-10" className="mb-12">
+              <h2 className="text-2xl font-bold text-[#111827] mb-4">10. お問い合わせ</h2>
               <p className="text-[#4b5563] leading-relaxed mb-4">
                 本プライバシーポリシーに関するお問い合わせは、以下までご連絡ください：
               </p>
@@ -192,7 +245,7 @@ export default function PrivacyPage() {
               <p className="text-sm text-[#9ca3af]">
                 制定日：2024年1月1日
                 <br />
-                最終更新日：2024年1月1日
+                最終更新日：2024年11月19日
               </p>
             </div>
           </article>
