@@ -68,7 +68,7 @@ graph TD
     HOME_SECTIONS --> CTA[CTA Section]
 ```
 
-**Design Rationale**: Flat hierarchy minimizes clicks to conversion. All critical information is accessible within 2 clicks from any page.
+**Design Rationale**: Flat hierarchy minimizes clicks to conversion. All critical information is accessible within 2 clicks from any page. The flat structure (maximum 1 level deep) eliminates the need for breadcrumb navigation as specified in Requirement 8.5, since users can always navigate directly via the main navigation menu.
 
 ## Components and Interfaces
 
@@ -255,13 +255,20 @@ interface NavigationProps {
 
 // Features:
 // - Sticky header on scroll
-// - Mobile hamburger menu
-// - Active page highlighting
+// - Mobile hamburger menu (Requirement 5.2)
+// - Active page highlighting (Requirement 8.3)
 // - Smooth scroll to sections
 // - Logo with link to home
 ```
 
-**Design Rationale**: Sticky navigation ensures CTA is always accessible. Mobile menu uses slide-in drawer pattern for familiarity.
+**Navigation Links** (Requirement 8.1):
+
+- Home (/)
+- About (/about)
+- Contact (/contact)
+- Services link omitted from Phase 1 MVP (can be added in Phase 2)
+
+**Design Rationale**: Sticky navigation ensures CTA is always accessible. Mobile menu uses slide-in drawer pattern for familiarity. The navigation provides consistent access across all pages (Requirement 8.2) with clear visual indication of the current page (Requirement 8.3).
 
 #### 6. Footer Component (Requirement 8)
 
@@ -277,8 +284,10 @@ interface FooterProps {
 // - Social media links with icons
 // - Legal links (Privacy Policy, Terms)
 // - Newsletter signup (optional Phase 2)
-// - Subtle philosophical tagline
+// - Subtle philosophical tagline (Requirement 3.4)
 ```
+
+**Design Rationale**: The footer includes a subtle philosophical tagline (e.g., "個を超え、知が立ち上がる場所" - "Where knowledge emerges beyond the individual") to satisfy Requirement 3.4, providing a hint of the deeper Third Reality philosophy without overwhelming practical-focused visitors.
 
 #### 7. CTA Section Component (Requirement 1, 4)
 
@@ -377,15 +386,16 @@ interface ContactContent {
 
 **Content**:
 
-- Headline: "個を超え、知が立ち上がる場所" (Large, bold, animated entrance)
-- Subheadline: "AI時代の知的共創圏 ConnectiveByte" (Medium, lighter weight)
-- CTA Button: "無料相談に申し込む" (Prominent, bright orange, hover animation)
+- Headline: "個を超え、知が立ち上がる場所" (Large, bold, animated entrance) - Subtle philosophical reference (Requirement 3.3)
+- Subheadline: "AI時代の知的共創圏 ConnectiveByte" (Medium, lighter weight) - Practical positioning for B1 layer
+- CTA Button: "無料相談に申し込む" (Prominent, bright orange, hover animation) - Clear action (Requirement 1.2)
 
-**Animations**:
+**Animations** (Requirement 1.5):
 
 - Headline: Fade in + slide up (0.6s delay)
 - Subheadline: Fade in + slide up (0.8s delay)
 - CTA: Fade in + scale (1.0s delay)
+- Total animation sequence completes within 1.5s to meet 2-second load time target for Hero Section
 
 #### Section 2: Problem Statement
 
@@ -452,7 +462,7 @@ interface ContactContent {
 - Large number display with animation
 - Subtle background pattern
 
-#### Section 5: Final CTA
+#### Section 5: Final CTA (Requirement 4.5)
 
 **Layout**:
 
@@ -476,6 +486,13 @@ interface ContactContent {
 - Step numbers in circles
 - CTA button with white background, brand color text
 
+**CTA Strategy** (Requirement 4.5): The homepage includes at least two prominent CTA elements linking to the Contact page:
+
+1. Hero section CTA (above the fold)
+2. Final CTA section (bottom of page)
+
+This dual-CTA approach ensures conversion opportunities at both initial engagement and after value proposition presentation.
+
 ### About Page Design (Requirement 3)
 
 **Layout**:
@@ -486,16 +503,17 @@ interface ContactContent {
 
 **Sections**:
 
-1. **Introduction**: Company story and mission
-2. **Philosophy**: "第三の実在" concept explained accessibly
-3. **Vision**: Future direction and goals
+1. **Introduction**: Company story and mission (Practical - B1 Layer)
+2. **Philosophy**: "第三の実在" (Third Reality) concept explained accessibly (Intellectual Layer)
+3. **Vision**: Future direction and goals (Practical - B1 Layer)
 
-**Content Strategy**:
+**Content Strategy (Requirement 3.5)**:
 
-- 70% practical (what we do, how we help)
-- 30% philosophical (why it matters, deeper meaning)
+- 70% practical (what we do, how we help) - Sections 1 & 3
+- 30% philosophical (why it matters, deeper meaning) - Section 2
 - Avoid jargon, use concrete examples
 - Include visual diagrams if helpful
+- Philosophy section uses accessible language to introduce Third Reality concept without overwhelming B1 layer visitors
 
 **Visual Treatment**:
 
@@ -503,6 +521,7 @@ interface ContactContent {
 - Ample whitespace
 - Pull quotes for key concepts
 - Subtle accent colors for emphasis
+- Philosophical content visually distinguished with subtle styling (e.g., background tint, border accent) per Requirement 3.3
 
 ### Contact Page Design (Requirement 4)
 
@@ -590,6 +609,24 @@ const breakpoints = {
 - Hover effects
 - Larger hero sections
 - Side-by-side layouts
+
+### Browser Compatibility (Requirement 5.5)
+
+**Supported Browsers**:
+
+- iOS Safari 14+ (released September 2020)
+- Android Chrome 90+ (released April 2021)
+- Desktop browsers (Chrome, Firefox, Safari, Edge) released within past 2 years from current date
+
+**Testing Strategy**:
+
+- Use BrowserStack or similar for cross-browser testing
+- Test on real devices when possible
+- Use progressive enhancement for advanced features
+- Provide fallbacks for older browsers
+- Next.js automatically handles browser compatibility with appropriate polyfills
+
+**Design Rationale**: Browser support targets cover 95%+ of users while allowing use of modern web features. Next.js build process automatically handles transpilation and polyfills for target browsers, ensuring Requirement 5.5 compliance without additional configuration.
 
 ## Performance Optimization (Requirement 7)
 
@@ -887,20 +924,32 @@ const Modal = ({ isOpen, onClose, children }) => {
 }
 ```
 
-### Content Update Process
+### Content Update Process (Requirement 6.3)
 
 **For Non-Technical Users**:
 
 1. Edit JSON files in `/content` directory
-2. Validate JSON syntax (use online validator)
+2. Validate JSON syntax (use online validator like jsonlint.com)
 3. Commit changes to Git
 4. Automatic deployment via CI/CD
+
+**Documentation** (Requirement 6.3):
+
+A content update guide will be provided in the repository documenting:
+
+- Location of content files (`content/homepage.json`, `content/about.json`, etc.)
+- JSON structure and required fields
+- How to update text, links, and configuration
+- Validation and testing procedures
+- Deployment process
 
 **For Future CMS Integration**:
 
 - Structure supports easy migration to headless CMS
 - Content types map to CMS content models
 - API layer can be added without component changes
+
+**Design Rationale**: Separating content into JSON files (Requirement 6.1, 6.2) allows non-technical administrators to update website content without modifying component code (Requirement 6.4), reducing maintenance complexity and risk of introducing bugs.
 
 ### Environment-Specific Content
 
@@ -1213,6 +1262,51 @@ NEXT_PUBLIC_CONTACT_EMAIL=info@connectivebyte.com
 RESEND_API_KEY=re_xxxxx
 ```
 
+## Dual-Layer Content Strategy Implementation (Requirements 2, 3)
+
+The website implements a sophisticated dual-layer approach to serve both B1 (business-focused) and intellectual audiences:
+
+### Content Distribution Across Site
+
+**Homepage (90% Practical / 10% Philosophical)**:
+
+- Hero headline subtly references philosophy: "個を超え、知が立ち上がる場所"
+- All other sections focus on practical benefits and solutions
+- Philosophical depth accessible through About page link
+
+**About Page (50% Practical / 50% Philosophical)**:
+
+- Introduction section: Company story and mission (practical)
+- Philosophy section: Third Reality concept explained accessibly
+- Vision section: Future direction and goals (practical)
+
+**Overall Site Balance (70% Practical / 30% Philosophical)** (Requirement 3.5):
+
+- Homepage (primary traffic): 90% practical
+- About page (interested visitors): 50% philosophical
+- Contact page: 100% practical
+- Footer tagline: Subtle philosophical reference
+- Weighted average favors practical content while providing depth for those who seek it
+
+### Design Elements Supporting Dual-Layer Strategy
+
+**B1 Layer (Practical) Elements**:
+
+- Clear problem statements (Requirement 2.1)
+- Concrete value propositions (Requirement 2.2)
+- Business-focused language (Requirement 2.4)
+- Prominent CTAs for consultation
+- Version 0 program information (Requirement 2.5)
+
+**Intellectual Layer Elements**:
+
+- Philosophical tagline in footer (Requirement 3.4)
+- Third Reality concept on About page (Requirement 3.1, 3.2)
+- Subtle design references to connectivity and emergence (Requirement 3.3)
+- Accessible philosophical language avoiding jargon (Requirement 3.2)
+
+**Design Rationale**: This approach ensures practical visitors get immediate value while intellectually curious visitors can discover deeper meaning. The homepage prioritizes conversion (practical focus) while the About page provides philosophical depth for those who seek it, achieving the required 70/30 balance across the entire site.
+
 ## Design Principles Summary
 
 ### 1. Clarity Over Cleverness
@@ -1254,8 +1348,8 @@ RESEND_API_KEY=re_xxxxx
 
 - Surface layer: Practical, business-focused
 - Deep layer: Philosophical, intellectual
-- 70/30 ratio favoring practical
-- Subtle hints at deeper meaning
+- 70/30 ratio favoring practical (implemented across site)
+- Subtle hints at deeper meaning for discovery
 
 ### 7. Conversion-Focused
 
