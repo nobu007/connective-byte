@@ -81,7 +81,7 @@ All core features have been successfully implemented:
   - _Requirements: 4.3, 4.4_
   - _Note: Form validation schema exists, needs test coverage_
 
-- [-]\* 8. Enhance E2E test coverage
+- [x]\* 8. Enhance E2E test coverage
   - Add Playwright test for contact form submission flow
   - Add test for navigation across all pages
   - Add visual regression tests for About and Contact pages
