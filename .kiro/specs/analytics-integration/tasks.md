@@ -28,14 +28,14 @@
   - Test events appear in Plausible dashboard
   - _Requirements: 2.1, 2.2, 2.4_
 
-- [-] 5. Implement scroll-based engagement tracking
+- [x] 5. Implement scroll-based engagement tracking
   - Create useScrollTracking hook with IntersectionObserver
   - Add tracking to Value Propositions section view
   - Add tracking to Social Proof section view
   - Implement scroll depth tracking
   - _Requirements: 3.1, 3.2, 3.4, 3.5_
 
-- [ ] 6. Implement click tracking for value proposition cards
+- [-] 6. Implement click tracking for value proposition cards
   - Add click event handlers to value card components
   - Track which card was clicked with event properties
   - Test card click events in dashboard

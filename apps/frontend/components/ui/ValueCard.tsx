@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import * as Icons from 'lucide-react';
 import { Check } from 'lucide-react';
 import { Card } from './Card';
+import { useTrackEvent } from '@/lib/analytics/useTrackEvent';
 import type { ValueCard as ValueCardType } from '@/types/content';
 
 interface ValueCardProps extends ValueCardType {
@@ -33,8 +34,13 @@ const colorClasses: Record<string, { bg: string; icon: string; border: string; t
 };
 
 export function ValueCard({ icon, title, subtitle, description, benefits, color, index }: ValueCardProps) {
+  const trackEvent = useTrackEvent();
   const IconComponent = Icons[icon as keyof typeof Icons] as React.ComponentType<{ size?: number; className?: string }>;
   const colors = colorClasses[color];
+
+  const handleCardClick = () => {
+    trackEvent('Value Card Click', { card: title });
+  };
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -48,6 +54,8 @@ export function ValueCard({ icon, title, subtitle, description, benefits, color,
       whileInView="animate"
       viewport={{ once: true, margin: '-50px' }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
+      onClick={handleCardClick}
+      className="cursor-pointer"
     >
       <Card className={`border-t-4 ${colors.border} h-full`}>
         <div className="flex flex-col h-full">
