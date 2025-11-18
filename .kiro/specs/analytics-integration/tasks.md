@@ -107,7 +107,7 @@
   - Add troubleshooting section
   - _Requirements: 10.5_
 
-- [-] 15. Verify analytics implementation
+- [x] 15. Verify analytics implementation
   - Deploy to staging/production environment
   - Verify page views appear in Plausible dashboard within 5 minutes
   - Test contact form submission tracking end-to-end
@@ -122,7 +122,7 @@
   - Verify traffic source tracking and UTM parameters
   - _Requirements: 1.3, 1.5, 7.1, 8.5, 9.1, 9.2, 9.3, 9.4, 9.5_
 
-- [ ] 16. Performance audit and optimization
+- [x] 16. Performance audit and optimization
   - Run Lighthouse audit on all pages
   - Verify analytics script loads asynchronously
   - Measure page load time impact (<50ms increase)
