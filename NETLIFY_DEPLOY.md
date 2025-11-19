@@ -38,6 +38,7 @@ NEXT_PUBLIC_CONTACT_EMAIL=info@connectivebyte.com
 
 # メール送信サービス（Resend）
 RESEND_API_KEY=re_your_api_key_here
+RESEND_AUDIENCE_ID=your_audience_id_here
 ```
 
 #### アナリティクス設定（推奨）
@@ -58,7 +59,10 @@ NEXT_PUBLIC_PLAUSIBLE_API_HOST=https://plausible.io
 4. 変数名と値を入力
 5. 「Create variable」をクリック
 
-詳細な設定方法は[Plausible Setup Guide](apps/frontend/docs/plausible-setup.md)を参照してください。
+詳細な設定方法は以下のガイドを参照してください：
+
+- [Plausible Setup Guide](apps/frontend/docs/plausible-setup.md)
+- [Newsletter Setup Guide](docs/newsletter-setup.md)
 
 ### 5. デプロイの実行
 
@@ -175,7 +179,11 @@ GitHubの private リポジトリの場合：
   - [ ] `NEXT_PUBLIC_SITE_URL`
   - [ ] `NEXT_PUBLIC_CONTACT_EMAIL`
   - [ ] `RESEND_API_KEY`（メール送信用）
+  - [ ] `RESEND_AUDIENCE_ID`（ニュースレター用）
   - [ ] `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`（アナリティクス用）
+- [ ] Resendアカウントの設定（ニュースレターを使用する場合）
+  - [ ] オーディエンスの作成
+  - [ ] 送信ドメインの認証
 - [ ] Plausible Analyticsアカウントの設定（アナリティクスを使用する場合）
 - [ ] カスタムドメインの設定（必要な場合）
 - [ ] デプロイ後の動作確認
@@ -192,6 +200,7 @@ GitHubの private リポジトリの場合：
 4. ✅ レスポンシブデザインが機能しているか
 5. ✅ SEO設定（メタタグなど）が正しいか
 6. ✅ お問い合わせフォームが動作するか
-7. ✅ アナリティクスが正しく動作しているか（Plausibleダッシュボードで確認）
+7. ✅ ニュースレター登録フォームが動作するか
+8. ✅ アナリティクスが正しく動作しているか（Plausibleダッシュボードで確認）
 
 Happy Deploying! 🚀

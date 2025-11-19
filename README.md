@@ -16,6 +16,7 @@ ConnectiveByteは、「理解されない孤独を吹き飛ばして、AI活用�
 - **拡張性**: モジュラー設計による容易な機能拡張
 - **保守性**: クリーンアーキテクチャと明確な責務分離による高い保守性
 - **アクセシビリティ**: WCAG 2.1 Level AA準拠の包括的なアクセシビリティ
+- **ニュースレター**: Resendを使用した高品質なメール配信システム
 
 ## 🛠️ 技術スタック
 
@@ -27,6 +28,7 @@ ConnectiveByteは、「理解されない孤独を吹き飛ばして、AI活用�
 - **Animations**: [Framer Motion](https://www.framer.com/motion/)
 - **Forms**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
 - **Icons**: [Lucide React](https://lucide.dev/)
+- **Email**: [Resend](https://resend.com/) + [React Email](https://react.email/)
 - **Analytics**: [Plausible Analytics](https://plausible.io/) (Privacy-friendly)
 - **Testing**: [Jest](https://jestjs.io/), [Playwright](https://playwright.dev/)
 - **Lint/Format**: [ESLint](https://eslint.org/), [Prettier](https://prettier.io/)
@@ -103,6 +105,7 @@ npm run dev
 #### オプション設定
 
 - `RESEND_API_KEY`: メール送信サービス（Resend）のAPIキー
+- `RESEND_AUDIENCE_ID`: Resendのオーディエンス（ニュースレター購読者リスト）ID
 - `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`: Plausible Analyticsのドメイン
 - `NEXT_PUBLIC_PLAUSIBLE_API_HOST`: Plausible AnalyticsのAPIホスト（デフォルト: https://plausible.io）
 - `NEXT_PUBLIC_PLAUSIBLE_TRACK_LOCALHOST`: ローカル環境でのトラッキング有効化（開発時のみ）
