@@ -17,7 +17,7 @@
   - Export TypeScript types
   - _Requirements: 7.1, 7.3, 7.4, 9.2_
 
-- [-] 3. Implement rate limiting utility
+- [x] 3. Implement rate limiting utility
   - Create lib/rate-limit.ts
   - Implement in-memory rate limiting (3 requests per hour per IP)
   - Add cleanup for expired entries
@@ -25,7 +25,7 @@
   - Add logging for rate limit violations
   - _Requirements: 9.1_
 
-- [ ] 4. Create welcome email template
+- [-] 4. Create welcome email template
   - Install @react-email/components if not already installed
   - Create emails/WelcomeEmail.tsx
   - Design email layout with ConnectiveByte branding
