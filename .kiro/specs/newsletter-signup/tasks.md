@@ -34,7 +34,7 @@
   - Style email for responsive display
   - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-- [-] 5. Implement newsletter API route
+- [x] 5. Implement newsletter API route
   - Create app/api/newsletter/route.ts
   - Implement POST handler with rate limiting
   - Add request validation using Zod schema
@@ -45,7 +45,7 @@
   - Return appropriate status codes and messages
   - _Requirements: 1.4, 1.5, 5.1, 5.2, 5.3, 5.4, 5.5, 9.3, 9.4_
 
-- [ ] 6. Create newsletter signup form component
+- [-] 6. Create newsletter signup form component
   - Create components/forms/NewsletterSignupForm.tsx
   - Implement form with React Hook Form + Zod
   - Add email field (required)
