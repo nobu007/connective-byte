@@ -45,7 +45,7 @@
   - Return appropriate status codes and messages
   - _Requirements: 1.4, 1.5, 5.1, 5.2, 5.3, 5.4, 5.5, 9.3, 9.4_
 
-- [-] 6. Create newsletter signup form component
+- [x] 6. Create newsletter signup form component
   - Create components/forms/NewsletterSignupForm.tsx
   - Implement form with React Hook Form + Zod
   - Add email field (required)
@@ -58,7 +58,7 @@
   - Integrate analytics tracking
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 2.3, 6.1, 6.2, 7.2, 7.5, 8.1, 8.2_
 
-- [ ] 7. Add newsletter section to footer
+- [-] 7. Add newsletter section to footer
   - Update components/layout/Footer.tsx
   - Add newsletter section with heading and description
   - Integrate NewsletterSignupForm component

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Twitter } from 'lucide-react';
 import { siteConfig } from '@/content/site-config';
 import { Container } from './Container';
+import { NewsletterSignupForm } from '@/components/forms/NewsletterSignupForm';
 
 export function Footer() {
   return (
@@ -64,6 +65,17 @@ export function Footer() {
                 </li>
               ))}
             </ul>
+          </div>
+        </div>
+
+        {/* Newsletter Section */}
+        <div className="mt-12 pt-8 border-t border-[#374151]">
+          <div className="max-w-md mx-auto text-center">
+            <h3 className="text-xl font-bold text-white mb-2">ニュースレター登録</h3>
+            <p className="text-[#9ca3af] text-sm mb-6">
+              AI時代の協創リーダーシップに関する最新情報をお届けします（月1-2回程度）
+            </p>
+            <NewsletterSignupForm variant="footer" />
           </div>
         </div>
 
