@@ -8,7 +8,7 @@
   - Document environment variables in .env.example
   - _Requirements: 5.1, 5.2_
 
-- [-] 2. Create newsletter validation schema
+- [x] 2. Create newsletter validation schema
   - Create lib/validation/newsletter-schema.ts
   - Implement Zod schema with email, name, consent fields
   - Add honeypot field (website) for bot detection
@@ -17,7 +17,7 @@
   - Export TypeScript types
   - _Requirements: 7.1, 7.3, 7.4, 9.2_
 
-- [ ] 3. Implement rate limiting utility
+- [-] 3. Implement rate limiting utility
   - Create lib/rate-limit.ts
   - Implement in-memory rate limiting (3 requests per hour per IP)
   - Add cleanup for expired entries
