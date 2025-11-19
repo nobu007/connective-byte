@@ -30,7 +30,7 @@ export default function PrivacyPage() {
             {/* Table of Contents */}
             <nav className="bg-[#f9fafb] rounded-lg p-6 mb-12">
               <h2 className="text-xl font-bold text-[#111827] mb-4">目次</h2>
-              <ol className="space-y-2 list-decimal list-inside text-[#1e3a8a]">
+              <ol className="space-y-2 list-decimal list-inside text-primary-deep-blue">
                 <li>
                   <a href="#section-1" className="hover:underline">
                     個人情報の定義
@@ -63,21 +63,26 @@ export default function PrivacyPage() {
                 </li>
                 <li>
                   <a href="#section-7" className="hover:underline">
-                    アクセス解析ツール
+                    ニュースレター
                   </a>
                 </li>
                 <li>
                   <a href="#section-8" className="hover:underline">
-                    Cookie等の使用
+                    アクセス解析ツール
                   </a>
                 </li>
                 <li>
                   <a href="#section-9" className="hover:underline">
-                    プライバシーポリシーの変更
+                    Cookie等の使用
                   </a>
                 </li>
                 <li>
                   <a href="#section-10" className="hover:underline">
+                    プライバシーポリシーの変更
+                  </a>
+                </li>
+                <li>
+                  <a href="#section-11" className="hover:underline">
                     お問い合わせ
                   </a>
                 </li>
@@ -103,6 +108,7 @@ export default function PrivacyPage() {
               </p>
               <ul className="list-disc list-inside space-y-2 text-[#4b5563] ml-4">
                 <li>お問い合わせフォームからの送信</li>
+                <li>ニュースレター登録フォームからの送信</li>
                 <li>メールでのお問い合わせ</li>
                 <li>サービス利用時の登録</li>
                 <li>アンケートやキャンペーンへの参加</li>
@@ -115,6 +121,7 @@ export default function PrivacyPage() {
               <p className="text-[#4b5563] leading-relaxed mb-4">当社は、収集した個人情報を以下の目的で利用します：</p>
               <ul className="list-disc list-inside space-y-2 text-[#4b5563] ml-4">
                 <li>お問い合わせへの対応</li>
+                <li>ニュースレターの配信</li>
                 <li>サービスの提供・運営</li>
                 <li>サービスに関する情報のご案内</li>
                 <li>サービスの改善・新サービスの開発</li>
@@ -159,7 +166,76 @@ export default function PrivacyPage() {
 
             {/* Section 7 */}
             <section id="section-7" className="mb-12">
-              <h2 className="text-2xl font-bold text-[#111827] mb-4">7. アクセス解析ツール</h2>
+              <h2 className="text-2xl font-bold text-[#111827] mb-4">7. ニュースレター</h2>
+              <p className="text-[#4b5563] leading-relaxed mb-4">
+                当社は、ニュースレター配信サービスを提供しています。ニュースレターに登録される際、以下の情報を収集します：
+              </p>
+
+              <h3 className="text-xl font-semibold text-[#111827] mb-3 mt-6">収集する情報</h3>
+              <ul className="list-disc list-inside space-y-2 text-[#4b5563] ml-4 mb-4">
+                <li>メールアドレス（必須）</li>
+                <li>お名前（任意）</li>
+                <li>登録日時</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-[#111827] mb-3 mt-6">情報の利用目的</h3>
+              <p className="text-[#4b5563] leading-relaxed mb-4">収集した情報は、以下の目的でのみ使用します：</p>
+              <ul className="list-disc list-inside space-y-2 text-[#4b5563] ml-4 mb-4">
+                <li>ニュースレターの配信</li>
+                <li>サービスに関する重要なお知らせの送信</li>
+                <li>配信内容の改善とパーソナライゼーション</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-[#111827] mb-3 mt-6">第三者サービスの利用</h3>
+              <p className="text-[#4b5563] leading-relaxed mb-4">
+                ニュースレターの配信には、Resend（
+                <a
+                  href="https://resend.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary-deep-blue hover:underline"
+                >
+                  https://resend.com
+                </a>
+                ）を使用しています。お客様の情報は、Resendのプライバシーポリシー（
+                <a
+                  href="https://resend.com/legal/privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary-deep-blue hover:underline"
+                >
+                  https://resend.com/legal/privacy-policy
+                </a>
+                ）に従って管理されます。
+              </p>
+
+              <h3 className="text-xl font-semibold text-[#111827] mb-3 mt-6">配信停止（登録解除）</h3>
+              <p className="text-[#4b5563] leading-relaxed mb-4">
+                ニュースレターの配信停止は、いつでも可能です。以下の方法で登録を解除できます：
+              </p>
+              <ul className="list-disc list-inside space-y-2 text-[#4b5563] ml-4 mb-4">
+                <li>各ニュースレターに記載されている配信停止リンクをクリック</li>
+                <li>
+                  配信停止ページ（
+                  <a href="/unsubscribe" className="text-primary-deep-blue hover:underline">
+                    /unsubscribe
+                  </a>
+                  ）から手続き
+                </li>
+                <li>
+                  お問い合わせ（
+                  <a href="mailto:info@connectivebyte.com" className="text-primary-deep-blue hover:underline">
+                    info@connectivebyte.com
+                  </a>
+                  ）による依頼
+                </li>
+              </ul>
+              <p className="text-[#4b5563] leading-relaxed">配信停止後、お客様の情報は速やかに削除されます。</p>
+            </section>
+
+            {/* Section 8 */}
+            <section id="section-8" className="mb-12">
+              <h2 className="text-2xl font-bold text-[#111827] mb-4">8. アクセス解析ツール</h2>
               <p className="text-[#4b5563] leading-relaxed mb-4">
                 当社のウェブサイトでは、サービスの改善とユーザー体験の向上のため、 Plausible
                 Analyticsを使用してアクセス解析を行っています。
@@ -197,7 +273,7 @@ export default function PrivacyPage() {
                   href="https://plausible.io/data-policy"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#1e3a8a] hover:underline"
+                  className="text-primary-deep-blue hover:underline"
                 >
                   Plausibleのデータポリシー
                 </a>
@@ -205,9 +281,9 @@ export default function PrivacyPage() {
               </p>
             </section>
 
-            {/* Section 8 */}
-            <section id="section-8" className="mb-12">
-              <h2 className="text-2xl font-bold text-[#111827] mb-4">8. Cookie等の使用</h2>
+            {/* Section 9 */}
+            <section id="section-9" className="mb-12">
+              <h2 className="text-2xl font-bold text-[#111827] mb-4">9. Cookie等の使用</h2>
               <p className="text-[#4b5563] leading-relaxed">
                 当社のウェブサイトでは、サービスの利便性向上のためCookieを使用することがあります。
                 Cookieの使用を希望されない場合は、ブラウザの設定でCookieを無効にすることができます。
@@ -215,18 +291,18 @@ export default function PrivacyPage() {
               </p>
             </section>
 
-            {/* Section 9 */}
-            <section id="section-9" className="mb-12">
-              <h2 className="text-2xl font-bold text-[#111827] mb-4">9. プライバシーポリシーの変更</h2>
+            {/* Section 10 */}
+            <section id="section-10" className="mb-12">
+              <h2 className="text-2xl font-bold text-[#111827] mb-4">10. プライバシーポリシーの変更</h2>
               <p className="text-[#4b5563] leading-relaxed">
                 当社は、法令の変更や事業内容の変更に伴い、本プライバシーポリシーを変更することがあります。
                 変更後のプライバシーポリシーは、本ページに掲載した時点で効力を生じるものとします。
               </p>
             </section>
 
-            {/* Section 10 */}
-            <section id="section-10" className="mb-12">
-              <h2 className="text-2xl font-bold text-[#111827] mb-4">10. お問い合わせ</h2>
+            {/* Section 11 */}
+            <section id="section-11" className="mb-12">
+              <h2 className="text-2xl font-bold text-[#111827] mb-4">11. お問い合わせ</h2>
               <p className="text-[#4b5563] leading-relaxed mb-4">
                 本プライバシーポリシーに関するお問い合わせは、以下までご連絡ください：
               </p>
@@ -234,7 +310,7 @@ export default function PrivacyPage() {
                 <p className="text-[#111827] font-semibold mb-2">ConnectiveByte</p>
                 <p className="text-[#4b5563]">
                   Email:{' '}
-                  <a href="mailto:info@connectivebyte.com" className="text-[#1e3a8a] hover:underline">
+                  <a href="mailto:info@connectivebyte.com" className="text-primary-deep-blue hover:underline">
                     info@connectivebyte.com
                   </a>
                 </p>
