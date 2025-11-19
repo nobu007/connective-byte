@@ -1,6 +1,6 @@
 # Implementation Plan
 
-- [-] 1. Set up email service configuration
+- [x] 1. Set up email service configuration
   - Install @react-email/components package
   - Add RESEND_AUDIENCE_ID environment variable to .env.local
   - Create Resend audience in dashboard
@@ -8,7 +8,7 @@
   - Document environment variables in .env.example
   - _Requirements: 5.1, 5.2_
 
-- [ ] 2. Create newsletter validation schema
+- [-] 2. Create newsletter validation schema
   - Create lib/validation/newsletter-schema.ts
   - Implement Zod schema with email, name, consent fields
   - Add honeypot field (website) for bot detection
