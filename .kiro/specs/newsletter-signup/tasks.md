@@ -25,7 +25,7 @@
   - Add logging for rate limit violations
   - _Requirements: 9.1_
 
-- [-] 4. Create welcome email template
+- [x] 4. Create welcome email template
   - Install @react-email/components if not already installed
   - Create emails/WelcomeEmail.tsx
   - Design email layout with ConnectiveByte branding
@@ -34,7 +34,7 @@
   - Style email for responsive display
   - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-- [ ] 5. Implement newsletter API route
+- [-] 5. Implement newsletter API route
   - Create app/api/newsletter/route.ts
   - Implement POST handler with rate limiting
   - Add request validation using Zod schema
