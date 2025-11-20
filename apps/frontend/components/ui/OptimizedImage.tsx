@@ -16,7 +16,6 @@ interface OptimizedImageProps {
 export function OptimizedImage({ src, alt, width, height, className = '', priority = false }: OptimizedImageProps) {
   // Extract base path without extension
   const basePath = src.replace(/\.(jpg|jpeg|png)$/i, '');
-  const extension = src.match(/\.(jpg|jpeg|png)$/i)?.[0] || '.jpg';
 
   return (
     <picture>

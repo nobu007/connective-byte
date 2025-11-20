@@ -39,7 +39,7 @@ export function useTrackEvent() {
     (eventName: EventName, properties?: EventProperties) => {
       // Filter out undefined values
       const cleanProps = properties
-        ? Object.fromEntries(Object.entries(properties).filter(([_, v]) => v !== undefined))
+        ? Object.fromEntries(Object.entries(properties).filter(([, value]) => value !== undefined))
         : undefined;
 
       trackEvent(eventName, cleanProps as Record<string, string | number>);

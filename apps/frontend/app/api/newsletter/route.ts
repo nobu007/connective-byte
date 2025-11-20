@@ -71,9 +71,10 @@ export async function POST(request: NextRequest) {
       });
 
       console.log('Newsletter subscriber added:', { email, name: name || 'N/A' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Check if already subscribed
-      if (error?.message?.includes('already exists') || error?.message?.includes('Contact already exists')) {
+      const message = error instanceof Error ? error.message : '';
+      if (message.includes('already exists') || message.includes('Contact already exists')) {
         console.log('Newsletter subscriber already exists:', email);
         // Still send welcome email and return success
       } else {
