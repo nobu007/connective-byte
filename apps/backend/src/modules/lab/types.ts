@@ -39,6 +39,7 @@ export interface APIRequest {
 
 export interface APIResponse {
   content: string;
+  model: string;
   tokens: TokenBreakdown;
   cost: number;
   latencyMs: number;
