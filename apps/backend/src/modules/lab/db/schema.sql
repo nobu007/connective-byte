@@ -32,12 +32,16 @@ CREATE INDEX IF NOT EXISTS idx_lab_api_calls_occurred_at ON lab_api_calls (occur
 CREATE TABLE IF NOT EXISTS lab_baselines (
   id UUID PRIMARY KEY,
   experiment_id UUID NOT NULL REFERENCES lab_experiments(id) ON DELETE CASCADE,
+  scenario VARCHAR(64) NOT NULL DEFAULT 'default',
   average_cost NUMERIC(12, 6) NOT NULL,
   total_tokens BIGINT NOT NULL,
   average_latency_ms INTEGER NOT NULL,
   call_count INTEGER NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_lab_baselines_experiment_scenario
+  ON lab_baselines (experiment_id, scenario);
 
 CREATE TABLE IF NOT EXISTS lab_user_progress (
   user_id UUID PRIMARY KEY,

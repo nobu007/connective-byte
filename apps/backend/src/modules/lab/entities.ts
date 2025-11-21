@@ -33,6 +33,7 @@ export interface APICallRecord {
 export interface Baseline {
   id: string;
   experimentId: string;
+  scenario: string;
   averageCost: number;
   totalTokens: number;
   averageLatencyMs: number;
