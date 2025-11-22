@@ -18,6 +18,8 @@ export * from './security/APIKeyManager';
 // Gateway
 export * from './gateway/APIGateway';
 export * from './gateway/adapters/OpenAIAdapter';
+export * from './gateway/adapters/AnthropicAdapter';
+export * from './gateway/adapters/GoogleAIAdapter';
 
 // Cost tracking
 export * from './cost/CostTracker';
@@ -33,11 +35,13 @@ export * from './optimization/PromptCompressor';
 export * from './optimization/CachingStrategy';
 export * from './optimization/BatchProcessor';
 export * from './optimization/StrategyRegistry';
+export * from './optimization/PromptOptimizer';
 
 // Simulation
 export * from './simulation/types';
 export * from './simulation/UsageSimulator';
 export * from './simulation/ScaleCalculator';
+export * from './simulation/CostProjector';
 
 // Digital Twin
 export * from './digital-twin/types';
@@ -65,6 +69,7 @@ export * from './providers/ProviderComparison';
 export * from './reports/types';
 export * from './reports/ReportBuilder';
 export * from './reports/ExportManager';
+export * from './reports/VisualizationGenerator';
 
 // Database
 export * from './db/client';
