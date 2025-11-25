@@ -48,6 +48,10 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  // Note: Servers should be running before tests (npm run dev in both apps/backend and apps/frontend)
-  // webServer configuration disabled to avoid process exit issues
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120000,
+  },
 });
