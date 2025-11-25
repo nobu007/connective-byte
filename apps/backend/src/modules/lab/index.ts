@@ -26,6 +26,7 @@ export * from './cost/CostTracker';
 export * from './cost/BaselineManager';
 export * from './cost/TokenAnalyzer';
 export * from './cost/OptimizationSuggester';
+export * from './cost/TokenVisualizer';
 export * from './cost/pricing';
 
 // Optimization
