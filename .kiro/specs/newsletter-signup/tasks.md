@@ -58,7 +58,7 @@
   - Integrate analytics tracking
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 2.3, 6.1, 6.2, 7.2, 7.5, 8.1, 8.2_
 
-- [-] 7. Add newsletter section to footer
+- [x] 7. Add newsletter section to footer
   - Update components/layout/Footer.tsx
   - Add newsletter section with heading and description
   - Integrate NewsletterSignupForm component
@@ -67,14 +67,14 @@
   - Test on mobile and desktop
   - _Requirements: 1.1, 2.4, 2.5_
 
-- [ ] 8. Configure analytics tracking
+- [x] 8. Configure analytics tracking
   - Add "Newsletter Signup Click" to Plausible goals
   - Configure custom property: location (footer, inline, popup)
   - Test event tracking in development
   - Verify events appear in Plausible dashboard
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
 
-- [ ] 9. Update privacy policy
+- [x] 9. Update privacy policy
   - Add newsletter section to app/privacy/page.tsx
   - Explain data collection (email, name, timestamp)
   - Describe data usage (newsletter only)
@@ -83,7 +83,7 @@
   - Update last modified date
   - _Requirements: 2.2, 10.1, 10.4, 10.5_
 
-- [ ] 10. Create unsubscribe page
+- [x] 10. Create unsubscribe page
   - Create app/unsubscribe/page.tsx
   - Display unsubscribe confirmation message
   - Explain that unsubscribe is processed automatically by Resend
@@ -91,7 +91,7 @@
   - Add link back to homepage
   - _Requirements: 4.2, 4.5_
 
-- [ ] 11. Update documentation
+- [x] 11. Update documentation
   - Update README.md with newsletter feature
   - Document Resend audience setup in NETLIFY_DEPLOY.md
   - Add newsletter configuration to environment variables guide
@@ -99,7 +99,7 @@
   - Document email template customization
   - _Requirements: 5.5_
 
-- [ ] 12. Write unit tests
+- [x] 12. Write unit tests
   - Test newsletter schema validation
   - Test rate limiting utility
   - Test NewsletterSignupForm component
@@ -107,7 +107,7 @@
   - Test success/error states
   - _Requirements: 7.1, 7.2, 7.3, 9.1_
 
-- [ ] 13. Write integration tests
+- [x] 13. Write integration tests
   - Test POST /api/newsletter endpoint
   - Test Resend API integration (mocked)
   - Test rate limiting enforcement
@@ -115,7 +115,7 @@
   - Test error handling
   - _Requirements: 5.1, 5.2, 9.1, 9.3, 9.4_
 
-- [ ] 14. Write E2E tests
+- [x] 14. Write E2E tests
   - Test newsletter signup flow from footer
   - Test form validation
   - Test success message display
@@ -123,7 +123,7 @@
   - Test analytics event tracking
   - _Requirements: 1.4, 1.5, 6.1, 8.1, 8.2_
 
-- [ ] 15. Deploy and verify
+- [x] 15. Deploy and verify
   - Add RESEND_AUDIENCE_ID to Netlify environment variables
   - Deploy to production
   - Test newsletter signup on production
@@ -133,7 +133,7 @@
   - Test unsubscribe link in welcome email
   - _Requirements: 3.1, 3.5, 4.1, 4.4, 5.2, 6.3_
 
-- [ ] 16. Performance and accessibility audit
+- [x] 16. Performance and accessibility audit
   - Run Lighthouse audit on pages with newsletter form
   - Verify form submission completes within 2 seconds
   - Test keyboard navigation
