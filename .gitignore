@@ -97,3 +97,9 @@ yarn-error.log*
 
 # Local Netlify folder
 .netlify
+
+# python
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
