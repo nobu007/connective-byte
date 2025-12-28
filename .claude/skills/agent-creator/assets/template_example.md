@@ -70,4 +70,4 @@ This agent integrates with the Miyabi framework through:
 
 ---
 
-_Generated with agent-creator skill_
+*Generated with agent-creator skill*

@@ -11,7 +11,6 @@ Set up or update the project's .gitignore file with Claude Code specific pattern
 ## Core Claude Code Files to Ignore
 
 Ensure these Claude Code local configuration files are ignored:
-
 - `CLAUDE.local.md` - Local AI assistant instructions (root)
 - `.claude/settings.local.json` - Personal Claude Code settings
 - `.mcp.local.json` - Local MCP server configuration (root)
@@ -19,7 +18,6 @@ Ensure these Claude Code local configuration files are ignored:
 ## Development Patterns
 
 These common development artifacts will also be added:
-
 - `temp/` - Temporary working directory
 - `temp-*/` - Temporary directories with prefix
 - `test-*/` - Test directories with prefix
@@ -35,7 +33,6 @@ These common development artifacts will also be added:
 ## Task
 
 Based on the above status:
-
 1. Create `.gitignore` if it doesn't exist
 2. Add all patterns that aren't already present
 3. Preserve existing entries and comments
@@ -60,7 +57,6 @@ test-*.js
 ```
 
 Implement this by:
-
 1. Using the gitignore status above to determine what's missing
 2. Adding missing patterns with appropriate comments
 3. Preserving the existing file structure and entries

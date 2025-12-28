@@ -2,7 +2,7 @@
 description: Create a git stash checkpoint with optional description
 category: workflow
 allowed-tools: Bash(git stash:*), Bash(git add:*), Bash(git status:*)
-argument-hint: '[optional description]'
+argument-hint: "[optional description]"
 ---
 
 ## Create a checkpoint
@@ -10,7 +10,6 @@ argument-hint: '[optional description]'
 Create a git stash checkpoint to save your current working state.
 
 ## Current status
-
 !`git status --short`
 
 ## Task

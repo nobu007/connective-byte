@@ -2,7 +2,7 @@
 description: Smart branch creation and switching with conventional naming
 allowed-tools: Bash(git:*), Read
 category: workflow
-argument-hint: '<branch-type/branch-name | branch-name>'
+argument-hint: "<branch-type/branch-name | branch-name>"
 ---
 
 # Git Checkout: Smart Branch Management
@@ -24,7 +24,6 @@ Based on the arguments provided: `$ARGUMENTS`
 Parse the branch specification and create/switch to the appropriate branch.
 
 ### Supported Branch Types
-
 - `feature/` - New features and enhancements
 - `bugfix/` - Bug fixes (non-critical)
 - `hotfix/` - Urgent production fixes
@@ -36,7 +35,6 @@ Parse the branch specification and create/switch to the appropriate branch.
 - `refactor/` - Code refactoring
 
 ### Branch Naming Rules
-
 1. If argument contains `/`, use as-is (e.g., `feature/user-auth`)
 2. If argument is single word, suggest adding a prefix
 3. Convert spaces to hyphens
@@ -91,18 +89,15 @@ Parse the branch specification and create/switch to the appropriate branch.
 ### Special Handling
 
 For hotfix branches:
-
 - Automatically checkout from main/master first
 - Set high priority indicator
 - Suggest immediate push after fix
 
 For feature branches:
-
 - Check if develop branch exists, use as base
 - Otherwise use current branch as base
 
 For release branches:
-
 - Validate version format if provided (e.g., release/v1.2.0)
 - Set up from develop or main
 

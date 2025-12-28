@@ -4,19 +4,38 @@
   "common_steps": [
     {
       "phase": "planning",
-      "typical_steps": ["要件定義", "技術選定", "アーキテクチャ設計"]
+      "typical_steps": [
+        "要件定義",
+        "技術選定",
+        "アーキテクチャ設計"
+      ]
     },
     {
       "phase": "implementation",
-      "typical_steps": ["開発環境セットアップ", "コア機能実装", "UI実装", "テスト実装"]
+      "typical_steps": [
+        "開発環境セットアップ",
+        "コア機能実装",
+        "UI実装",
+        "テスト実装"
+      ]
     },
     {
       "phase": "testing",
-      "typical_steps": ["ユニットテスト", "統合テスト", "E2Eテスト", "バグ修正"]
+      "typical_steps": [
+        "ユニットテスト",
+        "統合テスト",
+        "E2Eテスト",
+        "バグ修正"
+      ]
     },
     {
       "phase": "deployment",
-      "typical_steps": ["デプロイ準備", "本番環境デプロイ", "監視設定", "ドキュメント作成"]
+      "typical_steps": [
+        "デプロイ準備",
+        "本番環境デプロイ",
+        "監視設定",
+        "ドキュメント作成"
+      ]
     }
   ],
   "estimated_duration": {

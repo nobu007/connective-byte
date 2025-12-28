@@ -55,7 +55,7 @@ docs/api/
 
 コードベースを分析し、README.mdを更新:
 
-````markdown
+```markdown
 # Project Name
 
 ## 📊 Project Stats
@@ -75,26 +75,21 @@ docs/api/
 ### Core Agents (agents/)
 
 #### CoordinatorAgent
-
 Orchestrates task decomposition and agent assignment.
 
 **Methods**:
-
 - `decomposeIssue(issue: Issue): Promise<TaskDecomposition>`
 - `buildDAG(tasks: Task[]): Promise<DAG>`
 - `assignAgent(task: Task): Promise<AgentType>`
 
 **Dependencies**:
-
 - Octokit (GitHub API)
 - Anthropic SDK
 
 #### CodeGenAgent
-
 Generates code using Claude Sonnet 4.
 
 **Methods**:
-
 - `execute(task: Task): Promise<AgentResult>`
 - `generateCode(spec: CodeSpec): Promise<GeneratedCode>`
 
@@ -110,13 +105,11 @@ Full API documentation: [docs/api/](./docs/api/index.html)
 npm test              # Run tests
 npm run test:coverage # With coverage
 ```
-````
 
 ## 📝 Contributing
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md)
-
-````
+コントリビューションについては、プロジェクトルートの CONTRIBUTING.md または GitHubの標準的なコントリビューションガイドラインを参照してください。
+```
 
 ### 3. アーキテクチャ図生成
 
@@ -158,7 +151,7 @@ graph TB
     CG -->|Generate| AN
     D -->|Deploy| FB
     P -->|Create PR| GH
-````
+```
 
 #### データフロー図
 
@@ -199,48 +192,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-
 - New feature: User profile editing (#123)
 - Agent: DeploymentAgent auto-rollback
 
 ### Changed
-
 - Updated lodash to 4.17.21 for security
 - Improved CoordinatorAgent DAG algorithm
 
 ### Fixed
-
 - Fixed: Login token refresh issue (#124)
 - Fixed: Type errors in deployment config
 
 ### Security
-
 - Patched XSS vulnerability in UserProfile component
 
 ## [1.2.0] - 2025-10-08
 
 ### Added
-
 - Agent system implementation
 - GitHub Actions integration
 - Claude Code optimization
 
 ### Changed
-
 - Migrated from JavaScript to TypeScript
 - Updated testing framework to Vitest
 
 ## [1.1.0] - 2025-09-15
 
 ### Added
-
 - Initial agent implementation
 - Basic CI/CD pipeline
 
 ## [1.0.0] - 2025-09-01
 
 ### Added
-
 - Initial release
 - Core functionality
 ```
@@ -372,7 +357,11 @@ Duration: 12s
   "entryPoints": ["src/"],
   "out": "docs/api",
   "theme": "default",
-  "exclude": ["**/node_modules/**", "**/tests/**", "**/*.test.ts"],
+  "exclude": [
+    "**/node_modules/**",
+    "**/tests/**",
+    "**/*.test.ts"
+  ],
   "excludePrivate": true,
   "excludeProtected": false,
   "includeVersion": true,
@@ -404,7 +393,7 @@ Duration: 12s
 
 ### クラスのドキュメント
 
-````typescript
+```typescript
 /**
  * CoordinatorAgent orchestrates task decomposition and agent assignment.
  *
@@ -454,7 +443,7 @@ export class CoordinatorAgent extends BaseAgent {
     // Implementation
   }
 }
-````
+```
 
 ### インターフェースのドキュメント
 

@@ -16,14 +16,12 @@
 リポジトリのIssue一覧を取得します。
 
 #### パラメータ
-
 - `state=open`: オープン状態のIssueのみ
 - `sort=created`: 作成日時でソート
 - `direction=desc`: 新しい順
 - `per_page=100`: 1ページあたりの取得数
 
 #### レスポンス形式
-
 ```json
 [
   {
@@ -79,7 +77,6 @@ export GITHUB_REPOSITORY="owner/repository-name"
 ## エラーハンドリング
 
 ### HTTPステータスコード
-
 - `200`: 成功
 - `401`: 認証失敗（トークン無効）
 - `403`: 権限不足、レート制限超過
@@ -87,7 +84,6 @@ export GITHUB_REPOSITORY="owner/repository-name"
 - `422`: リクエスト形式が不正
 
 ### エラー対応
-
 - トークンの有効性チェック
 - リポジトリアクセス権限の確認
 - レート制限の監視（ヘッダーの `X-RateLimit-Remaining` を確認）

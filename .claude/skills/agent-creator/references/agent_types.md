@@ -9,7 +9,6 @@ This document describes the available agent types and their characteristics for 
 **Purpose**: Comprehensive code review specialist covering multiple quality aspects.
 
 **Key Characteristics**:
-
 - Architecture & design analysis
 - Code quality assessment
 - Security vulnerability detection
@@ -18,7 +17,6 @@ This document describes the available agent types and their characteristics for 
 - Documentation & API design review
 
 **Typical Use Cases**:
-
 - Post-commit code reviews
 - Pre-merge quality gates
 - Architecture decision validation
@@ -26,7 +24,6 @@ This document describes the available agent types and their characteristics for 
 - Performance bottleneck identification
 
 **Weight Distribution**:
-
 - Architecture & Design: 25%
 - Code Quality: 20%
 - Security & Dependencies: 20%
@@ -43,7 +40,6 @@ This document describes the available agent types and their characteristics for 
 **Purpose**: CI/CD automation specialist with deployment pipeline management.
 
 **Key Characteristics**:
-
 - Automated deployment execution
 - Health check monitoring
 - Automatic rollback functionality
@@ -51,7 +47,6 @@ This document describes the available agent types and their characteristics for 
 - Deployment validation
 
 **Typical Use Cases**:
-
 - Production deployments
 - Staging environment updates
 - Rollback procedures
@@ -59,7 +54,6 @@ This document describes the available agent types and their characteristics for 
 - Environment provisioning
 
 **Workflow Stages**:
-
 1. Pre-deployment validation
 2. Deployment execution
 3. Health check & monitoring
@@ -67,7 +61,6 @@ This document describes the available agent types and their characteristics for 
 5. Post-deployment tasks
 
 **Integration Points**:
-
 - CoordinatorAgent for task delegation
 - CI/CD pipelines
 - Monitoring systems
@@ -80,7 +73,6 @@ This document describes the available agent types and their characteristics for 
 **Purpose**: Test automation and coverage analysis specialist.
 
 **Key Characteristics**:
-
 - Automated test execution
 - Coverage report generation
 - Test result analysis
@@ -88,7 +80,6 @@ This document describes the available agent types and their characteristics for 
 - Performance testing
 
 **Typical Use Cases**:
-
 - Unit test execution
 - Integration testing
 - End-to-end testing
@@ -96,14 +87,12 @@ This document describes the available agent types and their characteristics for 
 - Quality gate validation
 
 **Coverage Requirements**:
-
 - Minimum 80% test coverage
 - All critical paths tested
 - Edge cases covered
 - Error handling verified
 
 **Test Types**:
-
 - Unit tests
 - Integration tests
 - API tests
@@ -118,7 +107,6 @@ This document describes the available agent types and their characteristics for 
 **Purpose**: Documentation generation and maintenance specialist.
 
 **Key Characteristics**:
-
 - API documentation generation
 - README creation
 - Code documentation analysis
@@ -126,7 +114,6 @@ This document describes the available agent types and their characteristics for 
 - Documentation maintenance
 
 **Typical Use Cases**:
-
 - API documentation generation
 - README file creation
 - Technical guide development
@@ -134,7 +121,6 @@ This document describes the available agent types and their characteristics for 
 - Documentation maintenance
 
 **Documentation Types**:
-
 - API reference documentation
 - User guides and tutorials
 - Technical specifications
@@ -143,7 +129,6 @@ This document describes the available agent types and their characteristics for 
 - Process documentation
 
 **Quality Standards**:
-
 - Technical accuracy
 - Completeness and clarity
 - Consistent formatting
@@ -157,7 +142,6 @@ This document describes the available agent types and their characteristics for 
 **Purpose**: Security analysis and vulnerability assessment specialist.
 
 **Key Characteristics**:
-
 - Security vulnerability scanning
 - OWASP Top 10 analysis
 - Code security review
@@ -165,7 +149,6 @@ This document describes the available agent types and their characteristics for 
 - Security best practices validation
 
 **Typical Use Cases**:
-
 - Security audits
 - Vulnerability assessments
 - Code security reviews
@@ -173,7 +156,6 @@ This document describes the available agent types and their characteristics for 
 - Compliance validation
 
 **Security Frameworks**:
-
 - OWASP Top 10
 - SANS Top 25
 - CVE database
@@ -181,7 +163,6 @@ This document describes the available agent types and their characteristics for 
 - Industry standards
 
 **Risk Categories**:
-
 - Critical (Immediate action required)
 - High (Address within 24 hours)
 - Medium (Address within 1 week)
@@ -194,7 +175,6 @@ This document describes the available agent types and their characteristics for 
 **Purpose**: General-purpose agent for research and complex multi-step tasks.
 
 **Key Characteristics**:
-
 - Complex research tasks
 - Information gathering
 - Multi-step task coordination
@@ -202,17 +182,15 @@ This document describes the available agent types and their characteristics for 
 - Solution development
 
 **Typical Use Cases**:
-
 - Research projects
 - Complex problem solving
 - Information synthesis
 - Multi-step workflows
 - Cross-functional coordination
 
-**Tool Access**: All tools available (\*)
+**Tool Access**: All tools available (*)
 
 **Workflow Patterns**:
-
 1. Requirement analysis
 2. Information gathering
 3. Problem decomposition
@@ -225,15 +203,15 @@ This document describes the available agent types and their characteristics for 
 
 ### When to Use Each Agent Type
 
-| Situation            | Recommended Agent | Rationale                                               |
-| -------------------- | ----------------- | ------------------------------------------------------- |
-| Code review needed   | `code-review`     | Specialized quality analysis across multiple dimensions |
-| Deployment pipeline  | `deployment`      | Automation expertise and rollback capabilities          |
-| Testing requirements | `testing`         | Coverage analysis and quality assurance focus           |
-| Documentation gaps   | `documentation`   | Technical writing and documentation generation          |
-| Security concerns    | `security`        | Vulnerability scanning and security best practices      |
-| Complex research     | `general-purpose` | Broad tool access and research capabilities             |
-| Unknown requirements | `general-purpose` | Flexible and adaptable to various tasks                 |
+| Situation | Recommended Agent | Rationale |
+|-----------|------------------|-----------|
+| Code review needed | `code-review` | Specialized quality analysis across multiple dimensions |
+| Deployment pipeline | `deployment` | Automation expertise and rollback capabilities |
+| Testing requirements | `testing` | Coverage analysis and quality assurance focus |
+| Documentation gaps | `documentation` | Technical writing and documentation generation |
+| Security concerns | `security` | Vulnerability scanning and security best practices |
+| Complex research | `general-purpose` | Broad tool access and research capabilities |
+| Unknown requirements | `general-purpose` | Flexible and adaptable to various tasks |
 
 ### Agent Combination Patterns
 
@@ -342,4 +320,4 @@ deployment:
 
 ---
 
-_This reference document is part of the agent-creator skill_
+*This reference document is part of the agent-creator skill*

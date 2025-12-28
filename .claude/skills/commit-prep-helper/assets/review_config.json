@@ -23,8 +23,19 @@
   "quality": {
     "max_function_lines": 50,
     "max_line_length": 120,
-    "warn_patterns": ["console\\.log", "print\\s*\\(", "TODO:", "FIXME:", "HACK:", "XXX:"],
-    "ignore_patterns": ["#\\s*TODO:", "//\\s*TODO:", "/\\*\\s*TODO:"]
+    "warn_patterns": [
+      "console\\.log",
+      "print\\s*\\(",
+      "TODO:",
+      "FIXME:",
+      "HACK:",
+      "XXX:"
+    ],
+    "ignore_patterns": [
+      "#\\s*TODO:",
+      "//\\s*TODO:",
+      "/\\*\\s*TODO:"
+    ]
   },
   "complexity": {
     "max_cyclomatic_complexity": 10,
@@ -54,5 +65,11 @@
     ".venv",
     "venv"
   ],
-  "ignore_files": ["*.min.js", "*.bundle.js", "*.lock", "package-lock.json", "yarn.lock"]
+  "ignore_files": [
+    "*.min.js",
+    "*.bundle.js",
+    "*.lock",
+    "package-lock.json",
+    "yarn.lock"
+  ]
 }

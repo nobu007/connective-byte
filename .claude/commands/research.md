@@ -1,6 +1,6 @@
 ---
 description: Deep research with parallel subagents and automatic citations
-argument-hint: '<question to investigate>'
+argument-hint: "<question to investigate>"
 allowed-tools: Task, Read, Write, Edit, Grep, Glob
 category: workflow
 model: sonnet
@@ -11,7 +11,6 @@ model: sonnet
 Conduct deep, parallel research on any topic using multiple specialized subagents.
 
 ## Research Query
-
 $ARGUMENTS
 
 ## Research Process
@@ -41,7 +40,6 @@ $ARGUMENTS
    - Focus on authoritative sources
 
 #### After Classification, Determine:
-
 - **Resource Allocation**: Based on query type (1-10 subagents)
 - **Search Domains**: Academic, technical, news, or general web
 - **Depth vs Coverage**: How deep vs how wide to search
@@ -61,7 +59,6 @@ You MUST begin each task prompt with one of these trigger phrases to control sub
 - **Deep Research (10-15 searches)**: Start with "Deep dive:", "Comprehensive:", "Thorough research:", or "Exhaustive:"
 
 Example Task invocations:
-
 ```
 Task(description="Academic research", prompt="Deep dive: Find all academic papers on transformer architectures from 2017-2024", subagent_type="research-expert")
 Task(description="Quick fact check", prompt="Quick check: Verify the release date of GPT-4", subagent_type="research-expert")
@@ -72,7 +69,6 @@ This ensures all subagents work simultaneously AND understand the expected searc
 
 **Filesystem Artifact Pattern**:
 Each subagent saves full report to `/tmp/research_[timestamp]_[topic].md` and returns only:
-
 - File path to the full report
 - Brief 2-3 sentence summary
 - Key topics covered
@@ -83,12 +79,10 @@ Each subagent saves full report to `/tmp/research_[timestamp]_[topic].md` and re
 **CRITICAL: Subagents Return File References, Not Full Reports**
 
 Each subagent will:
-
 1. Write their full report to `/tmp/research_*.md`
 2. Return only a summary with the file path
 
 Synthesis Process:
-
 1. **Collect File References**: Gather all `/tmp/research_*.md` paths from subagent responses
 2. **Read Reports**: Use Read tool to access each research artifact
 3. **Merge Findings**:
@@ -108,11 +102,9 @@ The synthesized report (written to file) must include:
 # Research Report: [Query Topic]
 
 ## Executive Summary
-
 [3-5 paragraph overview synthesizing all findings]
 
 ## Key Findings
-
 1. **[Major Finding 1]** - Synthesized from multiple subagent reports
 2. **[Major Finding 2]** - Cross-referenced and verified
 3. **[Major Finding 3]** - With supporting evidence from multiple sources
@@ -120,19 +112,15 @@ The synthesized report (written to file) must include:
 ## Detailed Analysis
 
 ### [Theme 1 - Merged from Multiple Reports]
-
 [Comprehensive synthesis integrating all relevant subagent findings]
 
 ### [Theme 2 - Merged from Multiple Reports]
-
 [Comprehensive synthesis integrating all relevant subagent findings]
 
 ## Sources & References
-
 [Consolidated list of all sources from all subagents, organized by type]
 
 ## Research Methodology
-
 - Query Classification: [Breadth/Depth/Simple]
 - Subagents Deployed: [Number and focus areas]
 - Total Sources Analyzed: [Combined count]
@@ -141,21 +129,18 @@ The synthesized report (written to file) must include:
 ## Research Principles
 
 ### Quality Heuristics
-
 - Start with broad searches, then narrow based on findings
 - Prefer authoritative sources (academic papers, official docs, primary sources)
 - Cross-reference claims across multiple sources
 - Identify gaps and contradictions in available information
 
 ### Effort Scaling by Query Type
-
 - **Simple Factual**: 1-2 subagents, 3-5 searches each (verification focus)
 - **Depth-First**: 2-4 subagents, 10-15 searches each (deep understanding)
 - **Breadth-First**: 5-10 subagents, 5-10 searches each (wide coverage)
 - **Maximum Complexity**: 10 subagents (Claude Code limit)
 
 ### Parallelization Strategy
-
 - Spawn all initial subagents simultaneously for speed
 - Each subagent performs multiple parallel searches
 - 90% time reduction compared to sequential searching
@@ -170,7 +155,6 @@ The synthesized report (written to file) must include:
 ### Example Execution Patterns:
 
 **BREADTH-FIRST Example:** "Compare AI capabilities of Google, OpenAI, and Anthropic"
-
 - Classification: Breadth-first (multiple independent comparisons)
 - Launch 6 subagents in ONE message with focused investigation mode:
   - Task 1: "Investigate: Google's current AI products, models, and capabilities"
@@ -181,7 +165,6 @@ The synthesized report (written to file) must include:
   - Task 6: "Quick check: Latest announcements and news from each company (2024)"
 
 **DEPTH-FIRST Example:** "How do transformer models achieve attention?"
-
 - Classification: Depth-first (single topic, deep understanding)
 - Launch 3 subagents in ONE message with deep research mode:
   - Task 1: "Deep dive: Mathematical foundations and formulas behind attention mechanisms"
@@ -189,7 +172,6 @@ The synthesized report (written to file) must include:
   - Task 3: "Thorough research: Seminal papers including 'Attention is All You Need' and subsequent improvements"
 
 **SIMPLE FACTUAL Example:** "When was Claude 3 released?"
-
 - Classification: Simple factual query
 - Launch 1 subagent with verification mode:
   - Task 1: "Quick check: Verify the official release date of Claude 3 from Anthropic"
@@ -199,7 +181,6 @@ Each subagent works independently, writes findings to `/tmp/research_*.md`, and 
 ### Step 3: SYNTHESIZE AND DELIVER
 
 After all subagents complete:
-
 1. Read all research artifact files from `/tmp/research_*.md`
 2. Synthesize findings into comprehensive report
 3. Write final report to `/tmp/research_final_[timestamp].md`
@@ -209,7 +190,6 @@ After all subagents complete:
    - Key insights and recommendations
 
 **Benefits of Filesystem Artifacts**:
-
 - 90% reduction in token usage (passing paths vs full reports)
 - No information loss during synthesis
 - Preserves formatting and structure

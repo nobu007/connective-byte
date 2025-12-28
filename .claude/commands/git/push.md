@@ -7,20 +7,17 @@ allowed-tools: Bash(git:*), Task
 Push commits to remote repository with appropriate safety checks and branch management.
 
 ## Git Expert Integration
-
 For complex push scenarios (force push requirements, diverged branches, upstream conflicts, protected branch workflows), consider using the Task tool with `git-expert` subagent for specialized git expertise.
 
 ## Efficiency Note:
-
 Be concise. Use single bash calls where possible. Skip verbose explanations and intermediate status messages. Execute the push directly if safe, show only the result.
 
 ## Instructions for Claude:
 
 1. Run safety checks in a single bash call:
-   !git status --porcelain=v1 && echo "---" && git branch -vv | grep "^\*" && echo "---" && git remote -v | head -2 && echo "---" && git log --oneline @{u}..HEAD 2>/dev/null
+!git status --porcelain=v1 && echo "---" && git branch -vv | grep "^\*" && echo "---" && git remote -v | head -2 && echo "---" && git log --oneline @{u}..HEAD 2>/dev/null
 
 Parse output to check:
-
 - Any uncommitted changes (warn if present)
 - Current branch and tracking info
 - Remote repository URL
@@ -43,7 +40,6 @@ Parse output to check:
    - Protected branch: Remind about PR workflow
 
 Example concise output:
-
 - Skip: "Let me check if it's safe to push"
 - Skip: "I'll analyze your branch status"
 - Skip: "Ready to push X commits"

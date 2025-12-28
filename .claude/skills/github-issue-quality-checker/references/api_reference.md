@@ -3,12 +3,10 @@
 ## Quick Reference
 
 ### Environment Variables
-
 - `GITHUB_TOKEN`: GitHub Personal Access Token (required)
 - `GITHUB_REPOSITORY`: Target repository in "owner/repo" format (required)
 
 ### Command Line Usage
-
 ```bash
 python scripts/main.py [--repository owner/repo] [--token TOKEN] [--output-format text|json]
 ```
@@ -16,11 +14,9 @@ python scripts/main.py [--repository owner/repo] [--token TOKEN] [--output-forma
 ### Output Formats
 
 #### Text Format (default)
-
 Human-readable report with issue details and quality assessment.
 
 #### JSON Format
-
 ```json
 {
   "issue_number": 123,

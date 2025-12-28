@@ -59,7 +59,6 @@ system-analytics health-check
 ## 分析指標
 
 ### 📊 パフォーマンス指標
-
 - **処理件数**: 総処理Issue数
 - **成功率**: 処理成功率（%）
 - **平均処理時間**: Issue1件あたりの平均処理時間
@@ -67,14 +66,12 @@ system-analytics health-check
 - **GitHub APIコール数**: API呼び出し回数
 
 ### 🎯 品質指標
-
 - **リライト品質**: Issueリライトの品質スコア
 - **ラベル精度**: 自動付与ラベルの精度
 - **完全性**: タスク定義の完全性スコア
 - **エラー率**: エラー発生率
 
 ### 📈 トレンド分析
-
 - **品質スコア推移**: 日次での品質スコアの変化
 - **処理時間推移**: 処理時間の傾向
 - **成功率推移**: 成功率の変化パターン
@@ -82,7 +79,6 @@ system-analytics health-check
 ## レポート出力形式
 
 ### JSON形式
-
 ```json
 {
   "summary": {
@@ -99,12 +95,10 @@ system-analytics health-check
 ```
 
 ### Markdown形式
-
 ```markdown
 # 📊 システム分析レポート
 
 ## サマリー
-
 - 処理件数: 150
 - 成功率: 94.5%
 - 品質スコア: 87.2/100
@@ -113,21 +107,18 @@ system-analytics health-check
 ## 設定値と閾値
 
 ### 品質スコア
-
 - **🟢 優秀**: 90-100点
 - **🟡 良好**: 80-89点
 - **🟠 要改善**: 60-79点
 - **🔴 危機**: 0-59点
 
 ### 成功率
-
 - **🟢 優秀**: 98-100%
 - **🟡 良好**: 95-97%
 - **🟠 要改善**: 80-94%
 - **🔴 危機**: 0-79%
 
 ### 処理時間
-
 - **🟢 高速**: 0-5秒
 - **🟡 標準**: 5-10秒
 - **🟠 遅延**: 10-30秒
@@ -136,7 +127,6 @@ system-analytics health-check
 ## 使い方
 
 ### 基本的な監視
-
 ```bash
 # 1. 毎日の状態確認
 system-analytics summary
@@ -149,7 +139,6 @@ system-analytics trends --days 30
 ```
 
 ### 問題発生時の分析
-
 ```bash
 # 1. 健全性チェック
 system-analytics health-check
@@ -162,7 +151,6 @@ system-analytics quality-analysis --period last-week
 ```
 
 ### レポート生成と共有
-
 ```bash
 # 1. 日次レポート生成と保存
 system-analytics generate-daily-report --output ./reports/
@@ -184,17 +172,15 @@ system-analytics monthly-report --include trends --output ./reports/
 ## 自動化
 
 ### 定期レポート
-
 - 日次レポート: 毎日23:59に自動生成
 - 週次サマリー: 毎週月曜日9:00に自動生成
 - 月次分析: 毎月1日9:00に自動生成
 
 ### アラート設定
-
 - 品質スコア80%未満: 即時通知
 - 成功率90%未満: 警告通知
 - エラー率5%超過: 緊急通知
 
 ---
 
-_システム分析は継続的な改善の基盤となります_
+*システム分析は継続的な改善の基盤となります*

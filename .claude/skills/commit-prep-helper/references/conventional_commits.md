@@ -15,13 +15,11 @@
 ## 主要なType
 
 ### feat (新機能)
-
 - 新しい機能追加
 - APIの追加
 - 新しいコンポーネント
 
 例:
-
 ```
 feat(auth): add JWT authentication
 feat(api): add user profile endpoint
@@ -29,12 +27,10 @@ feat(ui): add dark mode toggle
 ```
 
 ### fix (バグ修正)
-
 - バグの修正
 - 既存機能の修正
 
 例:
-
 ```
 fix(auth): resolve token expiration issue
 fix(ui): fix button hover state
@@ -42,13 +38,11 @@ fix(api): handle null response correctly
 ```
 
 ### docs (ドキュメント)
-
 - ドキュメントの追加・更新
 - READMEの更新
 - コメントの追加
 
 例:
-
 ```
 docs: update API documentation
 docs: add installation guide
@@ -56,12 +50,10 @@ docs: update getting started guide
 ```
 
 ### test (テスト)
-
 - テストの追加・更新
 - テストカバレッジの改善
 
 例:
-
 ```
 test: add unit tests for auth service
 test: improve test coverage
@@ -69,13 +61,11 @@ test: fix failing integration tests
 ```
 
 ### chore (その他)
-
 - 依存関係の更新
 - 設定ファイルの変更
 - ビルドスクリプトの変更
 
 例:
-
 ```
 chore: update npm dependencies
 chore: add linting configuration
@@ -139,17 +129,14 @@ Closes #123
 ## 品質基準
 
 ### Lintチェック
-
 - ESLint/Black: エラーがないこと
 - Prettier: フォーマットが整っていること
 
 ### テストチェック
-
 - テスト実行が成功すること
 - カバレッジ80%以上を推奨
 
 ### コードレビュー
-
 - セキュリティ問題がないこと
 - 品質問題が最小限であること
 - 複雑度が適切であること

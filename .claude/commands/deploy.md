@@ -286,7 +286,7 @@ Duration: 7m 12s
 
 デプロイ完了後、`.ai/logs/deployment-YYYY-MM-DD.md` に詳細レポートが生成されます:
 
-````markdown
+```markdown
 # Deployment Report - 2025-10-08
 
 ## Summary
@@ -327,9 +327,7 @@ Duration: 7m 12s
 ```bash
 firebase hosting:rollback --site your-app-production
 ```
-````
-
-````
+```
 
 ## トラブルシューティング
 
@@ -338,7 +336,7 @@ firebase hosting:rollback --site your-app-production
 ```bash
 npm install -g firebase-tools
 firebase login
-````
+```
 
 ### Q2: デプロイ権限エラー
 

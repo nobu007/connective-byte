@@ -232,28 +232,28 @@ gh issue create \
 
 Issue タイプに応じて自動的にラベルが付与されます:
 
-| タイプ      | ラベル                 |
-| ----------- | ---------------------- |
-| feature     | 🆕feature, enhancement |
-| bug         | 🐛bug                  |
-| refactor    | ♻️refactor             |
-| docs        | 📝documentation        |
-| performance | ⚡performance          |
-| security    | 🔒security             |
-| test        | 🧪test                 |
+| タイプ | ラベル |
+|--------|--------|
+| feature | 🆕feature, enhancement |
+| bug | 🐛bug |
+| refactor | ♻️refactor |
+| docs | 📝documentation |
+| performance | ⚡performance |
+| security | 🔒security |
+| test | 🧪test |
 
 優先度に応じたラベル:
 
-| 優先度 | ラベル            |
-| ------ | ----------------- |
-| High   | 🔴priority-high   |
+| 優先度 | ラベル |
+|--------|--------|
+| High | 🔴priority-high |
 | Medium | 🟡priority-medium |
-| Low    | 🟢priority-low    |
+| Low | 🟢priority-low |
 
 Agent自動実行:
 
-| 設定 | ラベル          |
-| ---- | --------------- |
+| 設定 | ラベル |
+|------|--------|
 | 有効 | 🤖agent-execute |
 
 ## Issue Templateとの違い

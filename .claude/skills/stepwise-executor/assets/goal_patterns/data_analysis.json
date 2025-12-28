@@ -4,23 +4,45 @@
   "common_steps": [
     {
       "phase": "data_collection",
-      "typical_steps": ["データソースの特定", "データ抽出", "データ統合"]
+      "typical_steps": [
+        "データソースの特定",
+        "データ抽出",
+        "データ統合"
+      ]
     },
     {
       "phase": "data_preparation",
-      "typical_steps": ["データクレンジング", "欠損値処理", "異常値検出", "特徴量エンジニアリング"]
+      "typical_steps": [
+        "データクレンジング",
+        "欠損値処理",
+        "異常値検出",
+        "特徴量エンジニアリング"
+      ]
     },
     {
       "phase": "analysis",
-      "typical_steps": ["探索的データ分析", "統計分析", "相関分析", "仮説検証"]
+      "typical_steps": [
+        "探索的データ分析",
+        "統計分析",
+        "相関分析",
+        "仮説検証"
+      ]
     },
     {
       "phase": "visualization",
-      "typical_steps": ["グラフ作成", "ダッシュボード構築", "インサイト抽出"]
+      "typical_steps": [
+        "グラフ作成",
+        "ダッシュボード構築",
+        "インサイト抽出"
+      ]
     },
     {
       "phase": "reporting",
-      "typical_steps": ["分析結果のまとめ", "レポート作成", "プレゼンテーション準備"]
+      "typical_steps": [
+        "分析結果のまとめ",
+        "レポート作成",
+        "プレゼンテーション準備"
+      ]
     }
   ],
   "estimated_duration": {

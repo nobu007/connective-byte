@@ -2,7 +2,7 @@
 description: Restore project to a previous checkpoint
 category: workflow
 allowed-tools: Bash(git stash:*), Bash(git status:*), Bash(git reset:*), Bash(grep:*), Bash(head:*)
-argument-hint: '<checkpoint-number|latest>'
+argument-hint: "<checkpoint-number|latest>"
 ---
 
 ## Restore to checkpoint
@@ -10,11 +10,9 @@ argument-hint: '<checkpoint-number|latest>'
 Restore your project files to a previous checkpoint created with /checkpoint.
 
 ## Available checkpoints
-
 !`git stash list | grep "claude-checkpoint" | head -10`
 
 ## Current status
-
 !`git status --short`
 
 ## Task
@@ -39,7 +37,6 @@ Restore the project to a previous checkpoint. Based on $ARGUMENTS:
    - If uncommitted changes were backed up, inform user how to recover them
 
 Example outputs:
-
 - For `/restore`: "Restored to checkpoint: before major refactor (stash@{0})"
 - For `/restore 3`: "Restored to checkpoint: working OAuth implementation (stash@{3})"
 - With uncommitted changes: "Backed up current changes to stash@{0}. Restored to checkpoint: before major refactor (stash@{1})"

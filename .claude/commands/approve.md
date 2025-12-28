@@ -32,14 +32,13 @@ description: 統合审批屏幕 - QA、Deploy、PR、CodeReviewなど
 // Reactコンポーネントで承認画面を起動
 const approvalScreen = await ApprovalScreen.launch({
   type: 'deploy',
-  id: 'deploy-123',
+  id: 'deploy-123'
 });
 ```
 
 ### 2. 承認タイプ別のUI
 
 #### QA承認画面
-
 ```typescript
 interface QAApprovalData {
   id: string;
@@ -56,7 +55,6 @@ interface QAApprovalData {
 ```
 
 #### デプロイ承認画面
-
 ```typescript
 interface DeployApprovalData {
   id: string;
@@ -72,7 +70,6 @@ interface DeployApprovalData {
 ```
 
 #### PR承認画面
-
 ```typescript
 interface PRApprovalData {
   id: string;
@@ -118,7 +115,6 @@ graph TD
 ## UIコンポーネント構成
 
 ### メイン承認画面
-
 ```typescript
 // src/components/approval/ApprovalScreen.tsx
 interface ApprovalScreenProps {
@@ -131,7 +127,6 @@ interface ApprovalScreenProps {
 ```
 
 ### 共通UI要素
-
 - **StatusBadge**: 状態表示（Pending, Approved, Rejected）
 - **RiskIndicator**: リスクレベル表示
 - **ApproverAvatar**: 承認者アバター
@@ -140,7 +135,6 @@ interface ApprovalScreenProps {
 - **Checklist**: チェックリスト
 
 ### レスポンシブデザイン
-
 ```typescript
 // モバイル対応
 const MobileApprovalView = () => (
@@ -160,7 +154,6 @@ const DesktopApprovalView = () => (
 ## 承認ロジック
 
 ### 1. 承認権限チェック
-
 ```python
 # src/core/approval/permissions.py
 class ApprovalPermissionChecker:
@@ -172,7 +165,6 @@ class ApprovalPermissionChecker:
 ```
 
 ### 2. 承認処理実行
-
 ```python
 # src/core/approval/processor.py
 class ApprovalProcessor:
@@ -185,7 +177,6 @@ class ApprovalProcessor:
 ```
 
 ### 3. 承認後のアクション
-
 ```python
 # 承認タイプ別の後続処理
 ACTIONS = {
@@ -200,7 +191,6 @@ ACTIONS = {
 ## 承認リスト表示
 
 ### ダッシュボード機能
-
 ```typescript
 // 未処理の承認リスト
 const PendingApprovals = () => {
@@ -221,7 +211,6 @@ const PendingApprovals = () => {
 ```
 
 ### フィルタリング機能
-
 ```typescript
 // 承認のフィルタリングと検索
 const ApprovalFilters = () => {
@@ -239,7 +228,6 @@ const ApprovalFilters = () => {
 ## 通知システム
 
 ### 1. 承認要求通知
-
 ```python
 # Slack通知
 async def send_approval_request_notification(approval: Approval):
@@ -269,7 +257,6 @@ async def send_approval_request_notification(approval: Approval):
 ```
 
 ### 2. 承認完了通知
-
 ```python
 # 承認者へのフィードバック
 async def send_approval_completion_notification(approval: Approval, action: str):
@@ -282,7 +269,6 @@ async def send_approval_completion_notification(approval: Approval, action: str)
 ## セキュリティ機能
 
 ### 1. 二要素認証
-
 ```typescript
 // 高リスク承認には2FA必須
 const TwoFactorAuth = ({ required, onVerify }) => {
@@ -313,7 +299,6 @@ const TwoFactorAuth = ({ required, onVerify }) => {
 ```
 
 ### 2. 承認履歴の追跡
-
 ```python
 # 監査証跡
 class ApprovalAuditLogger:
@@ -334,7 +319,6 @@ class ApprovalAuditLogger:
 ## 統合機能
 
 ### 1. 既存システムとの連携
-
 ```python
 # QAシステム連携
 class QAApprovalIntegration:
@@ -351,7 +335,6 @@ class DeployApprovalIntegration:
 ```
 
 ### 2. APIエンドポイント
-
 ```python
 # FastAPIエンドポイント
 @app.post("/api/approvals/{approval_id}/approve")
@@ -376,7 +359,6 @@ async def reject_approval(
 ## 実行例
 
 ### QA承認
-
 ```bash
 /approve qa qa-2024-001
 
@@ -393,7 +375,6 @@ async def reject_approval(
 ```
 
 ### デプロイ承認
-
 ```bash
 /approve deploy deploy-123
 
@@ -412,7 +393,6 @@ async def reject_approval(
 ```
 
 ### 承認リスト
-
 ```bash
 /approve
 
@@ -434,7 +414,6 @@ async def reject_approval(
 ## 設定
 
 ### 環境変数
-
 ```bash
 # .env
 APPROVAL_WEBHOOK_URL=https://hooks.slack.com/...
@@ -444,7 +423,6 @@ APPROVAL_AUTO_REMINDER_HOURS=24
 ```
 
 ### 承認ポリシー設定
-
 ```yaml
 # approval_config.yml
 approval_policies:
@@ -467,24 +445,22 @@ approval_policies:
 ## 拡張機能
 
 ### 1. 承認テンプレート
-
 ```typescript
 // 承認依頼テンプレート
 const approvalTemplates = {
   deploy: {
-    title: 'デプロイ承認依頼',
-    description: 'バージョン {version} を {environment} 環境にデプロイします',
+    title: "デプロイ承認依頼",
+    description: "バージョン {version} を {environment} 環境にデプロイします",
     checklist: [
-      'テストが完了している',
-      'ロールバック計画が準備されている',
-      'メンテナンスウィンドウが確保されている',
-    ],
-  },
+      "テストが完了している",
+      "ロールバック計画が準備されている",
+      "メンテナンスウィンドウが確保されている"
+    ]
+  }
 };
 ```
 
 ### 2. 自動承認ルール
-
 ```python
 # 特定条件下で自動承認
 class AutoApprovalRules:
@@ -497,7 +473,6 @@ class AutoApprovalRules:
 ```
 
 ### 3. 承認 analytics
-
 ```python
 # 承認パフォーマンス分析
 class ApprovalAnalytics:
@@ -512,7 +487,6 @@ class ApprovalAnalytics:
 ## トラブルシューティング
 
 ### Q1: 承認画面が表示されない
-
 ```bash
 # 必要なモジュールを確認
 ls src/components/approval/
@@ -520,14 +494,12 @@ npm list @types/react
 ```
 
 ### Q2: 承認権限がない
-
 ```bash
 # ユーザーロールを確認
 python scripts_python/check_permissions.py --user=$(whoami)
 ```
 
 ### Q3: 通知が届かない
-
 ```bash
 # Webhook設定を確認
 curl -X POST $APPROVAL_WEBHOOK_URL -d '{"text":"test"}'

@@ -7,7 +7,6 @@ argument-hint: '[what to review] - e.g., "recent changes", "src/components", "*.
 # Code Review
 
 ## Current Repository State
-
 !`git status --short && echo "---" && git diff --stat && echo "---" && git log --oneline -5`
 
 ## Pre-Review Analysis: Think This Through End-to-End
@@ -15,16 +14,13 @@ argument-hint: '[what to review] - e.g., "recent changes", "src/components", "*.
 Before launching review agents, analyze the complete impact and context:
 
 ### Impact Assessment
-
 - **System Impact**: What systems, services, or components could be affected by these changes?
 - **Deployment Context**: What's the risk level and timeline for these changes?
 - **Integration Points**: Are there external dependencies, APIs, or team workflows involved?
 - **Stakeholder Impact**: Who depends on the code being reviewed?
 
 ### Review Strategy Coordination
-
 Based on impact assessment and **$ARGUMENTS**, determine:
-
 - **Critical vs. Nice-to-Have**: Which review aspects are CRITICAL vs. optional for this change?
 - **Potential Conflicts**: Could findings from different review areas suggest competing solutions?
 - **Shared Context**: What context should all review agents be aware of?
@@ -35,23 +31,20 @@ Based on impact assessment and **$ARGUMENTS**, determine:
 Based on **$ARGUMENTS** and the impact assessment above, determine which review agents are needed:
 
 If reviewing "changes" or recent modifications:
-
 1. Analyze the file types that have been modified
 2. Launch only relevant review agents:
-   - **Documentation files only** (_.md, _.txt, README): Launch only Documentation & API Review agent
-   - **Test files only** (_test._, _.spec._, tests/): Launch Testing Quality Review and Code Quality Review agents
-   - **Config files only** (_.json, _.yaml, *.toml, .*rc): Launch Security & Dependencies Review and Architecture Review agents
-   - **Source code files** (_.ts, _.js, \*.py, etc.): Launch all 6 review agents
+   - **Documentation files only** (*.md, *.txt, README): Launch only Documentation & API Review agent
+   - **Test files only** (*test.*, *.spec.*, tests/): Launch Testing Quality Review and Code Quality Review agents
+   - **Config files only** (*.json, *.yaml, *.toml, .*rc): Launch Security & Dependencies Review and Architecture Review agents
+   - **Source code files** (*.ts, *.js, *.py, etc.): Launch all 6 review agents
    - **Mixed changes**: Launch agents relevant to each file type present
 
 If reviewing a specific directory or broad scope:
-
 - Launch all 6 review agents for comprehensive coverage
 
 Use the Task tool to invoke the appropriate code-review-expert agents concurrently with enhanced thinking trigger instructions:
 
 ## 1. Architecture & Design Review
-
 ```
 Subagent: code-review-expert
 Description: Architecture review with end-to-end analysis
@@ -72,16 +65,14 @@ Check available experts with claudekit for domain-specific patterns.
 ```
 
 ## 2. Code Quality Review
-
 ```
 Subagent: code-review-expert
-Description: Code quality review
+Description: Code quality review  
 Prompt: Review code quality and maintainability in: $ARGUMENTS
 Focus on: readability, naming conventions, code complexity, DRY principles, code smells, refactoring opportunities, and consistent coding patterns. Pull domain-specific quality metrics from available experts.
 ```
 
 ## 3. Security & Dependencies Review
-
 ```
 Subagent: code-review-expert
 Description: Security and dependencies review with alternative hypothesis analysis
@@ -102,7 +93,6 @@ Use security insights from domain experts if available.
 ```
 
 ## 4. Performance & Scalability Review
-
 ```
 Subagent: code-review-expert
 Description: Performance and scalability review
@@ -111,7 +101,6 @@ Focus on: algorithm complexity, memory usage, database queries, caching strategi
 ```
 
 ## 5. Testing Quality Review
-
 ```
 Subagent: code-review-expert
 Description: Testing quality review
@@ -120,7 +109,6 @@ Focus on: meaningful assertions, test isolation, edge case handling, failure sce
 ```
 
 ## 6. Documentation & API Review
-
 ```
 Subagent: code-review-expert
 Description: Documentation and API review
@@ -141,21 +129,19 @@ Documentation Review Guidelines:
 After all agents complete, apply alternative hypothesis thinking before consolidating:
 
 ### Cross-Pattern Analysis
-
 - **Competing Solutions**: Do findings from different review areas suggest conflicting solutions or approaches?
 - **Alternative Explanations**: Are there alternative explanations for patterns seen across multiple review areas?
 - **Root Cause Investigation**: Could the same underlying issue be manifesting in multiple review aspects?
 - **Intentional Trade-offs**: What if apparent "problems" are actually intentional design decisions with valid reasoning?
 
 ### Prioritization with Context
-
 - **Real vs. Theoretical Issues**: Which issues matter given the actual deployment context and timeline?
 - **Conflicting Recommendations**: How do we sequence fixes that might conflict with each other?
 - **Alternative Approaches**: If obvious fixes prove problematic, what are the alternative solutions?
 
 Then consolidate findings into this structured format:
 
-````
+```
 🗂 Consolidated Code Review Report - [Target]
 
 📋 Review Scope
@@ -230,7 +216,7 @@ Repeated problems that need addressing:
 - [Problem pattern] (X occurrences)
   → [Actionable fix/next step]
 - [Additional problems with solutions...]
-````
+```
 
 After all agents complete, consolidate findings into this format. Focus on actionable feedback with specific file locations and code examples. Use type icons:
 🔒 Security | 🏗️ Architecture | ⚡ Performance | 🧪 Testing | 📝 Documentation | 💥 Breaking Change

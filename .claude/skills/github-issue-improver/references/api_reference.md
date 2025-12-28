@@ -5,15 +5,12 @@
 The GitHub Issue Improver uses Personal Access Tokens (PAT) for authentication.
 
 ### Required Environment Variable
-
 ```bash
 export GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
 ```
 
 ### Token Permissions
-
 The PAT requires the following scopes:
-
 - `repo` - Full control of private repositories
 - `public_repo` - Access public repositories (if only working with public repos)
 - `issues:write` - Read and write issues
@@ -21,13 +18,11 @@ The PAT requires the following scopes:
 ## Core API Endpoints
 
 ### Get Issue
-
 ```http
 GET /repos/{owner}/{repo}/issues/{issue_number}
 ```
 
 **Response Fields:**
-
 - `id` - Issue ID
 - `number` - Issue number
 - `title` - Issue title
@@ -40,7 +35,6 @@ GET /repos/{owner}/{repo}/issues/{issue_number}
 - `updated_at` - Last update timestamp
 
 **Example Response:**
-
 ```json
 {
   "id": 1,
@@ -64,13 +58,11 @@ GET /repos/{owner}/{repo}/issues/{issue_number}
 ```
 
 ### Update Issue
-
 ```http
 PATCH /repos/{owner}/{repo}/issues/{issue_number}
 ```
 
 **Request Body:**
-
 ```json
 {
   "title": "New title",
@@ -81,20 +73,17 @@ PATCH /repos/{owner}/{repo}/issues/{issue_number}
 ```
 
 **Fields:**
-
 - `title` (optional) - Issue title
 - `body` (optional) - Issue body text
 - `labels` (optional) - Array of label names
 - `assignees` (optional) - Array of assignee usernames
 
 ### Create Issue Comment
-
 ```http
 POST /repos/{owner}/{repo}/issues/{issue_number}/comments
 ```
 
 **Request Body:**
-
 ```json
 {
   "body": "Me too"
@@ -102,7 +91,6 @@ POST /repos/{owner}/{repo}/issues/{issue_number}/comments
 ```
 
 **Response:**
-
 ```json
 {
   "id": 1,
@@ -117,13 +105,11 @@ POST /repos/{owner}/{repo}/issues/{issue_number}/comments
 ```
 
 ### Get Repository Labels
-
 ```http
 GET /repos/{owner}/{repo}/labels
 ```
 
 **Response:**
-
 ```json
 [
   {
@@ -141,12 +127,10 @@ GET /repos/{owner}/{repo}/labels
 ## Rate Limits
 
 GitHub API has rate limits:
-
 - **Authenticated requests:** 5,000 requests per hour
 - **Unauthenticated requests:** 60 requests per hour
 
 Rate limit headers are included in responses:
-
 - `X-RateLimit-Limit` - Maximum requests per hour
 - `X-RateLimit-Remaining` - Remaining requests in current window
 - `X-RateLimit-Reset` - Unix timestamp when rate limit resets
@@ -156,39 +140,32 @@ Rate limit headers are included in responses:
 ### Common HTTP Status Codes
 
 #### 401 Unauthorized
-
 ```json
 {
   "message": "Requires authentication",
   "documentation_url": "https://docs.github.com/rest/reference/issues"
 }
 ```
-
 **Solution:** Check that `GITHUB_TOKEN` is valid and has required scopes.
 
 #### 403 Forbidden
-
 ```json
 {
   "message": "Rate limit exceeded",
   "documentation_url": "https://docs.github.com/rest/overview/rate-limits-for-the-rest-api"
 }
 ```
-
 **Solution:** Wait for rate limit reset or implement exponential backoff.
 
 #### 404 Not Found
-
 ```json
 {
   "message": "Not Found"
 }
 ```
-
 **Solution:** Verify repository exists and issue number is correct.
 
 #### 422 Unprocessable Entity
-
 ```json
 {
   "message": "Validation Failed",
@@ -201,18 +178,15 @@ Rate limit headers are included in responses:
   ]
 }
 ```
-
 **Solution:** Check request body format and required fields.
 
 ## Pagination
 
 List endpoints return paginated results. Response includes:
-
 - `Link` header with pagination URLs
 - Page info in response body for some endpoints
 
 **Example Link Header:**
-
 ```
 Link: <https://api.github.com/repositories/1234/issues?page=2>; rel="next",
       <https://api.github.com/repositories/1234/issues?page=5>; rel="last"
@@ -221,12 +195,10 @@ Link: <https://api.github.com/repositories/1234/issues?page=2>; rel="next",
 ## Conditional Requests
 
 Use conditional requests to avoid rate limits:
-
 - `If-None-Match` header with ETag
 - `If-Modified-Since` header with timestamp
 
 **Example:**
-
 ```http
 GET /repos/{owner}/{repo}/issues/{issue_number}
 If-None-Match: "some-etag-value"
@@ -237,28 +209,23 @@ Returns `304 Not Modified` if data hasn't changed.
 ## Best Practices
 
 ### 1. Use Appropriate Scopes
-
 Only request the minimum necessary permissions for your PAT.
 
 ### 2. Handle Rate Limits Gracefully
-
 - Check rate limit headers
 - Implement exponential backoff
 - Cache responses when possible
 
 ### 3. Use Conditional Requests
-
 - Include `If-None-Match` for GET requests
 - Store and reuse ETags
 
 ### 4. Validate Input
-
 - Validate repository format (owner/repo)
 - Check issue numbers are positive integers
 - Sanitize user input for issue bodies
 
 ### 5. Error Handling
-
 - Always check response status codes
 - Provide meaningful error messages
 - Implement retry logic for transient failures
@@ -268,12 +235,10 @@ Only request the minimum necessary permissions for your PAT.
 While this skill uses direct HTTP requests, you could also use:
 
 ### Python
-
 - `PyGithub` - Official-ish Python GitHub library
 - `github3.py` - Another popular Python library
 
 ### JavaScript
-
 - `@octokit/rest` - Official GitHub REST client
 - `simple-git` - Simplified Git operations
 

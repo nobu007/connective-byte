@@ -17,14 +17,12 @@ Launch ONE subagent to analyze the git status (including ignored files) and prop
 ## Target Files for Cleanup
 
 **Debug & Analysis Files:**
-
 - `analyze-*.js`, `analyze-*.ts` - Analysis scripts (e.g., `analyze-race-condition.js`)
 - `debug-*.js`, `debug-*.ts` - Debug scripts (e.g., `debug-detailed.js`, `debug-race-condition.js`)
 - `research-*.js`, `research-*.ts` - Research scripts (e.g., `research-frontmatter-libs.js`)
 - `*-analysis.md` - Analysis documents (e.g., `eslint-manual-analysis.md`)
 
 **Test Files (temporary/experimental):**
-
 - `test-*.js`, `test-*.ts`, `test-*.sh` - Test scripts (e.g., `test-race-condition.js`, `test-basic-add.js`, `test-poc.sh`)
 - `*-test.js`, `*-test.ts`, `*-test.sh` - Test scripts with suffix
 - `quick-test.js`, `quick-test.ts`, `quick-test.sh` - Quick test files
@@ -32,20 +30,17 @@ Launch ONE subagent to analyze the git status (including ignored files) and prop
 - `*-examples.js`, `*-examples.ts` - Example files (e.g., `frontmatter-replacement-examples.ts`)
 
 **Proof of Concept (POC) Files:**
-
 - `*-poc.*` - POC files in any language (e.g., `test-poc.sh`, `auth-poc.js`)
 - `poc-*.*` - POC files with prefix (e.g., `poc-validation.ts`)
 - `*_poc.*` - POC files with underscore (e.g., `feature_poc.js`)
 - `proof-of-concept-*.*` - Verbose POC naming
 
 **Temporary Directories:**
-
 - `temp-*` - Temporary directories (e.g., `temp-debug/`, `temp-test/`, `temp-test-fix/`)
 - `test-*` - Temporary test directories (e.g., `test-integration/`, `test-2-concurrent/`)
 - NOTE: These are different from standard `test/` or `tests/` directories which should be preserved
 
 **Reports & Summaries:**
-
 - `*_SUMMARY.md` - Summary reports (e.g., `TEST_SUMMARY.md`, `ESLINT_FIXES_SUMMARY.md`)
 - `*_REPORT.md` - Various reports (e.g., `QUALITY_VALIDATION_REPORT.md`, `RELEASE_READINESS_REPORT.md`)
 - `*_CHECKLIST.md` - Checklist documents (e.g., `MIGRATION_CHECKLIST.md`)
@@ -56,13 +51,11 @@ Launch ONE subagent to analyze the git status (including ignored files) and prop
 ## Safety Rules
 
 **Files safe to propose for deletion:**
-
 - Must be untracked (?? in git status) OR ignored (!! in git status)
 - Should match or be similar to cleanup patterns above
 - Must be clearly temporary/debug files
 
 **Never propose these files:**
-
 - Any committed files (not marked ?? or !!) unless working directory is clean
 - CHANGELOG.md, README.md, AGENTS.md, CLAUDE.md (even if untracked)
 - Core project directories: src/, dist/, scripts/, node_modules/, etc.
@@ -83,7 +76,6 @@ Launch ONE subagent to:
 6. **Do NOT delete anything** - only propose what should be deleted
 
 The agent should provide:
-
 - Clear list of proposed deletions with reasons
 - For untracked files: Confirmation they are marked (??) or (!!)
 - For committed files: Clear indication they are committed and match debug/temp patterns
@@ -100,7 +92,6 @@ Once the user approves the proposed deletions:
    - For committed files: `git rm` to properly remove from git tracking
 2. **Analyze the target cleanup patterns** and approved files to identify common types
 3. **Propose .gitignore patterns** based on the cleanup patterns to prevent future accumulation:
-
    ```
    # Debug and analysis files
    analyze-*.js
@@ -110,7 +101,7 @@ Once the user approves the proposed deletions:
    research-*.js
    research-*.ts
    *-analysis.md
-
+   
    # Temporary test files
    test-*.js
    test-*.ts
@@ -121,11 +112,11 @@ Once the user approves the proposed deletions:
    verify-*.md
    *-examples.js
    *-examples.ts
-
+   
    # Temporary directories
    temp-*/
    test-*/
-
+   
    # Reports and summaries
    *_SUMMARY.md
    *_REPORT.md
@@ -134,7 +125,6 @@ Once the user approves the proposed deletions:
    *_GUIDE.md
    *_ANALYSIS.md
    ```
-
 4. **Add suggested patterns to .gitignore** if user agrees
 
 This prevents the same types of files from cluttering the workspace in future development sessions.
@@ -209,7 +199,6 @@ Would you like me to proceed with the cleanup?
 ```
 
 The command analyzes your project and categorizes cleanup items:
-
 - **Untracked files**: Temporary debug/test files that can be deleted
 - **Committed files**: Often reports that should be moved to the reports/ directory
 - **.gitignore updates**: Patterns to prevent future accumulation

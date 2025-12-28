@@ -36,7 +36,6 @@ git add .
 ## 品質チェックフロー
 
 ### Step 1: ステージングファイル検出
-
 `scripts/check_staged_files.py`を実行し、コミット対象の変更を分析：
 
 ```bash
@@ -44,14 +43,12 @@ python .claude/skills/commit-prep-helper/scripts/check_staged_files.py
 ```
 
 検出内容：
-
 - 変更ファイル一覧
 - ファイルタイプ分析
 - 変更行数統計
 - テストファイルの有無
 
 ### Step 2: Lintチェック実行
-
 プロジェクトタイプを自動検出し、適切なLintツールを実行：
 
 ```bash
@@ -59,14 +56,12 @@ python .claude/skills/commit-prep-helper/scripts/run_linting.py
 ```
 
 対応ツール：
-
 - **Node.js**: ESLint + Prettier
 - **Python**: Black + (Flake8/pylint)
 - **Rust**: cargo-clippy + rustfmt
 - **Go**: gofmt + golint
 
 ### Step 3: テスト実行
-
 プロジェクトのテストフレームワークを自動検出して実行：
 
 ```bash
@@ -74,14 +69,12 @@ python .claude/skills/commit-prep-helper/scripts/run_tests.py
 ```
 
 対応フレームワーク：
-
 - **Node.js**: Jest, Vitest, Mocha
 - **Python**: pytest, unittest
 - **Rust**: cargo test
 - **Go**: go test
 
 ### Step 4: コードレビュー実行
-
 静的解析でセキュリティと品質問題を検出：
 
 ```bash
@@ -89,13 +82,11 @@ python .claude/skills/commit-prep-helper/scripts/code_review.py
 ```
 
 チェック項目：
-
 - セキュリティ脆弱性 (ハードコード、eval、XSS等)
 - コード品質 (console.log、TODO、長すぎる行等)
 - 複雑度 (関数の長さ、ネスト深さ)
 
 ### Step 5: コミットメッセージ生成とコミット実行
-
 `references/conventional_commits.md`のルールに従い、コミットメッセージを生成：
 
 ```bash
@@ -103,7 +94,6 @@ python .claude/skills/commit-prep-helper/scripts/create_commit.py
 ```
 
 生成ルール：
-
 - コミットタイプの自動判定 (feat/fix/docs/test/chore)
 - スコープの自動付与 (機能単位)
 - 品質チェック結果をBodyに記載
@@ -111,7 +101,6 @@ python .claude/skills/commit-prep-helper/scripts/create_commit.py
 ## 品質基準
 
 ### Lintチェック基準
-
 - **Errorレベル**: 0件必須 (ブロック要因)
 - **Warningレベル**: 5件以内推奨
 - **フォーマット**: Prettier/Blackエラー0件
@@ -119,13 +108,11 @@ python .claude/skills/commit-prep-helper/scripts/create_commit.py
 詳細: `references/quality_thresholds.md`
 
 ### テスト品質基準
-
 - **テスト成功率**: 100%必須
 - **カバレッジ**: 70%以上推奨、80%以上理想
 - **タイムアウト**: 5分
 
 ### コードレビュー基準
-
 - **セキュリティ**: 高危険度問題0件必須
 - **品質スコア**: 80点以上で合格
 - **複雑度**: 関数50行以内、ネスト4階層以内
@@ -133,7 +120,6 @@ python .claude/skills/commit-prep-helper/scripts/create_commit.py
 ## 対応プロジェクトタイプ
 
 ### Node.js/TypeScript
-
 ```
 package.json          -> 検出
 ├── jest.config.js    -> Jest使用
@@ -142,7 +128,6 @@ package.json          -> 検出
 ```
 
 ### Python
-
 ```
 requirements.txt      -> 検出
 pyproject.toml       -> 検出
@@ -151,7 +136,6 @@ pyproject.toml       -> 検出
 ```
 
 ### Rust/Go
-
 ```
 Cargo.toml           -> Rust検出
 go.mod              -> Go検出
@@ -160,7 +144,6 @@ go.mod              -> Go検出
 ## カスタマイズ設定
 
 ### プロジェクト固有設定
-
 プロジェクトルートに `.commit-prep-config.json` を配置：
 
 ```json
@@ -179,7 +162,6 @@ go.mod              -> Go検出
 ```
 
 ### レビュー設定のカスタマイズ
-
 `assets/review_config.json` でチェック項目を調整：
 
 - セキュリティパターンの追加/削除
@@ -189,7 +171,6 @@ go.mod              -> Go検出
 ## エラーハンドリング
 
 ### Lintエラー時
-
 ```bash
 # ESLintエラー例
 ❌ Lint Check Failed
@@ -198,7 +179,6 @@ ESLint: 3 errors found
 ```
 
 ### テスト失敗時
-
 ```bash
 # テスト失敗例
 ❌ Test Execution Failed
@@ -207,7 +187,6 @@ Jest: 2 tests failed, 15 passed
 ```
 
 ### セキュリティ問題時
-
 ```bash
 # セキュリティ警告
 ⚠️ Security Issues Found
@@ -220,7 +199,6 @@ Jest: 2 tests failed, 15 passed
 ### 典型的なユースケース
 
 **1. 機能追加後のコミット**
-
 ```
 ユーザ: 「ユーザー認証機能を実装したのでコミットして」
 スキル:
@@ -232,7 +210,6 @@ Jest: 2 tests failed, 15 passed
 ```
 
 **2. バグ修正時のコミット**
-
 ```
 ユーザ: 「APIのnullハンドリングを修正したのでコミットして」
 スキル:
@@ -244,7 +221,6 @@ Jest: 2 tests failed, 15 passed
 ```
 
 **3. ドキュメント更新時のコミット**
-
 ```
 ユーザ: 「READMEとAPIドキュメントを更新したのでコミットして」
 スキル:
@@ -258,7 +234,6 @@ Jest: 2 tests failed, 15 passed
 ## Resources
 
 ### scripts/
-
 実行可能なPythonスクリプト群で、各種品質チェックを自動実行します。
 
 - `check_staged_files.py` - Gitステージングファイルの検出と分析
@@ -268,7 +243,6 @@ Jest: 2 tests failed, 15 passed
 - `create_commit.py` - Conventional Commits準拠のコミットメッセージ生成
 
 ### references/
-
 スキルの動作に関する詳細ドキュメントで、Claudeが参照する情報源です。
 
 - `conventional_commits.md` - コミットメッセージのルールとテンプレート
@@ -276,7 +250,6 @@ Jest: 2 tests failed, 15 passed
 - `tool_mapping.md` - プロジェクトタイプ別ツール設定のマッピング
 
 ### assets/
-
 スキル実行時に使用される設定ファイルとテンプレートです。
 
 - `review_config.json` - コードレビューのチェック項目としきい値設定

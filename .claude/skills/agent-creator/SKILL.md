@@ -56,14 +56,14 @@ python .claude/skills/agent-creator/scripts/init_agent.py --init
 
 Select the appropriate agent type based on your needs:
 
-| Need                  | Recommended Type  | Key Features                               |
-| --------------------- | ----------------- | ------------------------------------------ |
-| Code quality analysis | `code-review`     | Architecture, security, performance review |
-| Deployment automation | `deployment`      | CI/CD, health checks, rollback             |
-| Test automation       | `testing`         | Coverage analysis, quality gates           |
-| Documentation needs   | `documentation`   | API docs, technical writing                |
-| Security concerns     | `security`        | Vulnerability scanning, compliance         |
-| Complex tasks         | `general-purpose` | Research, coordination, synthesis          |
+| Need | Recommended Type | Key Features |
+|------|------------------|--------------|
+| Code quality analysis | `code-review` | Architecture, security, performance review |
+| Deployment automation | `deployment` | CI/CD, health checks, rollback |
+| Test automation | `testing` | Coverage analysis, quality gates |
+| Documentation needs | `documentation` | API docs, technical writing |
+| Security concerns | `security` | Vulnerability scanning, compliance |
+| Complex tasks | `general-purpose` | Research, coordination, synthesis |
 
 ### Step 3: Generate Agent
 
@@ -153,7 +153,6 @@ python .claude/skills/agent-creator/scripts/generate_agent.py \
 **Best for**: Development teams needing systematic code quality analysis
 
 **Key Features**:
-
 - Architecture & design analysis (25% weight)
 - Code quality assessment (20% weight)
 - Security vulnerability detection (20% weight)
@@ -168,7 +167,6 @@ python .claude/skills/agent-creator/scripts/generate_agent.py \
 **Best for**: DevOps teams managing deployment pipelines
 
 **Key Features**:
-
 - Pre-deployment validation
 - Automated deployment execution
 - Health check monitoring
@@ -182,7 +180,6 @@ python .claude/skills/agent-creator/scripts/generate_agent.py \
 **Best for**: QA teams ensuring comprehensive testing coverage
 
 **Key Features**:
-
 - Test automation execution
 - Coverage report generation (80%+ requirement)
 - Quality assurance validation
@@ -196,7 +193,6 @@ python .claude/skills/agent-creator/scripts/generate_agent.py \
 **Best for**: Technical writers and development teams
 
 **Key Features**:
-
 - API documentation generation
 - README and guide creation
 - Technical writing assistance
@@ -210,7 +206,6 @@ python .claude/skills/agent-creator/scripts/generate_agent.py \
 **Best for**: Security teams and compliance officers
 
 **Key Features**:
-
 - OWASP Top 10 vulnerability scanning
 - Security best practices validation
 - Compliance assessment
@@ -224,12 +219,11 @@ python .claude/skills/agent-creator/scripts/generate_agent.py \
 **Best for**: Complex research and multi-step coordination tasks
 
 **Key Features**:
-
 - Broad research capabilities
 - Multi-step task coordination
 - Information synthesis
 - Problem decomposition
-- Full tool access (\*)
+- Full tool access (*)
 
 **Use Cases**: Research projects, problem analysis, cross-functional coordination
 
@@ -315,7 +309,6 @@ python scripts/validate_agent.py --all
 - `workflow_patterns.md` - Detailed workflow patterns and quality standards for each agent type
 
 **Key Information:**
-
 - Agent type selection guidelines
 - Workflow quality standards
 - Integration patterns and best practices
@@ -329,7 +322,6 @@ python scripts/validate_agent.py --all
 - `template_example.md` - Example of a generated agent definition file showing proper structure and format
 
 **Purpose:**
-
 - Demonstrates expected output format
 - Provides reference for manual customization
 - Shows best practices for agent documentation
@@ -339,7 +331,6 @@ python scripts/validate_agent.py --all
 ### Common Issues
 
 **Agent not found after creation:**
-
 ```bash
 # Restart Claude Code to reload agents
 # Verify agent exists in .claude/agents/
@@ -347,7 +338,6 @@ ls .claude/agents/
 ```
 
 **Validation errors:**
-
 ```bash
 # Check detailed validation output
 python scripts/validate_agent.py agent-name.md
@@ -359,7 +349,6 @@ python scripts/validate_agent.py agent-name.md
 ```
 
 **Directory not found:**
-
 ```bash
 # Initialize agents directory
 python scripts/init_agent.py --init
@@ -377,4 +366,4 @@ python scripts/init_agent.py --status
 
 ---
 
-_This agent-creator skill follows the Miyabi framework principles and integrates with the common library system for consistent environment management._
+*This agent-creator skill follows the Miyabi framework principles and integrates with the common library system for consistent environment management.*

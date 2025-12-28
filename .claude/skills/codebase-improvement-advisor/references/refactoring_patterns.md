@@ -3,22 +3,19 @@
 ## 基本的なリファクタリングパターン
 
 ### 1. Extract Method (メソッド抽出)
-
 **目的**: 長い関数を理解しやすい小さな関数に分割する
 
 **適用条件**:
-
 - 関数が長すぎる（30行以上）
 - 複数の処理を1つの関数で行っている
 - コメントを使って処理を説明している
 
 **実装例**:
-
 ```typescript
 // Before
 function generateReport(data: OrderData[]): string {
-  let report = '販売レポート\n\n';
-  report += '期間: ' + data[0].date + ' 〜 ' + data[data.length - 1].date + '\n\n';
+  let report = "販売レポート\n\n";
+  report += "期間: " + data[0].date + " 〜 " + data[data.length-1].date + "\n\n";
 
   let totalSales = 0;
   let totalOrders = data.length;
@@ -27,14 +24,14 @@ function generateReport(data: OrderData[]): string {
     totalSales += order.amount;
   }
 
-  report += '総売上: ¥' + totalSales.toLocaleString() + '\n';
-  report += '総注文数: ' + totalOrders + '件\n';
+  report += "総売上: ¥" + totalSales.toLocaleString() + "\n";
+  report += "総注文数: " + totalOrders + "件\n";
 
   const avgOrder = totalSales / totalOrders;
-  report += '平均注文額: ¥' + avgOrder.toLocaleString() + '\n\n';
+  report += "平均注文額: ¥" + avgOrder.toLocaleString() + "\n\n";
 
-  report += '日別売上\n';
-  report += '--------\n';
+  report += "日別売上\n";
+  report += "--------\n";
 
   const dailySales: { [key: string]: number } = {};
   for (const order of data) {
@@ -46,7 +43,7 @@ function generateReport(data: OrderData[]): string {
   }
 
   for (const date in dailySales) {
-    report += date + ': ¥' + dailySales[date].toLocaleString() + '\n';
+    report += date + ": ¥" + dailySales[date].toLocaleString() + "\n";
   }
 
   return report;
@@ -61,7 +58,7 @@ function generateReport(data: OrderData[]): string {
 }
 
 function createHeader(data: OrderData[]): string {
-  return `販売レポート\n\n期間: ${data[0].date} 〜 ${data[data.length - 1].date}\n\n`;
+  return `販売レポート\n\n期間: ${data[0].date} 〜 ${data[data.length-1].date}\n\n`;
 }
 
 function calculateSummaryStats(data: OrderData[]): string {
@@ -69,16 +66,14 @@ function calculateSummaryStats(data: OrderData[]): string {
   const totalOrders = data.length;
   const avgOrder = totalSales / totalOrders;
 
-  return (
-    `総売上: ¥${totalSales.toLocaleString()}\n` +
-    `総注文数: ${totalOrders}件\n` +
-    `平均注文額: ¥${avgOrder.toLocaleString()}\n\n`
-  );
+  return `総売上: ¥${totalSales.toLocaleString()}\n` +
+         `総注文数: ${totalOrders}件\n` +
+         `平均注文額: ¥${avgOrder.toLocaleString()}\n\n`;
 }
 
 function generateDailySales(data: OrderData[]): string {
   const dailySales = aggregateDailySales(data);
-  let report = '日別売上\n--------\n';
+  let report = "日別売上\n--------\n";
 
   for (const [date, amount] of Object.entries(dailySales)) {
     report += `${date}: ¥${amount.toLocaleString()}\n`;
@@ -97,25 +92,18 @@ function aggregateDailySales(data: OrderData[]): { [key: string]: number } {
 ```
 
 ### 2. Extract Variable (変数抽出)
-
 **目的**: 複雑な式や意味のある値に名前を付ける
 
 **適用条件**:
-
 - 複雑な計算式がある
 - マジックナンバーがある
 - 条件式が読みにくい
 
 **実装例**:
-
 ```typescript
 // Before
 function calculateDiscount(price: number, customerLevel: string, isPremiumMember: boolean): number {
-  if (
-    price > 10000 &&
-    (customerLevel === 'gold' || customerLevel === 'platinum') &&
-    isPremiumMember
-  ) {
+  if (price > 10000 && (customerLevel === 'gold' || customerLevel === 'platinum') && isPremiumMember) {
     return price * 0.85;
   } else if (price > 5000 && (customerLevel === 'gold' || customerLevel === 'platinum')) {
     return price * 0.9;
@@ -153,11 +141,9 @@ function calculateDiscount(price: number, customerLevel: string, isPremiumMember
 ```
 
 ### 3. Replace Magic Number with Symbolic Constant (マジックナンバーの置き換え)
-
 **目的**: 数値リテラルに意味のある名前を付ける
 
 **実装例**:
-
 ```typescript
 // Before
 class DeliveryCalculator {
@@ -217,11 +203,9 @@ class DeliveryCalculator {
 ```
 
 ### 4. Replace Conditional with Polymorphism (条件分岐のポリモーフィズム化)
-
 **目的**: 複雑な条件分岐をオブジェクト指向の設計に置き換える
 
 **実装例**:
-
 ```typescript
 // Before
 class PaymentProcessor {
@@ -350,7 +334,7 @@ class PaymentMethodFactory {
     ['credit_card', new CreditCardPayment()],
     ['bank_transfer', new BankTransferPayment()],
     ['digital_wallet', new DigitalWalletPayment()],
-    ['cryptocurrency', new CryptocurrencyPayment()],
+    ['cryptocurrency', new CryptocurrencyPayment()]
   ]);
 
   static create(methodName: string): PaymentMethod {
@@ -376,11 +360,9 @@ class PaymentProcessor {
 ```
 
 ### 5. Extract Class (クラス抽出)
-
 **目的**: 1つのクラスが複数の責務を持っている場合に分割する
 
 **実装例**:
-
 ```typescript
 // Before
 class Employee {
@@ -509,21 +491,11 @@ class Employee {
   }
 
   // Getters
-  get name(): string {
-    return this.personalInfo.name;
-  }
-  get email(): string {
-    return this.personalInfo.email;
-  }
-  get department(): string {
-    return this.employmentInfo.department;
-  }
-  get position(): string {
-    return this.employmentInfo.position;
-  }
-  get salary(): number {
-    return this.employmentInfo.salary;
-  }
+  get name(): string { return this.personalInfo.name; }
+  get email(): string { return this.personalInfo.email; }
+  get department(): string { return this.employmentInfo.department; }
+  get position(): string { return this.employmentInfo.position; }
+  get salary(): number { return this.employmentInfo.salary; }
 
   // Delegated methods
   calculateBonus(): number {
@@ -553,11 +525,9 @@ class Employee {
 ```
 
 ### 6. Introduce Parameter Object (パラメータオブジェクトの導入)
-
 **目的**: 多くのパラメータを持つメソッドを整理する
 
 **実装例**:
-
 ```typescript
 // Before
 function createUser(
@@ -620,7 +590,9 @@ class Address {
 }
 
 class UserPreferences {
-  constructor(public newsletterOptIn: boolean = false) {}
+  constructor(
+    public newsletterOptIn: boolean = false
+  ) {}
 }
 
 class UserData {
@@ -693,19 +665,12 @@ function updateUser(id: string, updates: Partial<UserData>): User {
 ```
 
 ### 7. Replace Nested Conditional with Guard Clauses (ガード節によるネストの置き換え)
-
 **目的**: 深いネストをなくしてコードを読みやすくする
 
 **実装例**:
-
 ```typescript
 // Before
-function calculateInsurancePremium(
-  age: number,
-  hasAccidents: boolean,
-  isSmoker: boolean,
-  hasPreExistingConditions: boolean
-): number {
+function calculateInsurancePremium(age: number, hasAccidents: boolean, isSmoker: boolean, hasPreExistingConditions: boolean): number {
   let basePremium = 100;
 
   if (age >= 18) {
@@ -778,12 +743,7 @@ function calculateInsurancePremium(
 }
 
 // After
-function calculateInsurancePremium(
-  age: number,
-  hasAccidents: boolean,
-  isSmoker: boolean,
-  hasPreExistingConditions: boolean
-): number {
+function calculateInsurancePremium(age: number, hasAccidents: boolean, isSmoker: boolean, hasPreExistingConditions: boolean): number {
   const BASE_PREMIUM = 100;
 
   // ガード節：年齢チェック
@@ -814,7 +774,7 @@ class InsuranceCalculator {
     ACCIDENTS: 0.5,
     SMOKING: 0.6,
     PRE_EXISTING_CONDITIONS: 1.0,
-    SENIOR_AGE: 1.5,
+    SENIOR_AGE: 1.5
   };
 
   static calculatePremium(
@@ -829,10 +789,7 @@ class InsuranceCalculator {
     }
 
     const riskMultiplier = this.calculateRiskMultiplier(
-      age,
-      hasAccidents,
-      isSmoker,
-      hasPreExistingConditions
+      age, hasAccidents, isSmoker, hasPreExistingConditions
     );
 
     return this.BASE_PREMIUM * riskMultiplier;

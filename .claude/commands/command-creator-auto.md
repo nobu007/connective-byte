@@ -10,7 +10,6 @@ This command automates the creation and update of **single-file commands** in `.
 It acts as a meta-command that takes a high-level description from the user and turns it into a production-ready `.md` command file, following the Miyabi framework standards.
 
 ## Core Philosophy
-
 - **One File, One Command**: Commands should be self-contained in a single Markdown file.
 - **Agent-Centric**: Instructions are written for the agent (Claude), not the user.
 - **Minimal Interaction**: Ask clarifying questions only when absolutely necessary. Default to best practices.
@@ -18,49 +17,42 @@ It acts as a meta-command that takes a high-level description from the user and 
 ## Workflow
 
 ### Step 1: Analyze Request & Mode
-
 Determine if this is a **New Creation** or an **Update**.
 
 - **New Creation**: User wants a new capability.
-  - _Action_: Determine a unique kebab-case filename (e.g., `pr-status-checker.md`).
+  - *Action*: Determine a unique kebab-case filename (e.g., `pr-status-checker.md`).
 - **Update**: User wants to modify an existing command.
-  - _Action_: Identify the target file (e.g., `code-review.md`) and read its current content.
+  - *Action*: Identify the target file (e.g., `code-review.md`) and read its current content.
 
 ### Step 2: Design Command
-
 Plan the command structure before writing.
 
 #### Frontmatter Design
-
 - `description`: Concise summary of "when to use this command".
 - `allowed-tools`: **Restrictive list**. Only include tools absolutely needed (e.g., `Bash`, `Read`, `Task`).
-  - _Note_: If the command needs to run git, include `Bash`. If it needs to read files, include `Read`.
+  - *Note*: If the command needs to run git, include `Bash`. If it needs to read files, include `Read`.
 - `argument-hint`: Helpful string showing expected arguments (e.g., `[target_dir]`).
 
 #### Body Design
-
 - **Prerequisites**: Use `!` syntax for auto-running context checks (e.g., `!git status -s`).
 - **Step-by-Step Logic**: Numbered steps for the agent to follow.
 - **Sub-Agent Delegation**: Use `Task` blocks for complex reasoning or parallel work.
-  - _Example_:
+  - *Example*:
     ```markdown
     ## Analysis
     ```
     Subagent: code-review-expert
     Prompt: Analyze...
     ```
-
     ```
 
 ### Step 3: Implement & Install
-
 1.  **Generate Content**: Create the full Markdown content.
 2.  **Write File**: Save to `.claude/commands/<filename>.md`.
-    - _Path_: Always use absolute path or relative to project root.
-    - _Overwrite_: If updating, set `Overwrite: true`.
+    - *Path*: Always use absolute path or relative to project root.
+    - *Overwrite*: If updating, set `Overwrite: true`.
 
 ### Step 4: Verification
-
 1.  **Check Existence**: Verify the file was created/updated.
 2.  **Syntax Check**: Ensure frontmatter is valid YAML and sections are clear.
 
@@ -70,23 +62,20 @@ Plan the command structure before writing.
 ---
 description: Checks the status of the current PR and lists failing checks.
 allowed-tools: Bash
-argument-hint: ''
+argument-hint: ""
 ---
 
 # PR Status Checker
 
 ## 1. Context Check
-
 !`git branch --show-current && gh pr view --json url,state,statusCheckRollup`
 
 ## 2. Analysis
-
 If the PR is merged, report success.
 If checks are failing, list them and suggest fixes.
 ```
 
 ## Instructions for the Agent (You)
-
 1.  **Parse Input**: specific requirements vs. vague intent.
 2.  **Propose/Execute**:
     - If simple: "I will create `xxx.md`." -> **Write immediately**.

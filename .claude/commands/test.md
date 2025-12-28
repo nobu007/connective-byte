@@ -9,7 +9,6 @@ description: プロジェクト全体のテストを実行
 ## 実行内容
 
 1. **TypeScript型チェック**
-
    ```bash
    npm run typecheck
    ```
@@ -49,7 +48,6 @@ npm run test:coverage
 ## 失敗時の対処
 
 ### TypeScriptエラー
-
 ```bash
 # エラー詳細確認
 npm run typecheck
@@ -59,7 +57,6 @@ cat agents/types/index.ts
 ```
 
 ### テスト失敗
-
 ```bash
 # 詳細モードで実行
 npm test -- --reporter=verbose

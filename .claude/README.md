@@ -63,14 +63,14 @@ Specialist Layer
 
 ### Agent実行権限
 
-| Agent            | 権限                    | エスカレーション先            |
-| ---------------- | ----------------------- | ----------------------------- |
-| CoordinatorAgent | 🟢 オーケストレーション | TechLead (循環依存時)         |
-| CodeGenAgent     | 🔵 コード生成           | TechLead (アーキテクチャ問題) |
-| ReviewAgent      | 🟡 品質判定             | CISO (セキュリティ)           |
-| IssueAgent       | 🟢 分析・Label          | PO (ビジネス判断)             |
-| PRAgent          | 🔵 PR作成               | TechLead (権限エラー)         |
-| DeploymentAgent  | 🔴 本番デプロイ         | CTO (本番環境)                |
+| Agent | 権限 | エスカレーション先 |
+|-------|------|------------------|
+| CoordinatorAgent | 🟢 オーケストレーション | TechLead (循環依存時) |
+| CodeGenAgent | 🔵 コード生成 | TechLead (アーキテクチャ問題) |
+| ReviewAgent | 🟡 品質判定 | CISO (セキュリティ) |
+| IssueAgent | 🟢 分析・Label | PO (ビジネス判断) |
+| PRAgent | 🔵 PR作成 | TechLead (権限エラー) |
+| DeploymentAgent | 🔴 本番デプロイ | CTO (本番環境) |
 
 ## 🎯 カスタムコマンド
 
@@ -149,12 +149,12 @@ TypeScriptコンパイルエラーをチェック
 
 ### エスカレーション基準
 
-| 問題種別           | エスカレーション先 | 重要度         |
-| ------------------ | ------------------ | -------------- |
-| アーキテクチャ問題 | TechLead           | Sev.2-High     |
-| セキュリティ脆弱性 | CISO               | Sev.1-Critical |
-| ビジネス優先度     | PO                 | Sev.3-Medium   |
-| 本番デプロイ       | CTO                | Sev.1-Critical |
+| 問題種別 | エスカレーション先 | 重要度 |
+|---------|------------------|--------|
+| アーキテクチャ問題 | TechLead | Sev.2-High |
+| セキュリティ脆弱性 | CISO | Sev.1-Critical |
+| ビジネス優先度 | PO | Sev.3-Medium |
+| 本番デプロイ | CTO | Sev.1-Critical |
 
 ## 🚀 使い方
 
@@ -191,11 +191,11 @@ ln -s ../../.claude/hooks/auto-format.sh ../../.git/hooks/pre-commit
 
 ## 📚 関連ドキュメント
 
-- [README.md](../README.md) - プロジェクト概要
-- [AGENTS.md](../AGENTS.md) - Agent運用プロトコル
-- [docs/AGENT_OPERATIONS_MANUAL.md](../docs/AGENT_OPERATIONS_MANUAL.md) - 完全運用マニュアル
-- [DEPLOYMENT.md](../DEPLOYMENT.md) - デプロイガイド
-- [CONTRIBUTING.md](../CONTRIBUTING.md) - 貢献ガイド
+- [README.md](commands/deploy.md) - プロジェクト概要
+- [AGENTS.md](commands/deploy.md) - Agent運用プロトコル
+- [docs/AGENT_OPERATIONS_MANUAL.md](commands/deploy.md) - 完全運用マニュアル
+- [DEPLOYMENT.md](commands/deploy.md) - デプロイガイド
+- [CONTRIBUTING.md](commands/deploy.md) - 貢献ガイド
 
 ## 🔐 セキュリティ
 

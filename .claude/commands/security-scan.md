@@ -80,7 +80,7 @@ npm run typecheck
 
 ### レポート例
 
-````markdown
+```markdown
 # Security Scan Report - 2025-10-08
 
 **Scan Time**: 2025-10-08T10:30:00Z
@@ -91,12 +91,12 @@ npm run typecheck
 
 ## 📊 Summary
 
-| Category     | Critical | High  | Moderate | Low   | Total  |
-| ------------ | -------- | ----- | -------- | ----- | ------ |
-| Dependencies | 0        | 2     | 3        | 5     | 10     |
-| Code         | 0        | 1     | 0        | 2     | 3      |
-| Secrets      | 0        | 0     | 0        | 0     | 0      |
-| **Total**    | **0**    | **3** | **3**    | **7** | **13** |
+| Category | Critical | High | Moderate | Low | Total |
+|----------|----------|------|----------|-----|-------|
+| Dependencies | 0 | 2 | 3 | 5 | 10 |
+| Code | 0 | 1 | 0 | 2 | 3 |
+| Secrets | 0 | 0 | 0 | 0 | 0 |
+| **Total** | **0** | **3** | **3** | **7** | **13** |
 
 **Overall Score**: 72/100 ⚠️ (Threshold: 80)
 
@@ -121,18 +121,14 @@ None found ✅
 Versions of lodash prior to 4.17.19 are vulnerable to prototype pollution.
 
 **Affected Locations**:
-
 - node_modules/lodash/lodash.js
 
 **Recommendation**:
-
 ```bash
 npm update lodash@>=4.17.21
 ```
-````
 
 **References**:
-
 - https://nvd.nist.gov/vuln/detail/CVE-2020-8203
 - https://github.com/lodash/lodash/pull/4874
 
@@ -145,14 +141,12 @@ npm update lodash@>=4.17.21
 **CWE**: CWE-79
 
 **Code**:
-
 ```typescript
 // ❌ Unsafe
 <div dangerouslySetInnerHTML={{ __html: userInput }} />
 ```
 
 **Recommendation**:
-
 ```typescript
 // ✅ Safe
 import DOMPurify from 'dompurify';
@@ -196,14 +190,12 @@ app.post('/login', limiter, loginHandler);
 **Severity**: Low
 
 **Code**:
-
 ```typescript
 // ❌ 予測可能
 const token = Math.random().toString(36);
 ```
 
 **Recommendation**:
-
 ```typescript
 // ✅ 暗号学的に安全
 import crypto from 'crypto';
@@ -246,14 +238,12 @@ const token = crypto.randomBytes(32).toString('hex');
 ## 🔍 Scan Details
 
 **Tools Used**:
-
 - npm audit (v10.2.0)
 - ESLint (v8.50.0) + eslint-plugin-security
 - git-secrets (v1.3.0)
 - TypeScript (v5.2.0)
 
 **Scan Coverage**:
-
 - Files Scanned: 234
 - Lines of Code: 12,450
 - Dependencies: 258
@@ -263,11 +253,11 @@ const token = crypto.randomBytes(32).toString('hex');
 
 ## 📈 Trend
 
-| Date       | Critical | High | Moderate | Low | Score |
-| ---------- | -------- | ---- | -------- | --- | ----- |
-| 2025-10-01 | 0        | 5    | 4        | 8   | 68    |
-| 2025-10-05 | 0        | 4    | 3        | 7   | 70    |
-| 2025-10-08 | 0        | 3    | 3        | 7   | 72    |
+| Date | Critical | High | Moderate | Low | Score |
+|------|----------|------|----------|-----|-------|
+| 2025-10-01 | 0 | 5 | 4 | 8 | 68 |
+| 2025-10-05 | 0 | 4 | 3 | 7 | 70 |
+| 2025-10-08 | 0 | 3 | 3 | 7 | 72 |
 
 **Improvement**: +4 points (5 days)
 
@@ -281,7 +271,6 @@ const token = crypto.randomBytes(32).toString('hex');
 4. Re-scan after fixes
 
 **Auto-fix Command**:
-
 ```bash
 npm audit fix --force
 /security-scan all
@@ -290,8 +279,7 @@ npm audit fix --force
 ---
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-````
+```
 
 ## スコアリングシステム
 
@@ -308,7 +296,7 @@ score -= vulnerabilities.low * 2;        // Low: -2点
 
 // 最低0点
 score = Math.max(0, score);
-````
+```
 
 **合格ライン**: 80点以上
 
@@ -431,7 +419,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '0 0 * * 0' # 毎週日曜日
+    - cron: '0 0 * * 0'  # 毎週日曜日
 
 jobs:
   security-scan:
@@ -463,11 +451,11 @@ jobs:
 
 セキュリティスコアが基準未満の場合、自動的にエスカレーションされます:
 
-| スコア  | エスカレーション先 | Severity       |
-| ------- | ------------------ | -------------- |
-| < 60点  | CTO + CISO         | Sev.1-Critical |
-| 60-79点 | CISO               | Sev.2-High     |
-| ≥ 80点  | なし               | なし           |
+| スコア | エスカレーション先 | Severity |
+|--------|-------------------|----------|
+| < 60点 | CTO + CISO | Sev.1-Critical |
+| 60-79点 | CISO | Sev.2-High |
+| ≥ 80点 | なし | なし |
 
 ## ツール設定
 
@@ -526,7 +514,7 @@ npm audit --audit-level=high
 // .eslintrc.json
 {
   "rules": {
-    "security/detect-object-injection": "warn" // error → warn
+    "security/detect-object-injection": "warn"  // error → warn
   }
 }
 ```

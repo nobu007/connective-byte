@@ -21,12 +21,10 @@ List all Claude Code checkpoints. Steps:
    - Use `git log -1 --format="%ai" stash@{n}` to get the timestamp for each stash
 
 4. Format and display as:
-
    ```
    Claude Code Checkpoints:
    [n] YYYY-MM-DD HH:MM:SS - Description (branch)
    ```
-
    Where n is the stash index number
 
 5. If `git stash list | grep "claude-checkpoint:"` returns nothing, display:

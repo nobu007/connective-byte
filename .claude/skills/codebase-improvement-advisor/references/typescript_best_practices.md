@@ -5,7 +5,6 @@
 ### 1. 型安全性
 
 #### 厳格な型定義
-
 ```typescript
 // ✅ 良い例
 interface User {
@@ -26,7 +25,6 @@ function getUser(id: any): any {
 ```
 
 #### Union Types の活用
-
 ```typescript
 // ✅ 良い例
 type Status = 'pending' | 'approved' | 'rejected';
@@ -48,7 +46,6 @@ interface ApiResponse {
 ### 2. 関数設計
 
 #### 関数の単一責任
-
 ```typescript
 // ✅ 良い例: 1つの関数で1つのことだけ
 function validateEmail(email: string): boolean {
@@ -73,7 +70,6 @@ function validateAndSaveUser(email: string, name: string): Promise<void> {
 ```
 
 #### 純粋関数の優先
-
 ```typescript
 // ✅ 良い例: 副作用のない純粋関数
 function calculateTotal(items: Item[]): number {
@@ -90,36 +86,32 @@ function addToTotal(price: number): void {
 ### 3. エラーハンドリング
 
 #### Result パターン
-
 ```typescript
 // ✅ 良い例: Result 型でのエラーハンドリング
-type Result<T, E = Error> =
-  | {
-      success: true;
-      data: T;
-    }
-  | {
-      success: false;
-      error: E;
-    };
+type Result<T, E = Error> = {
+  success: true;
+  data: T;
+} | {
+  success: false;
+  error: E;
+};
 
 function safeDivide(a: number, b: number): Result<number> {
   if (b === 0) {
     return {
       success: false,
-      error: new Error('Division by zero'),
+      error: new Error('Division by zero')
     };
   }
 
   return {
     success: true,
-    data: a / b,
+    data: a / b
   };
 }
 ```
 
 #### カスタムエラー型
-
 ```typescript
 // ✅ 良い例: 特定のエラー型
 class ValidationError extends Error {
@@ -146,7 +138,6 @@ class NetworkError extends Error {
 ### 4. 非同期処理
 
 #### Promise の適切な使用
-
 ```typescript
 // ✅ 良い例: async/await
 async function fetchUserData(userId: string): Promise<User> {
@@ -181,7 +172,6 @@ function fetchUserData(userId: string, callback: (user: User) => void): void {
 ### 5. パフォーマンス
 
 #### メモ化の活用
-
 ```typescript
 // ✅ 良い例: useMemo での計算結果のキャッシュ
 import { useMemo } from 'react';
@@ -196,7 +186,6 @@ function ExpensiveComponent({ items }: { items: Item[] }) {
 ```
 
 #### 遅延初期化
-
 ```typescript
 // ✅ 良い例: 遅延初期化
 class DatabaseConnection {
@@ -214,7 +203,6 @@ class DatabaseConnection {
 ### 6. コード組織
 
 #### モジュール分割
-
 ```typescript
 // ✅ 良い例: 機能ごとのモジュール分割
 // user/types.ts
@@ -245,9 +233,7 @@ export class UserService {
 ## リファクタリングパターン
 
 ### 1. Extract Method (メソッド抽出)
-
 **問題**: 長い関数が複数の処理をしている
-
 ```typescript
 // ❌ 改善前
 function processOrder(order: Order): void {
@@ -303,9 +289,7 @@ function calculateTotal(order: Order): number {
 ```
 
 ### 2. Extract Constant (定数抽出)
-
 **問題**: マジックナンバーや文字列リテラルが散在している
-
 ```typescript
 // ❌ 改善前
 function calculateShippingCost(weight: number, distance: number): number {
@@ -347,9 +331,7 @@ function applyDiscount(price: number, customerLevel: CustomerLevel): number {
 ```
 
 ### 3. Replace Conditional with Polymorphism (条件分岐のポリモーフィズム化)
-
 **問題**: 複雑な条件分岐が多い
-
 ```typescript
 // ❌ 改善前
 function calculatePrice(item: Item): number {
@@ -401,14 +383,13 @@ function calculatePrice(item: Item): number {
 ## セキュリティベストプラクティス
 
 ### 1. 入力検証
-
 ```typescript
 // ✅ 良い例: 厳格な入力検証
 function sanitizeInput(input: string): string {
   return input
     .trim()
     .replace(/[<>]/g, '') // HTMLタグを除去
-    .substring(0, 1000); // 長さを制限
+    .substring(0, 1000);  // 長さを制限
 }
 
 function validateEmail(email: string): boolean {
@@ -418,7 +399,6 @@ function validateEmail(email: string): boolean {
 ```
 
 ### 2. SQLインジェクション防止
-
 ```typescript
 // ✅ 良い例: パラメータ化クエリ
 async function getUserById(id: string): Promise<User> {
@@ -436,7 +416,6 @@ async function getUserById(id: string): Promise<User> {
 ```
 
 ### 3. 認証と認可
-
 ```typescript
 // ✅ 良い例: JWTトークン検証
 import jwt from 'jsonwebtoken';
@@ -477,7 +456,6 @@ function requireAuth(req: Request, res: Response, next: NextFunction): void {
 ## テスト戦略
 
 ### 1. ユニットテスト
-
 ```typescript
 // ✅ 良い例: 純粋関数のテスト
 describe('calculateTotal', () => {
@@ -488,7 +466,7 @@ describe('calculateTotal', () => {
   it('should calculate total correctly for multiple items', () => {
     const items = [
       { price: 100, quantity: 2 },
-      { price: 50, quantity: 3 },
+      { price: 50, quantity: 3 }
     ];
     expect(calculateTotal(items)).toBe(350);
   });
@@ -496,7 +474,6 @@ describe('calculateTotal', () => {
 ```
 
 ### 2. モックの使用
-
 ```typescript
 // ✅ 良い例: 適切なモック
 describe('UserService', () => {
@@ -506,7 +483,7 @@ describe('UserService', () => {
   beforeEach(() => {
     mockDatabase = {
       save: jest.fn(),
-      findById: jest.fn(),
+      findById: jest.fn()
     } as any;
 
     userService = new UserService(mockDatabase);
@@ -527,7 +504,6 @@ describe('UserService', () => {
 ## パフォーマンス最適化
 
 ### 1. メモリ使用量の最適化
-
 ```typescript
 // ✅ 良い例: WeakMap の使用
 class UserCache {
@@ -544,11 +520,10 @@ class UserCache {
 ```
 
 ### 2. 非同期処理の最適化
-
 ```typescript
 // ✅ 良い例: Promise.all での並列処理
 async function fetchMultipleUsers(userIds: string[]): Promise<User[]> {
-  const promises = userIds.map((id) => fetchUser(id));
+  const promises = userIds.map(id => fetchUser(id));
   return Promise.all(promises);
 }
 

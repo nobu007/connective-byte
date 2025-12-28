@@ -22,7 +22,6 @@ README.mdから仕様書と実装タスクを自動生成してください
 ```
 
 これだけで以下が完全自動実行される：
-
 1. **SpecWorkflowMcp連携** - 仕様ガイドラインの読み込みと適用
 2. **AI駆動PRD解析** - Claude Sonnet 4による高度なドキュメント理解
 3. **SPEC自動生成** - requirements.md, design.md, tasks.mdの高品質生成
@@ -35,13 +34,11 @@ README.mdから仕様書と実装タスクを自動生成してください
 ### 1. 🧠 AI強化PRDからSPEC自動生成
 
 **トリガー例：**
-
 - 「README.mdから仕様書と実装タスクを自動生成してください」
 - 「このPRDを解析してSPECを生成、AI品質チェックも実行してください」
 - 「既存コードから仕様を逆生成、Miyabi連携準備までお願いします」
 
 **AI連携自動実行内容：**
-
 1. **SpecWorkflowMcpガイドライン読み込み** - 標準SDDプロセスの適用
 2. **AI駆動PRD解析** - Claude Sonnet 4による高度なドキュメント理解
 3. **高品質SPEC生成** - requirements.md, design.md, tasks.mdの知的生成
@@ -49,7 +46,6 @@ README.mdから仕様書と実装タスクを自動生成してください
 5. **品質検証** - AIによる網羅性と一貫性のチェック
 
 **使用リソース：**
-
 - `scripts/enhanced_sdd_pipeline.py` - AI強化パイプライン（推奨）
 - `scripts/generate_spec_from_prd.py` - 従来の生成スクリプト
 - `references/prd_template.md` - PRDテンプレート参照
@@ -58,20 +54,17 @@ README.mdから仕様書と実装タスクを自動生成してください
 ### 2. SPECから実行タスクへの分解
 
 **トリガー例：**
-
 - 「SPECを実装タスクに分解してください」
 - 「このdesign.mdから具体的な実装計画を作成してください」
 - 「tasks.mdのタスクをさらに詳細化してください」
 
 **自動実行内容：**
-
 1. design.mdの技術的詳細を分析
 2. 実装優先順位の決定
 3. タスク間の依存関係の特定
 4. Miyabiエージェントとの連携タスク生成
 
 **使用リソース：**
-
 - `scripts/create_tasks_from_spec.py` - タスク分解スクリプト
 - `references/task_breakdown_patterns.md` - 分解パターン集
 - `references/sdd_integration_rules.md` - Miyabi連携ルール
@@ -79,33 +72,28 @@ README.mdから仕様書と実装タスクを自動生成してください
 ### 3. 整合性チェックと検証
 
 **トリガー例：**
-
 - 「PRDとSPECの整合性をチェックしてください」
 - 「仕様と実装コードの乖離を検証してください」
 - 「生成されたタスク網羅性を確認してください」
 
 **自動実行内容：**
-
 1. PRD↔requirements.mdの整合性検証
 2. design.md↔tasks.mdの技術的一貫性チェック
 3. 実装コードとの乖離検出
 4. レポート生成と修正提案
 
 **使用リソース：**
-
 - `scripts/validate_prd_spec_sync.py` - 整合性検証スクリプト
 - `assets/validation_checklists/` - 各種チェックリスト
 
 ### 4. 🚀 完全自動化SDDパイプライン
 
 **トリガー例：**
-
 - 「README.mdからSDD完全自動実行、Miyabi自律開発準備までお願いします」
 - 「このプロジェクトにAI強化SDDを適用してください」
 - 「仕様駆動開発の全工程を自動実行、品質担保までお願いします」
 
 **AI連携完全自動実行内容：**
-
 1. **Phase 0: SpecWorkflowMcpガイドライン読み込み** - SDD標準プロセス適用
 2. **Phase 1: 環境準備** - ワークスペース、依存関係の自動セットアップ
 3. **Phase 2: AI駆動PRD解析** - Claude Sonnet 4による知的ドキュメント解析
@@ -113,10 +101,9 @@ README.mdから仕様書と実装タスクを自動生成してください
 5. **Phase 4: AIタスク分解** - 実行可能レベルでの詳細タスク生成
 6. **Phase 5: AI品質検証** - 網羅性・一貫性・実行可能性のAIチェック
 7. **Phase 6: Miyabi連携準備** - 7エージェントとの連携データ生成
-8. **Phase 7: 完了レポート** - AI分析結果と次のアクション提示
+7. **Phase 7: 完了レポート** - AI分析結果と次のアクション提示
 
 **使用リソース：**
-
 - `scripts/enhanced_sdd_pipeline.py` - AI強化完全自動パイプライン（推奨）
 - `scripts/run_sdd_pipeline.py` - 従来のパイプラインスクリプト
 - SpecWorkflowMcpツール連携 - ガイドラインと承認プロセス
@@ -132,7 +119,6 @@ README.mdから仕様書と実装タスクを自動生成してください
 ### 具体的な実行例
 
 **例1: 新規機能開発**
-
 ```
 「ユーザー認証機能のPRDから仕様書と実装タスクを作成してください」
 ↓
@@ -143,7 +129,6 @@ README.mdから仕様書と実装タスクを自動生成してください
 ```
 
 **例2: 既存コードの仕様化**
-
 ```
 「既存のsrc/auth/*コードベースから仕様を逆生成してください」
 ↓
@@ -156,11 +141,9 @@ README.mdから仕様書と実装タスクを自動生成してください
 ## Resources
 
 ### scripts/
-
 SDDパイプラインを構成する実行可能なPythonスクリプト群。
 
 **主要スクリプト:**
-
 - `generate_spec_from_prd.py` - PRDからSPECを自動生成するメインスクリプト
 - `create_tasks_from_spec.py` - SPECから具体的な実装タスクを分解するスクリプト
 - `validate_prd_spec_sync.py` - PRDとSPECの整合性を検証するスクリプト
@@ -168,35 +151,29 @@ SDDパイプラインを構成する実行可能なPythonスクリプト群。
 - `setup_spec_workspace.py` - SPECワークスペースを初期化するスクリプト
 
 **実行方法:**
-
 ```bash
 python scripts/run_sdd_pipeline.py --prd README.md --spec-name user-auth
 python scripts/generate_spec_from_prd.py --input docs/PRD.md --output .spec-workflow/specs/new-feature
 ```
 
 ### references/
-
 SDDプロセスを支援するドキュメントとガイド。
 
 **主要ドキュメント:**
-
 - `prd_template.md` - PRD作成標準テンプレート
 - `spec_workflow_guide.md` - SpecWorkflowMcp利用詳細ガイド
 - `task_breakdown_patterns.md` - タスク分解の標準パターン集
 - `sdd_integration_rules.md` - Miyabiシステム連携ルール
 
 **参照タイミング:**
-
 - PRD作成時: `prd_template.md`
 - SPEC生成時: `spec_workflow_guide.md`
 - タスク分解時: `task_breakdown_patterns.md`, `sdd_integration_rules.md`
 
 ### assets/
-
 SDDプロセスで使用されるテンプレートやチェックリスト。
 
 **主要リソース:**
-
 - `sample_prd.md` - 高品質PRDのサンプル
 - `validation_checklists/` - 各種品質チェックリスト
   - `prd_validation.md` - PRD品質チェックリスト
@@ -211,7 +188,6 @@ SDDプロセスで使用されるテンプレートやチェックリスト。
 ### 🎯 典型的な使用シナリオ
 
 **シナリオ1: 新規機能開発**
-
 ```
 「ユーザー認証機能のREADME.mdから仕様書と実装タスクを自動生成してください」
 ↓
@@ -223,7 +199,6 @@ SDDプロセスで使用されるテンプレートやチェックリスト。
 ```
 
 **シナリオ2: 既存プロジェクトの仕様化**
-
 ```
 「src/auth/*の既存コードから仕様を逆生成、リファクタリング計画もお願いします」
 ↓
@@ -235,7 +210,6 @@ SDDプロセスで使用されるテンプレートやチェックリスト。
 ```
 
 **シナリオ3: 技術検証のためのプロトタイプ**
-
 ```
 「マイクロサービス構成の技術検証PRDから実装計画まで自動生成してください」
 ↓
@@ -252,7 +226,6 @@ SDDプロセスで使用されるテンプレートやチェックリスト。
 ### 🔧 詳細実行方法
 
 #### AI強化完全自動パイプライン（推奨）
-
 ```bash
 # Claude Codeでの実行（最も簡単）
 「README.mdからSDD完全自動実行、Miyabi自律開発準備までお願いします」
@@ -265,7 +238,6 @@ python .claude/skills/spec-flow-auto/scripts/enhanced_sdd_pipeline.py \
 ```
 
 #### 個別プロセス実行
-
 ```bash
 # PRDからSPEC生成のみ
 python scripts/generate_spec_from_prd.py \

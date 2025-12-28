@@ -42,14 +42,12 @@ python scripts/main.py --repository owner/repo --output-format text
 ### 1. Issue品質評価アルゴリズム
 
 #### 評価項目
-
 - **タイトル評価**（40点満点）：文字数、曖昧さパターン
 - **本文評価**（60点満点）：文字数、情報量
 - **情報量ボーナス**：環境情報、再現手順、エラー情報などの有無
 - **その他**：ラベルの有無、コードブロックの有無
 
 #### スコアリング方式
-
 - 満点100点から減点方式
 - 低いスコアほど品質が低い
 - 詳細な評価基準は `references/quality_criteria.md` を参照
@@ -57,14 +55,12 @@ python scripts/main.py --repository owner/repo --output-format text
 ### 2. 出力形式
 
 #### テキスト形式
-
 - Issue詳細情報
 - 品質スコアと評価理由
 - タイトル・本文のプレビュー
 - 対応すべき理由の明示
 
 #### JSON形式
-
 - 機械処理可能な構造化データ
 - CI/CDパイプラインでの利用に適した形式
 
@@ -106,7 +102,6 @@ python scripts/main.py
 ### scripts/
 
 **main.py** - メイン実行スクリプト
-
 - GitHub API連携
 - Issue品質評価ロジック
 - 結果出力とフォーマット
@@ -115,21 +110,18 @@ python scripts/main.py
 ### references/
 
 **quality_criteria.md** - 品質評価基準の詳細
-
 - スコアリングアルゴリズム
 - 評価項目と配点
 - 具体的な計算例
 - 品質判断の目安
 
 **github_api_usage.md** - GitHub API使用ガイド
-
 - APIエンドポイント詳細
 - 認証方法と権限
 - レート制限情報
 - セキュリティ考慮事項
 
 **api_reference.md** - クイックリファレンス
-
 - 環境変数一覧
 - コマンドライン使用法
 - 出力形式仕様
@@ -137,7 +129,6 @@ python scripts/main.py
 ### assets/
 
 **output_template.md** - 結果出力テンプレート
-
 - テキスト形式の出力フォーマット
 - Markdownレポートのテンプレート構造
 

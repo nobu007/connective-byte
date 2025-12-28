@@ -16,7 +16,6 @@ All agents follow a similar workflow structure:
 ### Code Review Workflow
 
 #### Phase 1: Architecture & Design Analysis (25%)
-
 ```
 1. Examine overall project structure
 2. Identify design patterns used
@@ -27,7 +26,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 2: Code Quality Assessment (20%)
-
 ```
 1. Review code readability and style
 2. Check for code smells and technical debt
@@ -38,7 +36,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 3: Security & Dependencies (20%)
-
 ```
 1. Scan for OWASP Top 10 vulnerabilities
 2. Check dependency versions and security
@@ -49,7 +46,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 4: Performance & Scalability (15%)
-
 ```
 1. Analyze algorithmic complexity
 2. Identify performance bottlenecks
@@ -60,7 +56,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 5: Testing Coverage (10%)
-
 ```
 1. Analyze test coverage metrics
 2. Review test quality and effectiveness
@@ -71,7 +66,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 6: Documentation & API Design (10%)
-
 ```
 1. Review API design consistency
 2. Check documentation completeness
@@ -86,7 +80,6 @@ All agents follow a similar workflow structure:
 ### Deployment Workflow
 
 #### Phase 1: Pre-deployment Validation
-
 ```
 1. Verify all tests pass with required coverage
 2. Check build artifacts and dependencies
@@ -97,7 +90,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 2: Deployment Execution
-
 ```
 1. Execute deployment pipeline
 2. Monitor deployment progress
@@ -108,7 +100,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 3: Health Check & Monitoring
-
 ```
 1. Perform comprehensive health checks
 2. Monitor key performance metrics
@@ -119,7 +110,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 4: Rollback Management
-
 ```
 1. Monitor rollback triggers
 2. Prepare rollback procedures
@@ -130,7 +120,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 5: Post-deployment Tasks
-
 ```
 1. Update deployment status
 2. Notify stakeholders
@@ -145,7 +134,6 @@ All agents follow a similar workflow structure:
 ### Testing Workflow
 
 #### Phase 1: Test Planning
-
 ```
 1. Analyze requirements and scope
 2. Identify test types needed
@@ -156,7 +144,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 2: Test Execution
-
 ```
 1. Run unit tests with coverage verification
 2. Execute integration tests
@@ -167,7 +154,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 3: Test Analysis
-
 ```
 1. Analyze test results and coverage
 2. Identify failing tests and root causes
@@ -178,7 +164,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 4: Quality Validation
-
 ```
 1. Verify code quality standards
 2. Check for security vulnerabilities
@@ -189,7 +174,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 5: Reporting
-
 ```
 1. Generate comprehensive test reports
 2. Provide quality recommendations
@@ -204,7 +188,6 @@ All agents follow a similar workflow structure:
 ### Documentation Workflow
 
 #### Phase 1: Documentation Analysis
-
 ```
 1. Analyze existing codebase structure
 2. Identify documentation gaps
@@ -215,7 +198,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 2: Content Generation
-
 ```
 1. Generate API documentation from code
 2. Create comprehensive README files
@@ -226,7 +208,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 3: Documentation Structure
-
 ```
 1. Organize documentation logically
 2. Ensure consistent formatting
@@ -237,7 +218,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 4: Quality Assurance
-
 ```
 1. Verify technical accuracy
 2. Check for completeness
@@ -248,7 +228,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 5: Maintenance Planning
-
 ```
 1. Establish update workflows
 2. Plan regular review cycles
@@ -263,7 +242,6 @@ All agents follow a similar workflow structure:
 ### Security Workflow
 
 #### Phase 1: Security Scanning
-
 ```
 1. Perform comprehensive code scans
 2. Check against OWASP Top 10
@@ -274,7 +252,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 2: Threat Analysis
-
 ```
 1. Identify potential security threats
 2. Assess attack surfaces
@@ -285,7 +262,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 3: Compliance Validation
-
 ```
 1. Check regulatory compliance
 2. Validate security policies
@@ -296,7 +272,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 4: Risk Assessment
-
 ```
 1. Categorize security risks
 2. Provide remediation recommendations
@@ -307,7 +282,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 5: Security Reporting
-
 ```
 1. Generate detailed security reports
 2. Provide actionable remediation steps
@@ -322,7 +296,6 @@ All agents follow a similar workflow structure:
 ### General Purpose Workflow
 
 #### Phase 1: Requirement Analysis
-
 ```
 1. Understand task objectives
 2. Identify constraints and limitations
@@ -333,7 +306,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 2: Information Gathering
-
 ```
 1. Research relevant information
 2. Analyze existing codebase
@@ -344,7 +316,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 3: Problem Decomposition
-
 ```
 1. Break complex tasks into steps
 2. Identify dependencies
@@ -355,7 +326,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 4: Execution & Coordination
-
 ```
 1. Execute planned steps systematically
 2. Coordinate with other agents
@@ -366,7 +336,6 @@ All agents follow a similar workflow structure:
 ```
 
 #### Phase 5: Synthesis & Reporting
-
 ```
 1. Synthesize findings and results
 2. Generate comprehensive reports
@@ -436,4 +405,4 @@ All agent workflows should meet these standards:
 
 ---
 
-_This workflow patterns document is part of the agent-creator skill_
+*This workflow patterns document is part of the agent-creator skill*
