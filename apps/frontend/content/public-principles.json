@@ -1,0 +1,65 @@
+{
+  "hero": {
+    "eyebrow": "Public Principles",
+    "title": "公開思想と技術原則",
+    "description": "ConnectiveByte が public 側で外部公開するのは、再利用できる思想、公開可能な技術原則、そして public/private 境界の考え方です。"
+  },
+  "philosophy": {
+    "title": "公開思想",
+    "items": [
+      {
+        "title": "接続可能性を価値にする",
+        "description": "思考の流れ、判断理由、前提条件を他者とAIに引き継げる形で残すことを重視します。"
+      },
+      {
+        "title": "検証できる主張だけを強く言う",
+        "description": "主張には根拠、判断には条件、改善には計測可能な指標を添えることを原則にします。"
+      },
+      {
+        "title": "AI協創を教育の問題として扱う",
+        "description": "ツール選定だけではなく、問い方、レビュー、共有形式まで含めて設計します。"
+      }
+    ]
+  },
+  "technology": {
+    "title": "公開技術原則",
+    "items": [
+      {
+        "title": "Static-first publication",
+        "description": "公開コンテンツは静的ファイル中心で扱い、差分追跡と配布をシンプルに保ちます。"
+      },
+      {
+        "title": "Manifest-driven publishing",
+        "description": "private 側から public 側へは allowlist 形式の manifest で明示された成果物だけを出力します。"
+      },
+      {
+        "title": "Schema to product",
+        "description": "思想や説明文も構造化データとして持ち、表示面では型付きコンテンツとして利用します。"
+      },
+      {
+        "title": "Verification before sync",
+        "description": "書き込み先の repo 境界と package 名を検証し、誤公開を防ぎます。"
+      }
+    ]
+  },
+  "boundary": {
+    "title": "Public / Private 境界",
+    "public_items": [
+      "公開可能な思想の説明",
+      "再利用できる技術原則",
+      "サイト表示に必要な静的コンテンツ",
+      "外部に共有して問題ない構成情報"
+    ],
+    "private_items": [
+      "生成ロジック",
+      "機密プロンプト",
+      "未公開の設計仕様",
+      "内部レビュー基準と改善フロー",
+      "競争優位に直結する検証ノウハウ"
+    ]
+  },
+  "cta": {
+    "title": "詳細は public repo と private core で分担する",
+    "description": "public repo は外部公開できる原則と説明責務を担い、private core は生成器、プロンプト、内部運用を保持します。"
+  }
+}

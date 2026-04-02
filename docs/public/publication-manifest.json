@@ -9,6 +9,11 @@
       "checksum": "40ddd6818dfd83004688c1bba55fbb9c666bfea3e69e6356b35b57be27785445"
     },
     {
+      "id": "public-principles-page",
+      "target": "apps/frontend/content/public-principles.json",
+      "checksum": "ab47a5cc99108ec5a1a96189b47498968aa38ece4480d18412f265bc368675ec"
+    },
+    {
       "id": "philosophy-doc",
       "target": "docs/public/philosophy.md",
       "checksum": "902aac0e6234f70c6eeb4f659400f48dc534ebe9585005cee18fbb9fbee4fa4e"

@@ -20,6 +20,7 @@ export const siteConfig = {
   navigation: [
     { name: 'ホーム', href: '/' },
     { name: 'About', href: '/about' },
+    { name: '原則', href: '/principles' },
     { name: 'お問い合わせ', href: '/contact' },
   ],
 

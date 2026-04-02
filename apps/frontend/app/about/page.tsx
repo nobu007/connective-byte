@@ -3,6 +3,7 @@ import aboutContent from '@/content/about.json';
 import { getWebPageSchema } from '@/lib/seo/structured-data';
 import { siteConfig } from '@/content/site-config';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'About - ConnectiveByte',
@@ -79,6 +80,19 @@ export default function AboutPage() {
               <div className="bg-gradient-to-r from-[#1e3a8a] to-[#10b981] text-white rounded-lg p-8 text-center">
                 <p className="text-2xl font-bold leading-relaxed">{aboutContent.vision.tagline}</p>
               </div>
+            </section>
+
+            <section className="mt-16 rounded-2xl border border-[#dbe4ef] bg-[#f8fbff] p-8">
+              <h2 className="mb-4 text-3xl font-bold text-[#111827]">公開原則を見る</h2>
+              <p className="mb-6 text-[#4b5563] leading-relaxed">
+                ConnectiveByte が public 側で公開している思想、技術原則、public/private 境界は原則ページで確認できます。
+              </p>
+              <Link
+                href="/principles"
+                className="inline-flex items-center rounded-full bg-[#111827] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1e3a8a]"
+              >
+                公開原則ページへ
+              </Link>
             </section>
           </article>
         </Container>
