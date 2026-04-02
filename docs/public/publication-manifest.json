@@ -1,0 +1,32 @@
+{
+  "source_repo": "connective_byte_core",
+  "source_manifest": "manifest.yaml",
+  "target_repo": "connective-byte",
+  "artifacts": [
+    {
+      "id": "about-page",
+      "target": "apps/frontend/content/about.json",
+      "checksum": "40ddd6818dfd83004688c1bba55fbb9c666bfea3e69e6356b35b57be27785445"
+    },
+    {
+      "id": "philosophy-doc",
+      "target": "docs/public/philosophy.md",
+      "checksum": "902aac0e6234f70c6eeb4f659400f48dc534ebe9585005cee18fbb9fbee4fa4e"
+    },
+    {
+      "id": "technology-principles-doc",
+      "target": "docs/public/technology-principles.md",
+      "checksum": "497d6e87f1de8a657452c3c9cfc394b5898ed27cfff694ae4e65742e8bda172d"
+    },
+    {
+      "id": "public-private-boundary-doc",
+      "target": "docs/public/public-private-boundary.md",
+      "checksum": "246215754b26590914a7d946bba1c8fb072bbcabc3aadeee8e9232fa970831a3"
+    },
+    {
+      "id": "docs-index",
+      "target": "docs/public/README.md",
+      "checksum": "3026a41f0fb01bfb0fa27ec7b702618efc14c2b97c20c8ef0a658e88dbf2bf30"
+    }
+  ]
+}

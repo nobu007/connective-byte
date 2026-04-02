@@ -145,6 +145,9 @@ npm run dev
 - [フロントエンド](./apps/frontend/README.md)
 - [バックエンド](./apps/backend/README.md)
 - [コンポーネントライブラリ](./libs/components/README.md)
+- [公開思想ガイド](./docs/public/philosophy.md)
+- [公開技術原則](./docs/public/technology-principles.md)
+- [公開/非公開境界](./docs/public/public-private-boundary.md)
 
 ## 🤝 コントリビューション
 
