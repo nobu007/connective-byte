@@ -36,7 +36,11 @@ export * from './optimization/PromptCompressor';
 export * from './optimization/CachingStrategy';
 export * from './optimization/BatchProcessor';
 export * from './optimization/StrategyRegistry';
-export * from './optimization/PromptOptimizer';
+export {
+  PromptOptimizer,
+  type PromptOptimizerOptions,
+  type OptimizationSuggestion as PromptOptimizationSuggestion,
+} from './optimization/PromptOptimizer';
 
 // Simulation
 export * from './simulation/types';
