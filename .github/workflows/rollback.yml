@@ -13,6 +13,17 @@ jobs:
     name: Rollback to Previous Version
     runs-on: ubuntu-latest
     steps:
+      # Fail fast when credentials are missing (see deploy.yml for rationale)
+      - name: Verify Netlify credentials
+        run: |
+          if [ -z "$NETLIFY_AUTH_TOKEN" ] || [ -z "$NETLIFY_SITE_ID" ]; then
+            echo "::error::NETLIFY_AUTH_TOKEN / NETLIFY_SITE_ID secrets are not configured."
+            exit 1
+          fi
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0

@@ -11,6 +11,19 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
+      # actions-netlify silently skips deploying when credentials are missing,
+      # which makes the job green while nothing is deployed. Fail explicitly.
+      - name: Verify Netlify credentials
+        run: |
+          if [ -z "$NETLIFY_AUTH_TOKEN" ] || [ -z "$NETLIFY_SITE_ID" ]; then
+            echo "::error::NETLIFY_AUTH_TOKEN / NETLIFY_SITE_ID secrets are not configured."
+            echo "::error::Set them in Settings → Secrets and variables → Actions (see DEPLOYMENT_GUIDE.md)."
+            exit 1
+          fi
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
       - uses: actions/checkout@v4
 
       - name: Use Node.js 20.x
