@@ -4,56 +4,55 @@ This directory contains comprehensive end-to-end tests for the ConnectiveByte fr
 
 ## Test Categories
 
-### 1. API Interaction Tests (`api-interaction.spec.ts`)
+### 1. Page Content Tests (`pages.spec.ts`)
 
-Tests API communication and response handling:
+Tests page content and structure:
 
-- Success response handling
-- Error response handling
-- Status indicator updates
+- Homepage hero, problem statement, value propositions and CTA
+- About page sections (mission, philosophy, values, vision)
+- Privacy policy sections and table of contents
+- Footer content and links
+- SEO meta tags
 
-### 2. Performance Tests (`performance.spec.ts`)
+### 2. Navigation Tests (`navigation.spec.ts`)
+
+Tests navigation behavior:
+
+- Navigation between all pages
+- Active page highlighting (`aria-current="page"`)
+- Mobile menu (open/close/navigate)
+- Accessible navigation landmark
+
+### 3. Contact Form Tests (`contact-form.spec.ts`)
+
+Tests the contact form:
+
+- Field display and accessibility attributes
+- Validation errors (empty form, invalid email, missing consent)
+- Successful submission
+- Privacy policy link
+
+### 4. Newsletter Tests (`newsletter-signup.spec.ts`, `newsletter-accessibility-audit.spec.ts`)
+
+Tests the newsletter signup form:
+
+- Signup flow and validation
+- Accessibility audit (ARIA labels, keyboard navigation, screen reader support)
+- Performance audit
+
+### 5. Performance Tests (`performance.spec.ts`)
 
 Tests API performance and response times:
 
 - Health check API response time validation
 - Performance threshold monitoring
 
-### 3. Health Monitoring Workflow Tests (`health-monitoring-workflow.spec.ts`)
+### 6. Responsive Layout Tests (`responsive-layout.spec.ts`)
 
-Tests health monitoring functionality:
+Tests visual consistency across viewports using screenshot comparison:
 
-- Initial health status loading
-- Error status handling
-- Detailed health information display
-
-### 4. Error Recovery Workflow Tests (`error-recovery-workflow.spec.ts`)
-
-Tests error handling and recovery mechanisms:
-
-- Retry logic with eventual success
-- Persistent error messaging
-- Network error recovery
-- Timeout scenario handling
-
-### 5. User Interaction Workflow Tests (`user-interaction-workflow.spec.ts`)
-
-Tests user interactions and UI behavior:
-
-- Loading state display
-- Page refresh functionality
-- UI component verification
-- Different status response handling
-- Accessibility standards compliance
-
-### 6. Visual Regression Tests (`visual-regression.spec.ts`)
-
-Tests visual consistency using screenshot comparison:
-
-- Homepage screenshots in different states (success, error, loading)
-- Component-level visual testing (status indicator)
-- Responsive design testing (mobile, tablet)
-- Dark mode visual testing
+- Desktop, tablet and mobile layouts
+- Baseline screenshots in `responsive-layout.spec.ts-snapshots/`
 
 ## Running Tests
 
@@ -66,13 +65,7 @@ npm run test:e2e -w apps/frontend
 ### Run specific test file
 
 ```bash
-npm run test:e2e -w apps/frontend -- api-interaction.spec.ts
-```
-
-### Run visual regression tests
-
-```bash
-npm run test:e2e -w apps/frontend -- visual-regression.spec.ts
+npm run test:e2e -w apps/frontend -- navigation.spec.ts
 ```
 
 ### Update visual regression baselines
@@ -80,7 +73,7 @@ npm run test:e2e -w apps/frontend -- visual-regression.spec.ts
 When UI changes are intentional, update the baseline screenshots:
 
 ```bash
-npm run test:e2e -w apps/frontend -- visual-regression.spec.ts --update-snapshots
+npm run test:e2e -w apps/frontend -- responsive-layout.spec.ts --update-snapshots
 ```
 
 ## Visual Regression Testing
@@ -89,7 +82,7 @@ Visual regression tests use Playwright's screenshot comparison feature to detect
 
 ### How it works:
 
-1. **Baseline Creation**: First run creates baseline screenshots in `e2e/visual-regression.spec.ts-snapshots/`
+1. **Baseline Creation**: First run creates baseline screenshots in `e2e/responsive-layout.spec.ts-snapshots/`
 2. **Comparison**: Subsequent runs compare current screenshots against baselines
 3. **Failure**: Tests fail if screenshots differ beyond the threshold
 4. **Update**: Use `--update-snapshots` flag to accept new visuals as baseline
@@ -99,7 +92,6 @@ Visual regression tests use Playwright's screenshot comparison feature to detect
 - Disable animations in visual tests for consistency
 - Use fixed timestamps for predictable content
 - Test multiple viewports (desktop, tablet, mobile)
-- Test both light and dark modes
 - Review visual diffs carefully before updating baselines
 
 ## Test Configuration
@@ -110,14 +102,6 @@ Tests are configured in `playwright.config.ts` with:
 - 30-second timeout per test
 - Chromium browser only (for faster execution)
 - HTML report generation
-
-## Coverage
-
-Current test coverage:
-
-- **23 E2E tests** covering all major user workflows
-- **7 visual regression tests** ensuring UI consistency
-- **100% critical path coverage** for health monitoring features
 
 ## Troubleshooting
 
@@ -132,8 +116,16 @@ Current test coverage:
 - Check if UI changes were intentional
 - Update baselines if changes are expected: `--update-snapshots`
 
+### Strict mode violations
+
+When a locator resolves to multiple elements, Playwright fails the test. Scope
+locators to a container (e.g. `page.locator('main form')`) or use
+`{ exact: true }`. Common duplicate sources on this site: the footer
+newsletter form (email label, consent checkbox, privacy link) and `<title>`
+elements (matched by `getByText` substring).
+
 ### Flaky tests
 
 - Increase timeouts if needed
-- Ensure proper wait conditions (e.g., `toBeVisible()`)
+- Ensure proper wait conditions (e.g. `toBeVisible()`)
 - Check for race conditions in async operations
