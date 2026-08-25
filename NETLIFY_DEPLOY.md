@@ -18,10 +18,10 @@
 
 以下の設定が自動的に適用されます（`netlify.toml`から）：
 
-- **Base directory**: `apps/frontend`
+- **Base directory**: `/`（リポジトリルート）
 - **Build command**: `npm run build`
 - **Publish directory**: `apps/frontend/out`
-- **Node.js version**: 20
+- **Node.js version**: 18
 
 ### 4. 環境変数の設定
 

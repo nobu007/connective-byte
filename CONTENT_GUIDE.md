@@ -657,3 +657,17 @@ If you encounter issues not covered in this guide:
 
 **Last Updated**: November 2025  
 **Version**: 1.0
+
+## public-principles.json（公開プリンシプルページ）
+
+`apps/frontend/content/public-principles.json` は `/principles` ページのコンテンツを管理する。
+
+| キー         | 内容                                        |
+| ------------ | ------------------------------------------- |
+| `hero`       | ページ先頭の見出し・サブタイトル            |
+| `philosophy` | 公開する思想（philosophy）セクション        |
+| `technology` | 技術原則セクション                          |
+| `boundary`   | 公開/非公開の境界に関するセクション         |
+| `cta`        | ページ末尾のCTA（リンク先は `/contact` 等） |
+
+元ネタは `docs/public/*.md`（philosophy / technology-principles / public-private-boundary）。公開文言を変更する場合はこのJSONを編集する。

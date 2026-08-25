@@ -40,25 +40,16 @@ ConnectiveByteは、「理解されない孤独を吹き飛ばして、AI活用�
 - **Runtime**: [Node.js](https://nodejs.org/)
 - **Template Engine**: [LiquidJS](https://liquidjs.com/)
 
-## 🎯 プロジェクトの哲学
-
-- **接続性**: あらゆるコンポーネントが緊密に連携し、シームレスな統合を実現
-- **拡張性**: モジュラー設計による容易な機能拡張
-- **保守性**: クリーンアーキテクチャと明確な責務分離による高い保守性
-
 ## 🏗️ プロジェクト構造
 
 ```
 ConnectiveByte/
 ├── apps/
 │   ├── frontend/    # Next.jsによるフロントエンドアプリケーション
-│   ├── backend/     # APIサーバー（FastAPI/Express）
-│   └── bot/         # Discord/Slack Bot
-├── libs/
-│   ├── components/  # 再利用可能なUIコンポーネント
-│   ├── logic/       # ビジネスロジックと共通機能
-│   └── design/      # デザインシステム
-└── starter-kit/     # 開発者向けテンプレート
+│   └── backend/     # Express.jsによるAPIサーバー
+└── libs/
+    ├── components/  # 再利用可能なUIコンポーネント
+    └── logic/       # ビジネスロジックと共通機能
 ```
 
 ## 🚀 クイックスタート
@@ -70,27 +61,25 @@ git clone https://github.com/nobu007/connective-byte.git
 cd connective-byte
 ```
 
-2. 環境変数の設定:
+2. 依存関係のインストール（ワークスペース全体を一括）:
 
 ```bash
-cd apps/frontend
-cp .env.example .env.local
+npm install
+```
+
+3. 環境変数の設定:
+
+```bash
+cp apps/frontend/.env.example apps/frontend/.env.local
 # .env.localを編集して必要な環境変数を設定
 ```
 
-3. フロントエンドの起動:
+4. 開発サーバーの起動:
 
 ```bash
-npm install
-npm run dev
-```
-
-4. バックエンドの起動:
-
-```bash
-cd apps/backend
-npm install
-npm run dev
+npm run dev              # frontend + backend を同時起動
+npm run dev:frontend     # フロントエンドのみ
+npm run dev:backend      # バックエンドのみ
 ```
 
 ### 環境変数の設定
@@ -133,18 +122,16 @@ npm run dev
 
 #### デプロイ設定（自動適用）
 
-- **Base directory**: `apps/frontend`
+- **Base directory**: `/`（リポジトリルート）
 - **Build command**: `npm run build`
 - **Publish directory**: `apps/frontend/out`
-- **Node.js version**: 20
+- **Node.js version**: 18
 
 ## 📚 ドキュメント
 
 各コンポーネントの詳細なドキュメントは以下を参照してください：
 
 - [フロントエンド](./apps/frontend/README.md)
-- [バックエンド](./apps/backend/README.md)
-- [コンポーネントライブラリ](./libs/components/README.md)
 - [公開思想ガイド](./docs/public/philosophy.md)
 - [公開技術原則](./docs/public/technology-principles.md)
 - [公開/非公開境界](./docs/public/public-private-boundary.md)
@@ -159,4 +146,4 @@ npm run dev
 
 ## 📄 ライセンス
 
-MITライセンスの下で公開されています。詳細は[LICENSE](./LICENSE)を参照してください。
+MPL-2.0（Mozilla Public License 2.0）の下で公開されています。詳細は[LICENSE](./LICENSE)を参照してください。
