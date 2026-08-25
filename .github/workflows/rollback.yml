@@ -3,13 +3,6 @@ name: Rollback Deployment
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: 'Environment to rollback'
-        required: true
-        type: choice
-        options:
-          - production
-          - staging
       commit_sha:
         description: 'Commit SHA to rollback to (leave empty for previous deployment)'
         required: false
@@ -34,16 +27,16 @@ jobs:
             TARGET_SHA=$(git log --format="%H" -n 2 | tail -1)
           fi
 
-          echo "target_sha=$TARGET_SHA" >> $GITHUB_OUTPUT
+          echo "target_sha=$TARGET_SHA" >> "$GITHUB_OUTPUT"
           echo "Rolling back to commit: $TARGET_SHA"
 
           # Get commit message
-          COMMIT_MSG=$(git log --format="%s" -n 1 $TARGET_SHA)
-          echo "commit_message=$COMMIT_MSG" >> $GITHUB_OUTPUT
+          COMMIT_MSG=$(git log --format="%s" -n 1 "$TARGET_SHA")
+          echo "commit_message=$COMMIT_MSG" >> "$GITHUB_OUTPUT"
 
       - name: Checkout target commit
         run: |
-          git checkout ${{ steps.target.outputs.target_sha }}
+          git checkout "${{ steps.target.outputs.target_sha }}"
 
       - name: Use Node.js 20.x
         uses: actions/setup-node@v4
@@ -58,16 +51,16 @@ jobs:
         run: npm run build:frontend
         env:
           NODE_ENV: production
-          NEXT_PUBLIC_API_URL: ${{ secrets.PRODUCTION_API_URL || 'https://api.connectivebyte.com' }}
 
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v3.0
         with:
           publish-dir: './apps/frontend/out'
+          functions-dir: './netlify/functions'
           production-branch: main
           github-token: ${{ secrets.GITHUB_TOKEN }}
           deploy-message: 'Rollback to ${{ steps.target.outputs.target_sha }} - ${{ steps.target.outputs.commit_message }}'
-          production-deploy: ${{ github.event.inputs.environment == 'production' }}
+          production-deploy: true
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
@@ -77,11 +70,7 @@ jobs:
         run: |
           sleep 10
 
-          if [ "${{ github.event.inputs.environment }}" == "production" ]; then
-            URL="${{ secrets.PRODUCTION_FRONTEND_URL || 'https://connectivebyte.netlify.app' }}"
-          else
-            URL="${{ secrets.STAGING_FRONTEND_URL || 'https://staging--connectivebyte.netlify.app' }}"
-          fi
+          URL="${{ secrets.PRODUCTION_FRONTEND_URL || 'https://connectivebyte.netlify.app' }}"
 
           STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
 
@@ -100,30 +89,29 @@ jobs:
             const issue = await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `Rollback performed on ${{ github.event.inputs.environment }}`,
+              title: `Rollback performed on production`,
               body: `## Rollback Details
 
-              - **Environment:** ${{ github.event.inputs.environment }}
-              - **Rolled back to:** ${{ steps.target.outputs.target_sha }}
-              - **Commit message:** ${{ steps.target.outputs.commit_message }}
-              - **Performed by:** @${{ github.actor }}
-              - **Timestamp:** ${new Date().toISOString()}
+            - **Rolled back to:** ${{ steps.target.outputs.target_sha }}
+            - **Commit message:** ${{ steps.target.outputs.commit_message }}
+            - **Performed by:** @${{ github.actor }}
+            - **Timestamp:** ${new Date().toISOString()}
 
-              ## Action Required
+            ## Action Required
 
-              Please investigate the issue that caused this rollback and create a fix.
+            Please investigate the issue that caused this rollback and create a fix.
 
-              ## Verification
+            ## Verification
 
-              - [ ] Site is accessible
-              - [ ] Core functionality works
-              - [ ] No errors in logs
-              - [ ] Issue has been identified
-              - [ ] Fix has been implemented
-              - [ ] Fix has been tested
-              - [ ] Ready for redeployment
-              `,
-              labels: ['rollback', 'urgent', ${{ github.event.inputs.environment }}]
+            - [ ] Site is accessible
+            - [ ] Core functionality works
+            - [ ] No errors in logs
+            - [ ] Issue has been identified
+            - [ ] Fix has been implemented
+            - [ ] Fix has been tested
+            - [ ] Ready for redeployment
+            `,
+              labels: ['rollback', 'urgent']
             });
 
             console.log(`Created issue #${issue.data.number}`);
@@ -133,9 +121,8 @@ jobs:
         run: |
           if [ "${{ job.status }}" == "success" ]; then
             echo "🔄 Rollback completed successfully"
-            echo "Environment: ${{ github.event.inputs.environment }}"
             echo "Target commit: ${{ steps.target.outputs.target_sha }}"
           else
             echo "❌ Rollback failed"
-            echo "Please check the logs and perform manual rollback if necessary"
+            echo "Please check the logs and perform manual rollback via the Netlify dashboard if necessary"
           fi

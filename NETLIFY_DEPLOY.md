@@ -19,9 +19,9 @@
 以下の設定が自動的に適用されます（`netlify.toml`から）：
 
 - **Base directory**: `/`（リポジトリルート）
-- **Build command**: `npm run build`
+- **Build command**: `npm run build:netlify`
 - **Publish directory**: `apps/frontend/out`
-- **Node.js version**: 18
+- **Node.js version**: 20
 
 ### 4. 環境変数の設定
 
@@ -88,12 +88,21 @@ const nextConfig: NextConfig = {
 
 ### セキュリティヘッダー
 
-`netlify.toml`でセキュリティヘッダーを設定済み：
+`apps/frontend/public/_headers`でセキュリティヘッダーを設定済み（静的エクスポートに含まれ、あらゆるデプロイ方法で適用される）：
 
 - X-Frame-Options: DENY
 - X-XSS-Protection: 1; mode=block
 - X-Content-Type-Options: nosniff
 - Referrer-Policy: strict-origin-when-cross-origin
+
+### フォームAPI（Netlify Functions）
+
+ニュースレター登録（`/api/newsletter`）とお問い合わせ（`/api/contact`）は、本番では`netlify/functions/`のNetlify Functionsが処理する:
+
+- 静的エクスポートはPOSTのAPI Routeを配信できないため、Function経由で提供
+- `public/_redirects`が`/api/*`をFunctionへ強制リダイレクト
+- ビジネスロジックは`apps/frontend/lib/api/`のハンドラに集約（開発用Next.jsルートと共用）
+- `RESEND_API_KEY`等の環境変数はNetlifyサイトの環境変数から自動的にFunctionへ渡される
 
 ## 🔄 自動デプロイ
 

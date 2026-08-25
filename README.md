@@ -47,9 +47,11 @@ ConnectiveByte/
 ├── apps/
 │   ├── frontend/    # Next.jsによるフロントエンドアプリケーション
 │   └── backend/     # Express.jsによるAPIサーバー
-└── libs/
-    ├── components/  # 再利用可能なUIコンポーネント
-    └── logic/       # ビジネスロジックと共通機能
+├── libs/
+│   ├── components/  # 再利用可能なUIコンポーネント
+│   └── logic/       # ビジネスロジックと共通機能
+└── netlify/
+    └── functions/   # 本番用API（ニュースレター・問い合わせフォーム）
 ```
 
 ## 🚀 クイックスタート
@@ -123,9 +125,9 @@ npm run dev:backend      # バックエンドのみ
 #### デプロイ設定（自動適用）
 
 - **Base directory**: `/`（リポジトリルート）
-- **Build command**: `npm run build`
+- **Build command**: `npm run build:netlify`
 - **Publish directory**: `apps/frontend/out`
-- **Node.js version**: 18
+- **Node.js version**: 20
 
 ## 📚 ドキュメント
 

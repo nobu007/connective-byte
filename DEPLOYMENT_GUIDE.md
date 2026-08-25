@@ -1,450 +1,109 @@
 # Deployment Guide
 
-This guide provides step-by-step instructions for deploying the ConnectiveByte platform to production.
+ConnectiveByteのデプロイ実態を説明するガイド。
 
-## Table of Contents
+## 構成の概要
 
-- [Prerequisites](#prerequisites)
-- [Environment Configuration](#environment-configuration)
-- [Frontend Deployment (Netlify)](#frontend-deployment-netlify)
-- [Backend Deployment](#backend-deployment)
-- [CI/CD Pipeline](#cicd-pipeline)
-- [Health Monitoring](#health-monitoring)
-- [Rollback Procedures](#rollback-procedures)
+| コンポーネント                     | デプロイ方法                                 | 環境     |
+| ---------------------------------- | -------------------------------------------- | -------- |
+| フロントエンド（`apps/frontend`）  | GitHub Actions → Netlify（静的エクスポート） | 本番のみ |
+| フォームAPI（`netlify/functions`） | 同上（Netlify Functionsとして同時デプロイ）  | 本番のみ |
+| バックエンド（`apps/backend`）     | 自動デプロイなし（手動）                     | なし     |
 
-## Prerequisites
+- フロントエンドは `main` ブランチへのpushで自動デプロイされる
+- ステージング環境は存在しない
+- フロントエンドはバックエンドを呼び出さない（静的サイトとして完結）
+- フォームAPI（`/api/newsletter`・`/api/contact`）は本番ではNetlify Functionsが処理する（静的エクスポートはPOSTルートを配信できないため）。ロジックは `apps/frontend/lib/api/` のハンドラに集約され、開発用ルート（`app/api/`）と本番用Functionが共用する
 
-### Required Accounts
+## 前提
 
-- GitHub account with repository access
-- Netlify account (for frontend hosting)
-- Production server or cloud platform account (for backend)
+- Node.js 20.x以上
+- npm 10.x以上
 
-### Required Tools
+## GitHub Secrets
 
-- Node.js 20.x or higher
-- npm 10.x or higher
-- Git
+Settings → Secrets and variables → Actions で以下を設定：
 
-## Environment Configuration
-
-### 1. GitHub Secrets
-
-Configure the following secrets in your GitHub repository (Settings → Secrets and variables → Actions):
-
-#### Required Secrets
+### 必須
 
 ```
-NETLIFY_AUTH_TOKEN=<your-netlify-auth-token>
-NETLIFY_SITE_ID=<your-netlify-site-id>
+NETLIFY_AUTH_TOKEN=<Netlifyのパーソナルアクセストークン>
+NETLIFY_SITE_ID=<NetlifyサイトID>
 ```
 
-#### Optional Secrets (for backend deployment)
+### 任意
 
 ```
-PRODUCTION_API_URL=https://api.connectivebyte.com
 PRODUCTION_FRONTEND_URL=https://connectivebyte.netlify.app
-STAGING_API_URL=https://staging-api.connectivebyte.com
-STAGING_FRONTEND_URL=https://staging--connectivebyte.netlify.app
 ```
 
-### 2. Environment Variables
+デプロイ後のヘルスチェックとロールバック検証に使用される。未設定の場合は上記デフォルト値が使われる。
 
-#### Frontend (.env.production)
+## フロントエンド デプロイ
 
-```bash
-NODE_ENV=production
-NEXT_PUBLIC_API_URL=https://api.connectivebyte.com
-```
+### 自動デプロイ
 
-#### Backend (.env.production)
+1. `main` にpushすると `Deploy to Production`（deploy.yml）が実行される
+2. `npm run build:frontend` で静的エクスポート（`apps/frontend/out/`）を生成
+3. 静的ファイルとNetlify Functions（`netlify/functions/`）をNetlifyへ本番アップロード
+4. 30秒後、本番URLのHTTP 200をヘルスチェック
 
-```bash
-NODE_ENV=production
-PORT=3001
-DATABASE_URL=postgresql://user:password@host:5432/connectivebyte
-JWT_SECRET=<your-secure-jwt-secret>
-JWT_EXPIRES_IN=1d
-```
+フォームAPIは `public/_redirects` の強制リダイレクトで `/api/newsletter`・`/api/contact` → Netlify Functionsへ振り分けられる。
 
-## Frontend Deployment (Netlify)
-
-### Automatic Deployment (Recommended)
-
-The frontend is automatically deployed to Netlify when you push to the `main` branch.
-
-1. **Push to main branch:**
-
-   ```bash
-   git push origin main
-   ```
-
-2. **Monitor deployment:**
-   - Check GitHub Actions: https://github.com/your-org/connective-byte/actions
-   - Check Netlify dashboard: https://app.netlify.com
-
-3. **Verify deployment:**
-   - Visit your production URL
-   - Check health status indicator
-   - Verify API connectivity
-
-### Manual Deployment
-
-If you need to deploy manually:
+### 手動デプロイ
 
 ```bash
-# Build the frontend
 npm run build:frontend
-
-# Deploy to Netlify using CLI
 cd apps/frontend
 npx netlify deploy --prod --dir=out
 ```
 
-### Netlify Configuration
+### Netlify側の設定
 
-The `netlify.toml` file is already configured with:
+`netlify.toml` で以下を定義済み：
 
-- Build settings
-- Redirects for SPA routing
-- Security headers
-- Node.js version
+- ビルドコマンド: `npm run build:netlify`（フロントエンドのみ、Node.js 20）
+- 公開ディレクトリ: `apps/frontend/out`
+- セキュリティヘッダー・アセットキャッシュ
 
-## Backend Deployment
+Netlifyダッシュボードで設定する環境変数（`RESEND_API_KEY` など）は [NETLIFY_DEPLOY.md](./NETLIFY_DEPLOY.md) を参照。
 
-### Option 1: AWS Elastic Beanstalk
+## バックエンド
 
-1. **Install EB CLI:**
+現在どこにもホストされていない。必要になった時点で手動デプロイする：
 
-   ```bash
-   pip install awsebcli
-   ```
+1. `npm run build:backend`（`apps/backend/dist/` に出力）
+2. サーバーに `dist/` と `package.json` を配置し `npm ci --omit=dev`
+3. 環境変数を設定（`PORT`、`DATABASE_URL`、`JWT_SECRET` など）
+4. `node dist/index.js` で起動（pm2等のプロセスマネージャーを推奨）
 
-2. **Initialize EB application:**
+CI（ci.yml）のbuildジョブがコンパイル検証とビルド成果物（artifact）の生成まで行う。
 
-   ```bash
-   cd apps/backend
-   eb init -p node.js-20 connective-byte-backend
-   ```
+## CI/CDワークフロー
 
-3. **Create environment:**
+| ワークフロー | トリガー              | 内容                                                  |
+| ------------ | --------------------- | ----------------------------------------------------- |
+| ci.yml       | push / PR to `main`   | lint・型チェック・単体テスト（FE/BE）・E2E・ビルド    |
+| deploy.yml   | push to `main` / 手動 | フロントエンドをNetlifyへ本番デプロイ＋ヘルスチェック |
+| rollback.yml | 手動のみ              | 過去コミットを再ビルドしてNetlifyへ本番デプロイ       |
+| security.yml | push / PR / 毎週月曜  | npm audit・CodeQL・TruffleHog                         |
 
-   ```bash
-   eb create production-env
-   ```
+## ロールバック
 
-4. **Deploy:**
+### Netlifyダッシュボード（最速）
 
-   ```bash
-   eb deploy
-   ```
+1. Deploysタブで以前の正常なデプロイを選択
+2. 「Publish deploy」をクリック
 
-5. **Set environment variables:**
-   ```bash
-   eb setenv NODE_ENV=production PORT=3001 DATABASE_URL=<your-db-url>
-   ```
+### GitHub Actions
 
-### Option 2: Docker Container
+Actions → Rollback Deployment → Run workflow でコミットSHAを指定（空欄なら1つ前のコミットにロールバック）。
 
-1. **Create Dockerfile:**
+## トラブルシューティング
 
-   ```dockerfile
-   FROM node:20-alpine
-   WORKDIR /app
-   COPY package*.json ./
-   RUN npm ci --production
-   COPY dist ./dist
-   EXPOSE 3001
-   CMD ["node", "dist/index.js"]
-   ```
-
-2. **Build and push:**
-
-   ```bash
-   docker build -t connective-byte-backend .
-   docker tag connective-byte-backend:latest your-registry/connective-byte-backend:latest
-   docker push your-registry/connective-byte-backend:latest
-   ```
-
-3. **Deploy to your container platform:**
-   - AWS ECS/Fargate
-   - Google Cloud Run
-   - Azure Container Instances
-   - DigitalOcean App Platform
-
-### Option 3: Traditional Server
-
-1. **Download deployment artifact from GitHub Actions**
-
-2. **Extract on server:**
-
-   ```bash
-   tar -xzf backend-deployment.tar.gz
-   cd backend
-   ```
-
-3. **Install dependencies:**
-
-   ```bash
-   npm ci --production
-   ```
-
-4. **Set environment variables:**
-
-   ```bash
-   export NODE_ENV=production
-   export PORT=3001
-   export DATABASE_URL=<your-db-url>
-   export JWT_SECRET=<your-jwt-secret>
-   ```
-
-5. **Start with PM2:**
-   ```bash
-   npm install -g pm2
-   pm2 start dist/index.js --name connective-byte-backend
-   pm2 save
-   pm2 startup
-   ```
-
-## CI/CD Pipeline
-
-### Workflows
-
-The project includes three GitHub Actions workflows:
-
-#### 1. CI/CD Pipeline (`ci.yml`)
-
-- Runs on: Push to main/develop, Pull requests
-- Jobs:
-  - Lint code
-  - Run backend tests with coverage
-  - Run frontend tests with coverage
-  - Run E2E tests
-  - Build applications
-- Artifacts: Build outputs, test reports
-
-#### 2. Production Deployment (`deploy.yml`)
-
-- Runs on: Push to main, Manual trigger
-- Jobs:
-  - Deploy frontend to Netlify
-  - Create backend deployment package
-  - Run production health checks
-- Notifications: Deployment status
-
-#### 3. Staging Deployment (`staging.yml`)
-
-- Runs on: Push to develop
-- Jobs:
-  - Deploy to staging environment
-  - Run smoke tests
-  - Comment on PR with preview URL
-
-#### 4. Security Scan (`security.yml`)
-
-- Runs on: Push, Pull requests, Weekly schedule
-- Jobs:
-  - Dependency vulnerability scan
-  - CodeQL security analysis
-  - Secret scanning
-
-### Triggering Deployments
-
-#### Automatic Deployment
-
-```bash
-# Deploy to production
-git push origin main
-
-# Deploy to staging
-git push origin develop
-```
-
-#### Manual Deployment
-
-1. Go to GitHub Actions
-2. Select "Deploy to Production" workflow
-3. Click "Run workflow"
-4. Select branch and confirm
-
-## Health Monitoring
-
-### Production Health Checks
-
-The deployment workflow automatically checks:
-
-- Frontend accessibility (HTTP 200)
-- Backend health endpoint (`/api/health`)
-- System status (ok/degraded/error)
-
-### Manual Health Check
-
-```bash
-# Check frontend
-curl https://connectivebyte.netlify.app
-
-# Check backend
-curl https://api.connectivebyte.com/api/health
-```
-
-### Expected Response
-
-```json
-{
-  "status": "ok",
-  "timestamp": "2025-11-17T12:00:00.000Z",
-  "uptime": 3600,
-  "checks": [
-    {
-      "name": "uptime",
-      "status": "pass",
-      "duration": 1
-    },
-    {
-      "name": "memory",
-      "status": "pass",
-      "duration": 2
-    }
-  ],
-  "version": "1.0.0"
-}
-```
-
-## Rollback Procedures
-
-### Frontend Rollback (Netlify)
-
-1. **Via Netlify Dashboard:**
-   - Go to Deploys tab
-   - Find previous successful deployment
-   - Click "Publish deploy"
-
-2. **Via CLI:**
-   ```bash
-   netlify rollback
-   ```
-
-### Backend Rollback
-
-#### Using PM2
-
-```bash
-pm2 stop connective-byte-backend
-# Deploy previous version
-pm2 start dist/index.js --name connective-byte-backend
-```
-
-#### Using Docker
-
-```bash
-docker pull your-registry/connective-byte-backend:previous-tag
-docker stop connective-byte-backend
-docker run -d --name connective-byte-backend your-registry/connective-byte-backend:previous-tag
-```
-
-#### Using Git
-
-```bash
-git revert <commit-hash>
-git push origin main
-# Wait for automatic deployment
-```
-
-## Monitoring and Alerts
-
-### Recommended Monitoring Tools
-
-1. **Uptime Monitoring:**
-   - UptimeRobot
-   - Pingdom
-   - StatusCake
-
-2. **Application Performance:**
-   - New Relic
-   - Datadog
-   - Sentry
-
-3. **Log Aggregation:**
-   - Loggly
-   - Papertrail
-   - CloudWatch Logs
-
-### Setting Up Alerts
-
-Configure alerts for:
-
-- HTTP 5xx errors
-- Response time > 1000ms
-- Health check failures
-- High memory usage (>90%)
-- High CPU usage (>80%)
-
-## Troubleshooting
-
-### Common Issues
-
-#### Frontend not loading
-
-1. Check Netlify deployment logs
-2. Verify environment variables
-3. Check browser console for errors
-4. Verify API URL configuration
-
-#### Backend not responding
-
-1. Check server logs
-2. Verify environment variables
-3. Check database connectivity
-4. Verify port configuration
-
-#### Health check failing
-
-1. Check backend server status
-2. Verify health endpoint accessibility
-3. Check system resources (memory, CPU)
-4. Review application logs
-
-### Support
-
-For deployment issues:
-
-1. Check GitHub Actions logs
-2. Review deployment artifacts
-3. Check platform-specific logs (Netlify, AWS, etc.)
-4. Contact platform support if needed
-
-## Security Checklist
-
-Before deploying to production:
-
-- [ ] All secrets are stored in GitHub Secrets
-- [ ] Environment variables are properly configured
-- [ ] HTTPS is enabled for all endpoints
-- [ ] Security headers are configured
-- [ ] CORS is properly configured
-- [ ] Rate limiting is enabled
-- [ ] Input validation is implemented
-- [ ] Error messages don't leak sensitive information
-- [ ] Dependencies are up to date
-- [ ] Security scan passes
-
-## Post-Deployment Checklist
-
-After deployment:
-
-- [ ] Frontend is accessible
-- [ ] Backend health check passes
-- [ ] All API endpoints respond correctly
-- [ ] Database connectivity works
-- [ ] Monitoring is active
-- [ ] Alerts are configured
-- [ ] Backup procedures are in place
-- [ ] Documentation is updated
-- [ ] Team is notified
-
-## Additional Resources
-
-- [Netlify Documentation](https://docs.netlify.com/)
-- [GitHub Actions Documentation](https://docs.github.com/en/actions)
-- [Next.js Deployment](https://nextjs.org/docs/deployment)
-- [Express.js Production Best Practices](https://expressjs.com/en/advanced/best-practice-performance.html)
+| 症状                                 | 確認方法                                                        |
+| ------------------------------------ | --------------------------------------------------------------- |
+| デプロイが失敗する                   | GitHub Actionsのログを確認                                      |
+| ローカルでビルドを再現               | `npm run build:frontend` を実行してエラーを確認                 |
+| デプロイ済みだがページが更新されない | NetlifyのDeploysタブでデプロイ状態とキャッシュを確認            |
+| ヘルスチェックが失敗する             | `PRODUCTION_FRONTEND_URL` の設定値、またはNetlify側の状態を確認 |

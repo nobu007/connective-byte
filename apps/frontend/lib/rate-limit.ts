@@ -20,7 +20,7 @@ const CLEANUP_INTERVAL = 5 * 60 * 1000;
 
 // Periodically clean up expired entries
 if (typeof setInterval !== 'undefined') {
-  setInterval(() => {
+  const timer = setInterval(() => {
     const now = Date.now();
     Object.keys(store).forEach((key) => {
       if (store[key].resetTime < now) {
@@ -28,6 +28,8 @@ if (typeof setInterval !== 'undefined') {
       }
     });
   }, CLEANUP_INTERVAL);
+  // Do not keep the process alive just for this cleanup timer
+  timer.unref?.();
 }
 
 /**

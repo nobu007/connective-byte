@@ -1,60 +1,33 @@
 [build]
-  command = "npm run build"
+  command = "npm run build:netlify"
   publish = "apps/frontend/out"
   base = "/"
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
   NEXT_PUBLIC_SITE_URL = "https://connectivebyte.com"
   # Analytics - Plausible
   # Note: Set NEXT_PUBLIC_PLAUSIBLE_DOMAIN in Netlify UI environment variables
   # NEXT_PUBLIC_PLAUSIBLE_DOMAIN = "connectivebyte.com"
   NEXT_PUBLIC_PLAUSIBLE_API_HOST = "https://plausible.io"
 
-# Redirect all requests to index.html for client-side routing
+[functions]
+  directory = "netlify/functions"
+
+# Form API endpoints are served by Netlify Functions.
+# The same rules also ship in apps/frontend/public/_redirects (baked into the
+# published out/ directory) so API-based deploys get them too.
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/api/newsletter"
+  to = "/.netlify/functions/newsletter"
   status = 200
+  force = true
 
-# Security headers
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    X-XSS-Protection = "1; mode=block"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+[[redirects]]
+  from = "/api/contact"
+  to = "/.netlify/functions/contact"
+  status = 200
+  force = true
 
-# Cache static assets
-[[headers]]
-  for = "/static/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/_next/static/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# Cache images
-[[headers]]
-  for = "/*.jpg"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/*.png"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/*.svg"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/*.webp"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+# Security headers and asset caching live in apps/frontend/public/_headers,
+# which the static export copies into out/ so they apply to every deploy method.
