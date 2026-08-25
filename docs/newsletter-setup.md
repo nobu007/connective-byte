@@ -49,7 +49,7 @@ ConnectiveByteのニュースレター機能は、以下の技術を使用して
 
 #### ローカル開発環境
 
-`apps/frontend/.env.local`に以下を追加：
+リポジトリルートの `.env` に以下を追加：
 
 ```bash
 # Resend API Key

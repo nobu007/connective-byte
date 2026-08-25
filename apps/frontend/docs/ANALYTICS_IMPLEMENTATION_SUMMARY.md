@@ -273,7 +273,7 @@ NEXT_PUBLIC_PLAUSIBLE_TRACK_LOCALHOST=true           # Development only
 
 ```bash
 # Enable local tracking
-echo "NEXT_PUBLIC_PLAUSIBLE_TRACK_LOCALHOST=true" >> apps/frontend/.env.local
+echo "NEXT_PUBLIC_PLAUSIBLE_TRACK_LOCALHOST=true" >> .env   # リポジトリルート
 
 # Start dev server
 npm run dev -w apps/frontend

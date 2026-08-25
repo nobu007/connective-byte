@@ -72,8 +72,8 @@ npm install
 3. 環境変数の設定:
 
 ```bash
-cp apps/frontend/.env.example apps/frontend/.env.local
-# .env.localを編集して必要な環境変数を設定
+cp .env.example .env
+# .envを編集して必要な環境変数を設定（frontend/backend共通・ルート一箇所）
 ```
 
 4. 開発サーバーの起動:
@@ -101,7 +101,7 @@ npm run dev:backend      # バックエンドのみ
 - `NEXT_PUBLIC_PLAUSIBLE_API_HOST`: Plausible AnalyticsのAPIホスト（デフォルト: https://plausible.io）
 - `NEXT_PUBLIC_PLAUSIBLE_TRACK_LOCALHOST`: ローカル環境でのトラッキング有効化（開発時のみ）
 
-詳細は `apps/frontend/.env.example` を参照してください。
+詳細は `.env.example` を参照してください。
 
 ## 🚀 デプロイ
 
