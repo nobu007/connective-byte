@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { render } from '../../../test/test-utils';
 import { Footer } from '../Footer';
 
 // Mock site config
@@ -48,9 +49,11 @@ describe('Footer', () => {
 
   it('renders privacy policy link', () => {
     render(<Footer />);
-    const privacyLink = screen.getByRole('link', { name: /プライバシーポリシー/i });
-    expect(privacyLink).toBeInTheDocument();
-    expect(privacyLink).toHaveAttribute('href', '/privacy');
+    // Footer の legal リンクと NewsletterSignupForm の同意文リンクの2箇所に存在する
+    const privacyLinks = screen.getAllByRole('link', { name: /プライバシーポリシー/i });
+    const legalLink = privacyLinks.find((link) => link.getAttribute('href') === '/privacy');
+    expect(legalLink).toBeDefined();
+    expect(legalLink).toHaveAttribute('href', '/privacy');
   });
 
   describe('social media links', () => {

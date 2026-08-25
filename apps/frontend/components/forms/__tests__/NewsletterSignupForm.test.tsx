@@ -1,26 +1,12 @@
 import '@testing-library/jest-dom';
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { render } from '../../../test/test-utils';
 import { NewsletterSignupForm } from '../NewsletterSignupForm';
-import { PlausibleProvider } from '@/lib/analytics/PlausibleProvider';
-
-// Wrapper component with PlausibleProvider
-const Wrapper = ({ children }: { children: React.ReactNode }) => (
-  <PlausibleProvider
-    config={{
-      enabled: false,
-      domain: 'test.com',
-      apiHost: 'https://plausible.io',
-      trackLocalhost: false,
-    }}
-  >
-    {children}
-  </PlausibleProvider>
-);
 
 describe('NewsletterSignupForm', () => {
   it('should render form fields', () => {
-    render(<NewsletterSignupForm />, { wrapper: Wrapper });
+    render(<NewsletterSignupForm />);
 
     expect(screen.getByLabelText(/メールアドレス/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /登録/i })).toBeInTheDocument();
@@ -28,7 +14,7 @@ describe('NewsletterSignupForm', () => {
 
   it('should show validation error for invalid email', async () => {
     const user = userEvent.setup();
-    render(<NewsletterSignupForm />, { wrapper: Wrapper });
+    render(<NewsletterSignupForm />);
 
     const emailInput = screen.getByLabelText(/メールアドレス/i);
     const submitButton = screen.getByRole('button', { name: /登録/i });
@@ -43,7 +29,7 @@ describe('NewsletterSignupForm', () => {
 
   it('should show validation error when consent is not checked', async () => {
     const user = userEvent.setup();
-    render(<NewsletterSignupForm />, { wrapper: Wrapper });
+    render(<NewsletterSignupForm />);
 
     const emailInput = screen.getByLabelText(/メールアドレス/i);
     const submitButton = screen.getByRole('button', { name: /登録/i });

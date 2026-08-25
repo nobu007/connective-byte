@@ -26,8 +26,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse and validate request body
+    // Parse request body
     const body = await request.json();
+
+    // Honeypot check - if website field is filled, it's likely a bot.
+    // Inspect the raw body BEFORE schema validation (the schema rejects a filled
+    // honeypot) so bots get a fake success without revealing the trap.
+    const honeypot = (body as { website?: unknown }).website;
+    if (typeof honeypot === 'string' && honeypot.length > 0) {
+      console.log('Newsletter bot detected (honeypot triggered):', (body as { email?: unknown }).email);
+      // Return success to avoid revealing the honeypot
+      return NextResponse.json({ success: true });
+    }
+
+    // Validate request body
     const result = newsletterSchema.safeParse(body);
 
     if (!result.success) {
@@ -36,14 +48,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: firstError.message }, { status: 400 });
     }
 
-    const { email, name, website } = result.data;
-
-    // Honeypot check - if website field is filled, it's likely a bot
-    if (website) {
-      console.log('Newsletter bot detected (honeypot triggered):', email);
-      // Return success to avoid revealing the honeypot
-      return NextResponse.json({ success: true });
-    }
+    const { email, name } = result.data;
 
     // Check if Resend is configured
     if (!process.env.RESEND_API_KEY) {

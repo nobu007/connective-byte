@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { POST } from '../route';
 import { NextRequest } from 'next/server';
 import { resetRateLimit } from '@/lib/rate-limit';
@@ -22,17 +25,18 @@ if (!Response.json) {
   };
 }
 
-// Mock Resend
+// Mock Resend — single shared instance so route and test observe the same jest.fn's
 jest.mock('resend', () => {
+  const instance = {
+    contacts: {
+      create: jest.fn().mockResolvedValue({ id: 'contact_123' }),
+    },
+    emails: {
+      send: jest.fn().mockResolvedValue({ id: 'email_123' }),
+    },
+  };
   return {
-    Resend: jest.fn().mockImplementation(() => ({
-      contacts: {
-        create: jest.fn().mockResolvedValue({ id: 'contact_123' }),
-      },
-      emails: {
-        send: jest.fn().mockResolvedValue({ id: 'email_123' }),
-      },
-    })),
+    Resend: jest.fn(() => instance),
   };
 });
 
