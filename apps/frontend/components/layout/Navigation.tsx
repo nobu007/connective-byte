@@ -32,6 +32,10 @@ export function Navigation() {
 
   const closeMenu = () => setIsOpen(false);
 
+  // trailingSlash: true (next.config) renders /about as /about/ in pathname,
+  // so compare with and without the trailing slash (home excepted)
+  const isActive = (href: string) => pathname === href || (href !== '/' && pathname === `${href}/`);
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -59,9 +63,9 @@ export function Navigation() {
                 <Link
                   href={item.href}
                   className={`text-sm font-medium transition-colors hover:text-[#10b981] ${
-                    pathname === item.href ? 'text-[#10b981]' : 'text-[#4b5563]'
+                    isActive(item.href) ? 'text-[#10b981]' : 'text-[#4b5563]'
                   }`}
-                  aria-current={pathname === item.href ? 'page' : undefined}
+                  aria-current={isActive(item.href) ? 'page' : undefined}
                 >
                   {item.name}
                 </Link>
@@ -109,11 +113,9 @@ export function Navigation() {
                         href={item.href}
                         onClick={closeMenu}
                         className={`block px-4 py-2 text-base font-medium rounded-lg transition-colors ${
-                          pathname === item.href
-                            ? 'bg-[#10b981]/10 text-[#10b981]'
-                            : 'text-[#4b5563] hover:bg-[#f3f4f6]'
+                          isActive(item.href) ? 'bg-[#10b981]/10 text-[#10b981]' : 'text-[#4b5563] hover:bg-[#f3f4f6]'
                         }`}
-                        aria-current={pathname === item.href ? 'page' : undefined}
+                        aria-current={isActive(item.href) ? 'page' : undefined}
                       >
                         {item.name}
                       </Link>
