@@ -93,7 +93,9 @@ jobs:
       - name: Start backend server
         run: npm run dev:backend &
         env:
-          NODE_ENV: test
+          # NOT 'test': NODE_ENV=test makes index.ts skip app.listen and the
+          # health check below would never succeed
+          NODE_ENV: development
           PORT: 3001
 
       - name: Wait for backend to be ready
