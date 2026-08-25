@@ -26,7 +26,8 @@
     "lint:backend": "npm run lint -w apps/backend",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "prepare": "husky install",
-    "type-check": "npm run type-check -w apps/frontend"
+    "type-check": "npm run type-check -w apps/frontend",
+    "sec:allow-scripts": "npx @lavamoat/allow-scripts auto"
   },
   "repository": {
     "type": "git",

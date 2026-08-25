@@ -13,7 +13,8 @@
     "test": "jest",
     "test:e2e": "playwright test --timeout=30000",
     "test:e2e:headed": "playwright test --headed --timeout=30000",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "sec:allow-scripts": "npx @lavamoat/allow-scripts auto"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
