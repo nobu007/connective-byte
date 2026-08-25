@@ -25,6 +25,15 @@ export async function handleContact(request: Request): Promise<Response> {
 
     // Check if Resend API key is configured
     if (!resend) {
+      // In development (and tests) accept the submission without email so the
+      // form is usable without a Resend account. In production, fail loudly:
+      // returning success here would silently drop the inquiry (it would only
+      // exist in the function logs) while the visitor believes it was sent.
+      const env = process.env.NODE_ENV;
+      if (env === 'production') {
+        console.error('RESEND_API_KEY not configured. Contact submission rejected.');
+        return json({ error: 'メール送信サービスが設定されていません。管理者にお問い合わせください。' }, 500);
+      }
       console.warn('RESEND_API_KEY not configured. Email will not be sent.');
       console.log('Contact form submission:', { name, email, message });
       return json({ success: true, message: 'お問い合わせを受け付けました（開発モード）' }, 200);
