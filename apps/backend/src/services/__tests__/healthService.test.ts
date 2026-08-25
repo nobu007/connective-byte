@@ -327,12 +327,21 @@ describe('HealthService', () => {
     });
 
     it('should have memory check', async () => {
+      // Mock heap stats: real usage varies by runner and can cross the warn
+      // threshold, making the status assertion flaky on CI
+      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+        heapUsed: 40 * 1024 * 1024,
+        heapTotal: 128 * 1024 * 1024,
+      } as NodeJS.MemoryUsage);
+
       const result = await healthService.getHealthStatus(false);
       const memoryCheck = result.data?.checks?.find((c) => c.name === 'memory');
 
       expect(memoryCheck).toBeDefined();
       expect(memoryCheck?.status).toBe('ok');
       expect(memoryCheck?.message).toContain('Heap');
+
+      jest.restoreAllMocks();
     });
 
     it.skip('should have disk space check (disabled to avoid hangs)', async () => {
