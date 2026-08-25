@@ -49,25 +49,11 @@ pushごとの自動ビルドはビルドクレジットを消費するため使�
 
 ## フロントエンド デプロイ
 
-### 自動デプロイ（標準）
+手動デプロイ（上記の標準フロー）のみを使う。フォームAPIは `public/_redirects` の強制リダイレクトで `/api/newsletter`・`/api/contact` → Netlify Functionsへ振り分けられる。
 
-1. `main` にpushするとNetlifyが変更を検知してビルドを開始
-2. `netlify.toml` の設定で `npm run build:netlify`（Node.js 20）を実行し静的エクスポート（`apps/frontend/out/`）を生成
-3. 静的ファイルとNetlify Functions（`netlify/functions/`）が本番に公開される
+### netlify.tomlの設定
 
-フォームAPIは `public/_redirects` の強制リダイレクトで `/api/newsletter`・`/api/contact` → Netlify Functionsへ振り分けられる。
-
-### 参考: Git連携なしの個別コマンド
-
-```bash
-npm run build:frontend
-cd apps/frontend
-npx netlify deploy --prod --dir=out
-```
-
-### Netlify側の設定
-
-`netlify.toml` で以下を定義済み：
+`netlify.toml` で以下を定義済み（Git連携のビルドを再有効化した場合に適用される。手動デプロイでは `npm run deploy` が同等の内容を直接アップロードする）：
 
 - ビルドコマンド: `npm run build:netlify`（フロントエンドのみ、Node.js 20）
 - 公開ディレクトリ: `apps/frontend/out`

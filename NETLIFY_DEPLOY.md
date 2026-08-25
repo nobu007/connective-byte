@@ -1,215 +1,44 @@
 # Netlifyへのデプロイガイド
 
-このドキュメントでは、ConnectiveByteプロジェクトをNetlifyにデプロイする手順を説明します。
+Netlifyの月枠クレジット節約のため、このプロジェクトは**pushごとの自動ビルドを行わない**。開発完了時に `npm run deploy` で手動デプロイする。
 
-## 🚀 デプロイ手順
+手順・初回セットアップ・トラブルシューティングは [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) に集約している。この文書ではNetlify固有の補足のみ記載する。
 
-### 1. Netlifyアカウントの準備
+## 環境変数
 
-1. [Netlify](https://www.netlify.com/)にアクセスしてアカウントを作成（GitHubアカウントでログイン推奨）
+Netlify UIで手動設定せず `npm run deploy:env`（`.env` → サイトの環境変数へ一括取り込み）を使う。設定する変数の一覧はルートの `.env.example` を参照。
 
-### 2. リポジトリの接続
+## ビルド設定（netlify.toml）
 
-1. Netlifyダッシュボードで「Add new site」→「Import an existing project」を選択
-2. GitHubリポジトリ `nobu007/connective-byte` を選択
-3. ビルド設定は自動で`netlify.toml`から読み込まれます
+`netlify.toml` で以下を定義済み:
 
-### 3. ビルド設定の確認
-
-以下の設定が自動的に適用されます（`netlify.toml`から）：
-
-- **Base directory**: `/`（リポジトリルート）
 - **Build command**: `npm run build:netlify`
 - **Publish directory**: `apps/frontend/out`
+- **Functions directory**: `netlify/functions`
 - **Node.js version**: 20
 
-### 4. 環境変数の設定
+手動デプロイ（`npm run deploy`）では `out/` と `netlify/functions/` を直接アップロードするため、このビルド設定は使われない。Git連携を再有効化した場合にのみ適用される。
 
-Netlifyダッシュボードの「Site settings」→「Environment variables」で以下を設定：
+## カスタムドメインの設定
 
-#### 必須の環境変数
-
-```bash
-# サイトURL
-NEXT_PUBLIC_SITE_URL=https://connectivebyte.com
-
-# お問い合わせメールアドレス
-NEXT_PUBLIC_CONTACT_EMAIL=info@connectivebyte.com
-
-# メール送信サービス（Resend）
-RESEND_API_KEY=re_your_api_key_here
-RESEND_AUDIENCE_ID=your_audience_id_here
-```
-
-#### アナリティクス設定（推奨）
-
-```bash
-# Plausible Analytics
-NEXT_PUBLIC_PLAUSIBLE_DOMAIN=connectivebyte.com
-NEXT_PUBLIC_PLAUSIBLE_API_HOST=https://plausible.io
-```
-
-**注意**: `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`を設定しない場合、アナリティクスは無効化されます。
-
-#### 環境変数の設定手順
-
-1. Netlifyダッシュボードで「Site settings」を開く
-2. 左メニューから「Environment variables」を選択
-3. 「Add a variable」をクリック
-4. 変数名と値を入力
-5. 「Create variable」をクリック
-
-詳細な設定方法は以下のガイドを参照してください：
-
-- [Plausible Setup Guide](apps/frontend/docs/plausible-setup.md)
-- [Newsletter Setup Guide](docs/newsletter-setup.md)
-
-### 5. デプロイの実行
-
-1. 「Deploy site」ボタンをクリック
-2. ビルドログを確認してエラーがないことを確認
-3. デプロイ完了後、生成されたURLでサイトにアクセス
-
-## 📝 重要な設定内容
-
-### Next.js 静的エクスポート設定
-
-`apps/frontend/next.config.ts`で以下を設定済み：
-
-```typescript
-const nextConfig: NextConfig = {
-  output: 'export', // 静的HTMLとしてエクスポート
-  images: {
-    unoptimized: true, // 画像最適化を無効化
-  },
-  trailingSlash: true, // URLの末尾にスラッシュを追加
-};
-```
-
-### セキュリティヘッダー
-
-`apps/frontend/public/_headers`でセキュリティヘッダーを設定済み（静的エクスポートに含まれ、あらゆるデプロイ方法で適用される）：
-
-- X-Frame-Options: DENY
-- X-XSS-Protection: 1; mode=block
-- X-Content-Type-Options: nosniff
-- Referrer-Policy: strict-origin-when-cross-origin
-
-### フォームAPI（Netlify Functions）
-
-ニュースレター登録（`/api/newsletter`）とお問い合わせ（`/api/contact`）は、本番では`netlify/functions/`のNetlify Functionsが処理する:
-
-- 静的エクスポートはPOSTのAPI Routeを配信できないため、Function経由で提供
-- `public/_redirects`が`/api/*`をFunctionへ強制リダイレクト
-- ビジネスロジックは`apps/frontend/lib/api/`のハンドラに集約（開発用Next.jsルートと共用）
-- `RESEND_API_KEY`等の環境変数はNetlifyサイトの環境変数から自動的にFunctionへ渡される
-
-## 🔄 自動デプロイ
-
-mainブランチへのpushで自動的にデプロイされます：
-
-```bash
-git add .
-git commit -m "Update: feature implementation"
-git push origin main
-```
-
-## 🐛 トラブルシューティング
-
-### ビルドエラーが発生する場合
-
-1. **依存関係のインストールエラー**
-
-   ```bash
-   # ローカルで確認
-   cd apps/frontend
-   npm install
-   npm run build
-   ```
-
-2. **TypeScriptエラー**
-
-   ```bash
-   npm run type-check
-   ```
-
-3. **Lintエラー**
-   ```bash
-   npm run lint
-   ```
-
-### デプロイ後にページが表示されない
-
-1. Netlifyのビルドログを確認
-2. `out`ディレクトリが正しく生成されているか確認
-3. リダイレクト設定が正しいか確認
-
-### 画像が表示されない
-
-静的エクスポート時はNext.jsの画像最適化が使えません。
-`next/image`を使用している場合は`unoptimized: true`が設定されているか確認してください。
-
-## 📊 パフォーマンス最適化
-
-### ビルド時間の短縮
-
-```toml
-[build]
-  # 依存関係のキャッシュを有効化
-  [build.processing]
-    skip_processing = false
-```
-
-### カスタムドメインの設定
-
-1. Netlifyダッシュボードで「Domain settings」を開く
+1. Netlifyダッシュボードの「Domain settings」を開く
 2. 「Add custom domain」でドメインを追加
 3. DNS設定を更新
 
-## 🔒 プライベートリポジトリの場合
+## Resend（フォーム・ニュースレター）
 
-GitHubの private リポジトリの場合：
+- `RESEND_API_KEY` — APIキー（`npm run env:check` で有効性を検証できる）
+- `RESEND_AUDIENCE_ID` — ニュースレター用オーディエンスID（Resend → Audiences で作成）
+- 送信元ドメインはResendで検証済みである必要がある（Resend → Domains）。未検証ドメインからの送信は拒否される
 
-1. Netlifyのプランを確認（Proプラン以上が必要）
-2. リポジトリのアクセス権限を確認
+## デプロイチェックリスト
 
-## 📚 参考リンク
+- [ ] `npm run env:check` がすべて ✅
+- [ ] `.env` 変更済みなら `npm run deploy:env` を実行
+- [ ] `npm run deploy` が成功
+- [ ] フォーム・ニュースレターの動作確認（本番URLで送信テスト）
+
+## 参考リンク
 
 - [Netlify Documentation](https://docs.netlify.com/)
 - [Next.js Static Exports](https://nextjs.org/docs/app/building-your-application/deploying/static-exports)
-- [Netlify + Next.js](https://docs.netlify.com/frameworks/next-js/overview/)
-
-## ✅ デプロイチェックリスト
-
-- [ ] `netlify.toml`の設定確認
-- [ ] `next.config.ts`の静的エクスポート設定確認
-- [ ] ローカルで`npm run build`が成功することを確認
-- [ ] 環境変数の設定
-  - [ ] `NEXT_PUBLIC_SITE_URL`
-  - [ ] `NEXT_PUBLIC_CONTACT_EMAIL`
-  - [ ] `RESEND_API_KEY`（メール送信用）
-  - [ ] `RESEND_AUDIENCE_ID`（ニュースレター用）
-  - [ ] `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`（アナリティクス用）
-- [ ] Resendアカウントの設定（ニュースレターを使用する場合）
-  - [ ] オーディエンスの作成
-  - [ ] 送信ドメインの認証
-- [ ] Plausible Analyticsアカウントの設定（アナリティクスを使用する場合）
-- [ ] カスタムドメインの設定（必要な場合）
-- [ ] デプロイ後の動作確認
-- [ ] セキュリティヘッダーの確認
-- [ ] アナリティクスの動作確認（Plausibleダッシュボードでイベント確認）
-
-## 🎉 デプロイ完了後
-
-デプロイが完了したら、以下を確認してください：
-
-1. ✅ サイトが正常に表示されるか
-2. ✅ ページ遷移が正常に動作するか
-3. ✅ 画像やアセットが正しく読み込まれるか
-4. ✅ レスポンシブデザインが機能しているか
-5. ✅ SEO設定（メタタグなど）が正しいか
-6. ✅ お問い合わせフォームが動作するか
-7. ✅ ニュースレター登録フォームが動作するか
-8. ✅ アナリティクスが正しく動作しているか（Plausibleダッシュボードで確認）
-
-Happy Deploying! 🚀
