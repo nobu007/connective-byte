@@ -4,14 +4,14 @@ ConnectiveByteのデプロイ実態を説明するガイド。
 
 ## 構成の概要
 
-| コンポーネント                     | デプロイ方法                                  | 環境     |
-| ---------------------------------- | --------------------------------------------- | -------- |
-| フロントエンド（`apps/frontend`）  | Netlify Git連携（pushで自動ビルド・デプロイ） | 本番のみ |
-| フォームAPI（`netlify/functions`） | 同上（Netlify Functionsとして同時デプロイ）   | 本番のみ |
-| バックエンド（`apps/backend`）     | 自動デプロイなし（手動）                      | なし     |
+| コンポーネント                     | デプロイ方法                                                         | 環境     |
+| ---------------------------------- | -------------------------------------------------------------------- | -------- |
+| フロントエンド（`apps/frontend`）  | 手動デプロイ（`npm run deploy`、クレジット節約のため自動ビルドなし） | 本番のみ |
+| フォームAPI（`netlify/functions`） | 同上（Netlify Functionsとして同時デプロイ）                          | 本番のみ |
+| バックエンド（`apps/backend`）     | 自動デプロイなし（手動）                                             | なし     |
 
-- フロントエンドは `main` ブランチへのpushでNetlifyが自動ビルド・デプロイする（Netlify標準のGitインテグレーション。GitHub Actionsは不使用）
-- ステージング環境は存在しない（PRごとのDeploy PreviewがNetlify側で自動生成される）
+- フロントエンドは `npm run deploy` で手動デプロイする（Netlifyの月枠クレジット節約のため自動ビルドは使わない）
+- ステージング環境は存在しない
 - フロントエンドはバックエンドを呼び出さない（静的サイトとして完結）
 - フォームAPI（`/api/newsletter`・`/api/contact`）は本番ではNetlify Functionsが処理する（静的エクスポートはPOSTルートを配信できないため）。ロジックは `apps/frontend/lib/api/` のハンドラに集約され、開発用ルート（`app/api/`）と本番用Functionが共用する
 
@@ -20,15 +20,32 @@ ConnectiveByteのデプロイ実態を説明するガイド。
 - Node.js 20.x以上
 - npm 10.x以上
 
-## Netlify Git連携の設定（一度だけ）
+## 手動デプロイ（標準フロー）
 
-1. Netlifyダッシュボードで **Add new site → Import an existing project → GitHub**
-2. `connective-byte` リポジトリを選択
-3. ビルド設定は `netlify.toml` から自動読み込みされる（手入力不要）
+Netlifyの月枠クレジット節約のため、pushごとの自動ビルドは行わない。開発が一段落したタイミングで手動デプロイする。
 
-設定後は `main` へのpushごとに自動デプロイされる。GitHub側のsecrets設定は不要。
+### 初回セットアップ（一度だけ）
 
-Netlifyダッシュボードで設定する環境変数（`RESEND_API_KEY` など）は [NETLIFY_DEPLOY.md](./NETLIFY_DEPLOY.md) を参照。
+1. `.env` に以下を設定:
+   - `NETLIFY_AUTH_TOKEN` — Netlify → User settings → Applications → New token
+   - `NETLIFY_SITE_ID` — Netlify → Site configuration → Site details → Site ID
+   - （`RESEND_API_KEY` / `RESEND_AUDIENCE_ID` — フォーム・ニュースレター用）
+2. `npm run deploy:env` — `.env` の内容をNetlifyサイトの環境変数へ取り込み（本番Functionが `RESEND_API_KEY` 等を読めるようになる）
+3. `npm run env:check` — 設定の検証（RESEND_API_KEYは読み取り専用API呼び出しで有効性確認）
+
+### デプロイ（開発完了時に）
+
+```bash
+npm run deploy
+```
+
+`next build`（`.env` の `NEXT_PUBLIC_*` を埋め込む）→ `out/` と `netlify/functions/` をNetlify本番へアップロード、まで一括実行。
+
+`.env` の環境変数を変更したときは `npm run deploy:env` を再実行する。
+
+### Git連携を使わない
+
+pushごとの自動ビルドはビルドクレジットを消費するため使わない。もし過去にNetlify側でGitHub連携を設定済みなら、Site settings → Build & deploy で連携を解除（または builds を stop）すること。
 
 ## フロントエンド デプロイ
 
@@ -40,7 +57,7 @@ Netlifyダッシュボードで設定する環境変数（`RESEND_API_KEY` な�
 
 フォームAPIは `public/_redirects` の強制リダイレクトで `/api/newsletter`・`/api/contact` → Netlify Functionsへ振り分けられる。
 
-### 手動デプロイ（Git連携を使わない緊急時）
+### 参考: Git連携なしの個別コマンド
 
 ```bash
 npm run build:frontend
@@ -75,7 +92,7 @@ CI（ci.yml）のbuildジョブがコンパイル検証とビルド成果物（a
 | ci.yml       | push / PR to `main`  | lint・型チェック・単体テスト（FE/BE）・E2E・ビルド |
 | security.yml | push / PR / 毎週月曜 | npm audit・CodeQL・TruffleHog                      |
 
-デプロイ自体はGitHub Actionsで行わない（Netlify Git連携が担当）。
+デプロイ自体はGitHub Actionsで行わない（`npm run deploy` の手動実行）。
 
 ## ロールバック
 

@@ -105,22 +105,22 @@ npm run dev:backend      # バックエンドのみ
 
 ## 🚀 デプロイ
 
-### Netlifyへのデプロイ
+### Netlifyへの手動デプロイ
 
-このプロジェクトはNetlifyで簡単にデプロイできます。
+Netlifyの月枠クレジット節約のため、pushごとの自動ビルドは行わない。開発完了時に手動でデプロイする:
 
-#### クイックデプロイ
+```bash
+npm run env:check   # .env の検証（RESEND_API_KEY の有効性確認を含む）
+npm run deploy      # ビルド → Netlify 本番へアップロード
+```
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/nobu007/connective-byte)
+初回のみ（`.env` に `NETLIFY_AUTH_TOKEN` / `NETLIFY_SITE_ID` を設定した後）:
 
-#### 手動デプロイ
+```bash
+npm run deploy:env  # .env の内容をNetlifyサイトの環境変数へ取り込み
+```
 
-1. [Netlify](https://www.netlify.com/)にログイン
-2. 「Add new site」→「Import an existing project」を選択
-3. GitHubリポジトリを接続
-4. ビルド設定は`netlify.toml`から自動で読み込まれます
-
-詳細な手順は[NETLIFY_DEPLOY.md](./NETLIFY_DEPLOY.md)を参照してください。
+詳細な手順は[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)を参照。
 
 #### デプロイ設定（自動適用）
 
