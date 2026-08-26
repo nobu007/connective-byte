@@ -10,13 +10,15 @@ export class ConsoleEmailService implements EmailService {
   async sendVerificationEmail(email: string, token: string): Promise<void> {
     console.log(`[EMAIL SERVICE] Verification email sent to: ${email}`);
     console.log(`[EMAIL SERVICE] Verification token: ${token}`);
-    console.log(`[EMAIL SERVICE] Verification link: http://localhost:3001/verify?token=${token}`);
+    console.log(
+      `[EMAIL SERVICE] Verification link: http://localhost:3000/verify-email?token=${token}`
+    );
   }
 
   async sendPasswordResetEmail(email: string, token: string): Promise<void> {
     console.log(`[EMAIL SERVICE] Password reset email sent to: ${email}`);
     console.log(`[EMAIL SERVICE] Reset token: ${token}`);
-    console.log(`[EMAIL SERVICE] Reset link: http://localhost:3001/reset-password?token=${token}`);
+    console.log(`[EMAIL SERVICE] Reset link: http://localhost:3000/reset-password?token=${token}`);
   }
 
   async sendPasswordChangedNotification(email: string): Promise<void> {
