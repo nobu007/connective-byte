@@ -1,6 +1,6 @@
 /**
  * Contact form handler.
- * Shared by the Next.js route handler (development) and the Netlify Function (production).
+ * Shared by the Next.js route handler (development) and the Pages Functions (production).
  */
 import { Resend } from 'resend';
 import { contactSchema } from '../validation/contact-schema';
