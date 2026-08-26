@@ -15,21 +15,24 @@ interface RateLimitStore {
 // In-memory store for rate limit data
 const store: RateLimitStore = {};
 
-// Cleanup interval (every 5 minutes)
+// 期限切れエントリの掃除間隔（5分）
 const CLEANUP_INTERVAL = 5 * 60 * 1000;
+let lastCleanupAt = 0;
 
-// Periodically clean up expired entries
-if (typeof setInterval !== 'undefined') {
-  const timer = setInterval(() => {
-    const now = Date.now();
-    Object.keys(store).forEach((key) => {
-      if (store[key].resetTime < now) {
-        delete store[key];
-      }
-    });
-  }, CLEANUP_INTERVAL);
-  // Do not keep the process alive just for this cleanup timer
-  timer.unref?.();
+/**
+ * 期限切れエントリの一括掃除。
+ * モジュール読み込み時の setInterval は Cloudflare Workers で
+ * 「global scope での禁止操作」エラーになるため、rateLimit() 呼び出し時に
+ * 遅延実行する（Node環境でも unref 済み timer と実質同等）。
+ */
+function cleanupExpired(now: number): void {
+  if (now - lastCleanupAt < CLEANUP_INTERVAL) return;
+  lastCleanupAt = now;
+  Object.keys(store).forEach((key) => {
+    if (store[key].resetTime < now) {
+      delete store[key];
+    }
+  });
 }
 
 /**

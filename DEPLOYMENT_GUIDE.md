@@ -4,16 +4,16 @@ ConnectiveByteのデプロイ実態を説明するガイド。
 
 ## 構成の概要
 
-| コンポーネント                     | デプロイ方法                                                         | 環境     |
-| ---------------------------------- | -------------------------------------------------------------------- | -------- |
-| フロントエンド（`apps/frontend`）  | 手動デプロイ（`npm run deploy`、クレジット節約のため自動ビルドなし） | 本番のみ |
-| フォームAPI（`netlify/functions`） | 同上（Netlify Functionsとして同時デプロイ）                          | 本番のみ |
-| バックエンド（`apps/backend`）     | 自動デプロイなし（手動）                                             | なし     |
+| コンポーネント                    | デプロイ方法                                                             | 環境     |
+| --------------------------------- | ------------------------------------------------------------------------ | -------- |
+| フロントエンド（`apps/frontend`） | 手動デプロイ（`npm run deploy:cf` → Cloudflare Pages、直接アップロード） | 本番のみ |
+| フォームAPI（`functions/api/`）   | 同上（Cloudflare Pages Functionsとして同時デプロイ）                     | 本番のみ |
+| バックエンド（`apps/backend`）    | 自動デプロイなし（手動）                                                 | なし     |
 
-- フロントエンドは `npm run deploy` で手動デプロイする（Netlifyの月枠クレジット節約のため自動ビルドは使わない）
+- ホスティングは **Cloudflare Pages**（Netlifyから移行。Netlifyは月枠クレジットでデプロイがブロックされたため）。直接アップロード（`wrangler pages deploy`）はビルド数を消費しない
 - ステージング環境は存在しない
 - フロントエンドはバックエンドを呼び出さない（静的サイトとして完結）
-- フォームAPI（`/api/newsletter`・`/api/contact`）は本番ではNetlify Functionsが処理する（静的エクスポートはPOSTルートを配信できないため）。ロジックは `apps/frontend/lib/api/` のハンドラに集約され、開発用ルート（`app/api/`）と本番用Functionが共用する
+- フォームAPI（`/api/newsletter`・`/api/contact`）は本番ではPages Functions（`functions/api/`）が処理する（静的エクスポートはPOSTルートを配信できないため）。ロジックは `apps/frontend/lib/api/` のハンドラに集約され、開発用ルート（`app/api/`）と本番用Functionが共用する
 
 ## 前提
 
@@ -22,43 +22,45 @@ ConnectiveByteのデプロイ実態を説明するガイド。
 
 ## 手動デプロイ（標準フロー）
 
-Netlifyの月枠クレジット節約のため、pushごとの自動ビルドは行わない。開発が一段落したタイミングで手動デプロイする。
+pushごとの自動ビルドは行わない。開発が一段落したタイミングで手動デプロイする。
 
 ### 初回セットアップ（一度だけ）
 
-1. `.env` に以下を設定:
-   - `NETLIFY_AUTH_TOKEN` — Netlify → User settings → Applications → New token
-   - `NETLIFY_SITE_ID` — Netlify → Project configuration → General → Project details → Project information → Project ID（UUID形式。Project ID = API の site_id = 環境変数 NETLIFY_SITE_ID はすべて同じ識別子）
+1. Cloudflareアカウントを作成（無料枠で商用利用可。直接アップロードはビルド数ノーカウント）
+2. `.env` に以下を設定:
+   - `CLOUDFLARE_API_TOKEN` — Cloudflare → My Profile → API Tokens → Create Token（テンプレート「Edit Cloudflare Pages」で作成）
    - （`RESEND_API_KEY` / `RESEND_AUDIENCE_ID` — フォーム・ニュースレター用）
-2. `npm run deploy:env` — `.env` の内容をNetlifyサイトの環境変数へ取り込み（本番Functionが `RESEND_API_KEY` 等を読めるようになる）
-3. `npm run env:check` — 設定の検証（RESEND_API_KEYは読み取り専用API呼び出しで有効性確認）
+3. 本番環境変数の設定（Functionが `RESEND_API_KEY` 等を読めるようにする）:
+   ```bash
+   npx wrangler pages secret put RESEND_API_KEY --project-name connective-byte
+   npx wrangler pages secret put RESEND_AUDIENCE_ID --project-name connective-byte
+   ```
+   または dashboard → Workers & Pages → connective-byte → Settings → Variables
+4. `npm run env:check` — 設定の検証（RESEND_API_KEYは読み取り専用API呼び出しで有効性確認）
+5. カスタムドメイン: dashboard → connective-byte → Custom domains → connectivebyte.com を追加し、DNS側に `CNAME → connective-byte.pages.dev` を設定
 
 ### デプロイ（開発完了時に）
 
 ```bash
-npm run deploy
+npm run deploy:cf
 ```
 
-`next build`（`.env` の `NEXT_PUBLIC_*` を埋め込む）→ `out/` と `netlify/functions/` をNetlify本番へアップロード、まで一括実行。
+`next build`（`.env` の `NEXT_PUBLIC_*` を埋め込む）→ `_redirects` のNetlify用リライト除去（`scripts/prepare-cloudflare.mjs`）→ `out/` と `functions/` をCloudflare本番へ直接アップロード、まで一括実行。
 
-`.env` の環境変数を変更したときは `npm run deploy:env` を再実行する。
-
-### Git連携を使わない
-
-pushごとの自動ビルドはビルドクレジットを消費するため使わない。もし過去にNetlify側でGitHub連携を設定済みなら、Site settings → Build & deploy で連携を解除（または builds を stop）すること。
+`.env` の環境変数を変更したときは手順3の `wrangler pages secret put` を再実行する。
 
 ## フロントエンド デプロイ
 
-手動デプロイ（上記の標準フロー）のみを使う。フォームAPIは `public/_redirects` の強制リダイレクトで `/api/newsletter`・`/api/contact` → Netlify Functionsへ振り分けられる。
+手動デプロイ（上記の標準フロー）のみを使う。フォームAPIは `functions/api/newsletter.ts`・`functions/api/contact.ts` が `/api/newsletter`・`/api/contact` として直接配信される（Pages Functionsのパス規約。リダイレクト不要）。
 
-### netlify.tomlの設定
+### wrangler.tomlの設定
 
-`netlify.toml` で以下を定義済み（Git連携のビルドを再有効化した場合に適用される。手動デプロイでは `npm run deploy` が同等の内容を直接アップロードする）：
+`wrangler.toml` で以下を定義済み:
 
-- ビルドコマンド: `npm run build:netlify`（フロントエンドのみ、Node.js 20）
+- プロジェクト名: `connective-byte`
 - 公開ディレクトリ: `apps/frontend/out`
-- Functionsディレクトリ: `netlify/functions`
-- セキュリティヘッダー・アセットキャッシュ
+- 互換性フラグ: `nodejs_compat`（共有handlerが `process.env` を使用するため）
+- セキュリティヘッダー・アセットキャッシュ: `apps/frontend/public/_headers`（`out/` に焼き込まれ、Cloudflareも同じ形式を解釈する）
 
 ## バックエンド
 
@@ -82,14 +84,19 @@ CI（ci.yml）のbuildジョブがコンパイル検証とビルド成果物（a
 
 ## ロールバック
 
-1. Netlifyダッシュボードの Deploys タブで以前の正常なデプロイを選択
-2. 「Publish deploy」をクリック
+1. Cloudflareダッシュボード → connective-byte → Deployment history で以前の正常なデプロイを選択
+2. 「Rollback to this deployment」をクリック
 
 ## トラブルシューティング
 
-| 症状                                 | 確認方法                                                       |
-| ------------------------------------ | -------------------------------------------------------------- |
-| デプロイが失敗する                   | NetlifyのDeploysタブでビルドログを確認                         |
-| ローカルでビルドを再現               | `npm run build:netlify` を実行してエラーを確認                 |
-| デプロイ済みだがページが更新されない | NetlifyのDeploysタブでデプロイ状態とキャッシュを確認           |
-| フォームが404/エラーになる           | Functionsログ（Netlify → Functions）と `RESEND_API_KEY` を確認 |
+| 症状                                 | 確認方法                                                                                    |
+| ------------------------------------ | ------------------------------------------------------------------------------------------- |
+| デプロイが失敗する                   | `npm run deploy:cf` の出力とCloudflareのDeployment historyを確認                            |
+| ローカルでビルドを再現               | `npm run build:cf` を実行してエラーを確認                                                   |
+| ローカルでFunction含め動作確認       | リポジトリルートから `npx wrangler pages dev`（`.env` を自動読込。 Functions検出はcwd依存） |
+| デプロイ済みだがページが更新されない | Cloudflareのキャッシュ設定とDeployment historyを確認                                        |
+| フォームが404/エラーになる           | `wrangler tail`（Functionのライブログ）と `RESEND_API_KEY` のVariables設定を確認            |
+
+## 旧ホスティング（Netlify）
+
+2026年8月にCloudflare Pagesへ移行した。移行の経緯: Netlifyの月枠クレジット枯渇でデプロイがアカウントレベルでブロックされたため。旧構成（`netlify.toml`・`netlify/functions/`・`npm run deploy`）は参照用に残しているが、`netlify/functions` はメンテナンスされていない場合があり、フォームロジックの変更は `apps/frontend/lib/api/` の共有handlerと `functions/api/` の両方に反映すること。

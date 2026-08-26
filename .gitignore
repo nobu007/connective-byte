@@ -267,3 +267,4 @@ yarn-error.log*
 .netlify
 
 # python
+.wrangler/

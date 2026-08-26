@@ -31,7 +31,9 @@
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "prepare": "husky",
     "type-check": "npm run type-check -w apps/frontend",
-    "sec:allow-scripts": "npx @lavamoat/allow-scripts auto"
+    "sec:allow-scripts": "npx @lavamoat/allow-scripts auto",
+    "build:cf": "npm run build:netlify && node scripts/prepare-cloudflare.mjs",
+    "deploy:cf": "npm run build:cf && npx wrangler pages deploy"
   },
   "repository": {
     "type": "git",
