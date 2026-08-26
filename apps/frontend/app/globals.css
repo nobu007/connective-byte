@@ -11,14 +11,9 @@
   --font-family-heading: 'Inter', 'Noto Sans JP', sans-serif;
   --font-family-body: 'Inter', 'Noto Sans JP', sans-serif;
 
-  /* Spacing */
-  --spacing-xs: 0.5rem;
-  --spacing-sm: 1rem;
-  --spacing-md: 1.5rem;
-  --spacing-lg: 2rem;
-  --spacing-xl: 3rem;
-  --spacing-2xl: 4rem;
-  --spacing-3xl: 6rem;
+  /* Note: --spacing-xs〜3xl の名前付きトークンは定義しないこと。
+     Tailwind v4では --spacing-md 等が max-w-md をコンテナ幅(28rem)ではなく
+     スペーシング値(1.5rem)に解決してしまい、レイアウトが崩れる。 */
 }
 
 :root {
@@ -30,25 +25,30 @@
   --color-border: #e5e7eb;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* リセットは必ず @layer base に入れること。
+   非レイヤーのリセットはレイヤー化されたTailwindユーティリティ（p-* / m-* 等）より
+   優先されてしまい、全ページのパディング・マージンが死ぬ。 */
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-body {
-  font-family: var(--font-family-body);
-  color: var(--color-text-primary);
-  background-color: var(--color-bg-primary);
-  line-height: 1.7;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  body {
+    font-family: var(--font-family-body);
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-primary);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-/* Focus visible styles for accessibility */
-*:focus-visible {
-  outline: 2px solid var(--color-primary-tech-green);
-  outline-offset: 2px;
+  /* Focus visible styles for accessibility */
+  *:focus-visible {
+    outline: 2px solid var(--color-primary-tech-green);
+    outline-offset: 2px;
+  }
 }
 
 /* Skip to content link for accessibility */
