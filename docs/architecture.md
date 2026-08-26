@@ -19,7 +19,7 @@ ConnectiveByte/
 │   ├── logic/           # ビジネスロジック
 │   └── design/          # デザインシステム
 ├── docs/                  # ドキュメント
-└── netlify.toml           # Netlifyデプロイ設定
+└── functions/api/         # 本番用API（Cloudflare Pages Functions）
 ```
 
 ## フロントエンド (apps/frontend)

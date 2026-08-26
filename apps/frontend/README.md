@@ -20,7 +20,7 @@ ConnectiveByteは、「理解されない孤独を吹き飛ばして、AI活用�
 - **Animations**: Framer Motion
 - **Forms**: React Hook Form + Zod
 - **Icons**: Lucide React
-- **Deployment**: Netlify (Static Export)
+- **Deployment**: Cloudflare Pages (Static Export)
 
 ## 📦 プロジェクト構造
 
@@ -118,17 +118,16 @@ RESEND_API_KEY=your_api_key_here
 
 ## 🚀 デプロイメント
 
-### Netlifyへのデプロイ
+### Cloudflare Pagesへのデプロイ
 
-1. Netlifyアカウントにログイン
-2. リポジトリを接続
-3. ビルド設定:
-   - Build command: `npm run build`
-   - Publish directory: `apps/frontend/out`
-4. 環境変数を設定
-5. デプロイ
+開発完了時にリポジトリルートから手動デプロイ（直接アップロードのためビルドクレジット不要）:
 
-詳細は`netlify.toml`を参照してください。
+```bash
+npm run env:check    # 環境変数の検証
+npm run deploy:cf    # ビルド → 本番へアップロード
+```
+
+詳細はルートの `DEPLOYMENT_GUIDE.md` を参照。
 
 ## 📊 パフォーマンス
 

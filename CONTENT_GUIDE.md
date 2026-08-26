@@ -490,36 +490,17 @@ Visit http://localhost:3000 to preview your changes.
 
 ## Deployment Process
 
-### Automatic Deployment (Recommended)
+### Deployment
 
-If your repository is connected to Netlify or similar service:
+Deployments are manual, run when development is complete:
 
-1. **Commit your changes** to Git:
+1. **Commit your changes** to Git and push
 
-   ```bash
-   git add apps/frontend/content/
-   git commit -m "Update homepage hero section"
-   git push
-   ```
-
-2. **Automatic build** will trigger on Netlify
-
-3. **Wait 2-5 minutes** for deployment to complete
-
-4. **Verify changes** on the live website
-
-### Manual Deployment
-
-If deploying manually:
-
-1. **Build the project**:
+2. **Deploy from the repository root**:
 
    ```bash
-   cd apps/frontend
-   npm run build
+   npm run deploy:cf
    ```
-
-2. **Deploy the `out/` directory** to your hosting service
 
 3. **Verify changes** on the live website
 

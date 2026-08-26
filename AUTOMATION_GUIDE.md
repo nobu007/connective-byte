@@ -130,8 +130,8 @@ npm run dev:backend
 # Build both frontend and backend
 npm run build
 
-# Build for Netlify deployment
-npm run build:netlify
+# Build for Cloudflare Pages deployment
+npm run build:cf
 
 # Preview production build
 npm run preview
@@ -195,22 +195,20 @@ npm run type-check
 
 **Status**: Automated on every push/PR
 
-### Netlify Deployment (`netlify.toml`)
+### Cloudflare Pages Deployment (manual)
 
-**Configuration**:
+**Configuration** (`wrangler.toml`):
 
-- Base directory: `apps/frontend`
-- Build command: `npm run build`
-- Publish directory: `out`
-- Node version: 20
-- NPM version: 10
+- Project: `connective-byte`
+- Publish directory: `apps/frontend/out`
+- Functions: `functions/api/`（フォームAPI）
+- Compatibility flags: `nodejs_compat`
 
-**Features**:
+**Flow**:
 
-- Automatic deployments on push to main
-- Preview deployments for PRs
-- SPA routing support
-- Security headers (X-Frame-Options, CSP, etc.)
+- Manual deploy on development milestones: `npm run deploy:cf`（pushごとの自動ビルドなし）
+- Security headers via `apps/frontend/public/_headers`
+- Rollback from the dashboard's Deployment history
 
 ---
 

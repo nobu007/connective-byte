@@ -50,8 +50,8 @@ ConnectiveByte/
 ├── libs/
 │   ├── components/  # 再利用可能なUIコンポーネント
 │   └── logic/       # ビジネスロジックと共通機能
-└── netlify/
-    └── functions/   # 本番用API（ニュースレター・問い合わせフォーム）
+└── functions/
+    └── api/         # 本番用API（Cloudflare Pages Functions: ニュースレター・問い合わせフォーム）
 ```
 
 ## 🚀 クイックスタート
@@ -105,29 +105,17 @@ npm run dev:backend      # バックエンドのみ
 
 ## 🚀 デプロイ
 
-### Netlifyへの手動デプロイ
+### Cloudflare Pagesへの手動デプロイ
 
-Netlifyの月枠クレジット節約のため、pushごとの自動ビルドは行わない。開発完了時に手動でデプロイする:
-
-```bash
-npm run env:check   # .env の検証（RESEND_API_KEY の有効性確認を含む）
-npm run deploy      # ビルド → Netlify 本番へアップロード
-```
-
-初回のみ（`.env` に `NETLIFY_AUTH_TOKEN` / `NETLIFY_SITE_ID` を設定した後）:
+pushごとの自動ビルドは行わない。開発完了時に手動でデプロイする（直接アップロードのためビルドクレジットを消費しない）:
 
 ```bash
-npm run deploy:env  # .env の内容をNetlifyサイトの環境変数へ取り込み
+npm run env:check    # .env の検証（RESEND_API_KEY の有効性確認を含む）
+npm run deploy:cf    # ビルド → Cloudflare Pages 本番へアップロード
 ```
 
-詳細な手順は[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)を参照。
-
-#### デプロイ設定（自動適用）
-
-- **Base directory**: `/`（リポジトリルート）
-- **Build command**: `npm run build:netlify`
-- **Publish directory**: `apps/frontend/out`
-- **Node.js version**: 20
+初回セットアップ（Cloudflareアカウント、APIトークン、本番secret、カスタムドメイン）は
+[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)を参照。
 
 ## 📚 ドキュメント
 

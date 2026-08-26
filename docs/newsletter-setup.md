@@ -59,14 +59,14 @@ RESEND_API_KEY=re_your_api_key_here
 RESEND_AUDIENCE_ID=aud_your_audience_id_here
 ```
 
-#### 本番環境（Netlify）
+#### 本番環境（Cloudflare Pages）
 
-Netlifyダッシュボードで環境変数を設定：
+wranglerで本番secretを設定：
 
-1. 「Site settings」→「Environment variables」に移動
-2. 以下の変数を追加：
-   - `RESEND_API_KEY`: Resend APIキー
-   - `RESEND_AUDIENCE_ID`: ResendオーディエンスID
+```bash
+npx wrangler pages secret put RESEND_API_KEY --project-name connective-byte
+npx wrangler pages secret put RESEND_AUDIENCE_ID --project-name connective-byte
+```
 
 ## 🧪 動作確認
 

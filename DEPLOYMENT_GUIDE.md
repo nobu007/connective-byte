@@ -99,4 +99,4 @@ CI（ci.yml）のbuildジョブがコンパイル検証とビルド成果物（a
 
 ## 旧ホスティング（Netlify）
 
-2026年8月にCloudflare Pagesへ移行した。移行の経緯: Netlifyの月枠クレジット枯渇でデプロイがアカウントレベルでブロックされたため。旧構成（`netlify.toml`・`netlify/functions/`・`npm run deploy`）は参照用に残しているが、`netlify/functions` はメンテナンスされていない場合があり、フォームロジックの変更は `apps/frontend/lib/api/` の共有handlerと `functions/api/` の両方に反映すること。
+2026年8月にCloudflare Pagesへ移行した。移行の経緯: Netlifyの月枠クレジット枯渇でデプロイがアカウントレベルでブロックされたため。旧構成（`netlify.toml`・`netlify/functions/`・`npm run deploy`）は撤去済み（git履歴で参照可能）。フォームロジックの変更は `apps/frontend/lib/api/` の共有handlerのみでよく、`functions/api/`（本番）と `app/api/`（開発）が自動的にそれを共用する。

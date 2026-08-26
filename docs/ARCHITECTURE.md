@@ -509,7 +509,7 @@ npm run dev          # TypeScript execution (ts-node)
 
 ### Deployment Strategy
 
-- **Frontend**: Static export to Netlify/Vercel
+- **Frontend**: Static export to Cloudflare Pages
 - **Backend**: Node.js server deployment
 - **Configuration**: Environment variables for API URLs
 
