@@ -67,8 +67,8 @@ export const corsConfig: RequestHandler = (
   const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:3001',
-    'https://connectivebyte.netlify.app',
-    'https://staging--connectivebyte.netlify.app',
+    'https://connectivebyte.com',
+    'https://connective-byte.pages.dev',
   ];
 
   const origin = req.headers.origin;

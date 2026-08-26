@@ -1,7 +1,7 @@
 /**
  * Cloudflare Pages Functions アダプタ。
  * 共有handler（Request → Response）を Pages Function（onRequest）へ変換する。
- * Netlify版（netlify/functions/*.ts）と同じ役割で、ビジネスロジックは共用。
+ * 開発用Next.jsルート（app/api/*）と同じ役割で、ビジネスロジックは共用。
  */
 
 type Env = Record<string, unknown>;

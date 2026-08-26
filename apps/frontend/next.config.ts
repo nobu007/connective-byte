@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  // Netlifyでの静的エクスポート設定
+  // 静的エクスポート設定（Cloudflare Pagesへ直接アップロード。Functionは functions/api/ を参照）
   output: 'export',
 
   // 画像最適化の無効化（静的エクスポート時は必須）

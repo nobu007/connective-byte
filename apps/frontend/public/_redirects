@@ -1,6 +1,0 @@
-# Form API endpoints -> Netlify Functions.
-# Forced (200!) so they take precedence over any static match; the static
-# export does not emit these paths, so unknown methods correctly fall through
-# to the function which handles POST only.
-/api/newsletter  /.netlify/functions/newsletter  200!
-/api/contact     /.netlify/functions/contact     200!

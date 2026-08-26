@@ -57,13 +57,13 @@ results.push([
     : '⚠️ 未設定（Cloudflare Pages デプロイ用。My Profile → API Tokens → Edit Cloudflare Pages テンプレート）',
 ]);
 
-// --- 手動デプロイ（Netlify: 旧ホスティング） ---
-results.push([
-  'NETLIFY_AUTH_TOKEN / NETLIFY_SITE_ID',
-  isSet('NETLIFY_AUTH_TOKEN') && isSet('NETLIFY_SITE_ID')
-    ? '✅ 両方設定済み（旧: npm run deploy。Cloudflareへ移行済みのため通常不要）'
-    : `ℹ️ 未設定（旧Netlify用。移行済みのため未設定でOK）`,
-]);
+// --- 手動デプロイ（Netlify: 旧ホスティング。2026年8月に撤去済み） ---
+if (isSet('NETLIFY_AUTH_TOKEN') || isSet('NETLIFY_SITE_ID')) {
+  results.push([
+    'NETLIFY_AUTH_TOKEN / NETLIFY_SITE_ID',
+    'ℹ️ 設定されていますが旧Netlify用です（移行済み）。.env から削除して構いません',
+  ]);
+}
 
 console.log(`.env 検証結果（${ENV_PATH}）:\n`);
 for (const [name, status] of results) console.log(`  ${status}  [${name}]`);

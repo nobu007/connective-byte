@@ -263,8 +263,6 @@ yarn-error.log*
 # TypeScript cache
 *.tsbuildinfo
 
-# Local Netlify folder
-.netlify
 
 # python
 .wrangler/
