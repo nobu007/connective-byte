@@ -107,6 +107,6 @@ for (const r of results) console.log(`  ${r.ok ? '✅' : '❌'} ${r.name}${r.det
 const failed = results.filter((r) => !r.ok);
 console.log(`\n${results.length - failed.length}/${results.length} 合格`);
 if (failed.length) {
-  console.log('❌ 失敗があります。NetlifyのDeploys/Functionsログを確認してください。');
+  console.log('❌ 失敗があります。CloudflareのDeployment historyと `npx wrangler tail` を確認してください。');
   process.exit(1);
 }
