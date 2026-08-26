@@ -101,6 +101,42 @@ for (const [path, payload] of [
   }
 }
 
+// --- バックエンドAPI（Cloudflare Workers: api.connectivebyte.com） ---
+const apiBase = (
+  process.env.API_SMOKE_URL || 'https://api.connectivebyte.com'
+).replace(/\/+$/, '');
+for (const [path, options, expect] of [
+  ['/api/health', {}, 200],
+  [
+    '/api/auth/login',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    },
+    400,
+  ],
+]) {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    let res;
+    try {
+      res = await fetch(`${apiBase}${path}`, {
+        ...options,
+        signal: controller.signal,
+        headers: { 'User-Agent': 'connective-byte-smoke/1.0', ...(options.headers || {}) },
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+    const ok = res.status === expect;
+    record(`API ${path} → ${expect}`, ok, ok ? '' : `HTTP ${res.status}`);
+  } catch (err) {
+    record(`API ${path} → ${expect}`, false, err.message);
+  }
+}
+
 // --- 結果 ---
 console.log(`本番スモークテスト: ${baseUrl}\n`);
 for (const r of results) console.log(`  ${r.ok ? '✅' : '❌'} ${r.name}${r.detail ? ` — ${r.detail}` : ''}`);

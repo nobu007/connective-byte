@@ -30,7 +30,9 @@
     "type-check": "npm run type-check -w apps/frontend",
     "sec:allow-scripts": "npx @lavamoat/allow-scripts auto",
     "build:cf": "dotenv -e .env -- npm run build -w apps/frontend",
-    "deploy:cf": "npm run build:cf && npx wrangler pages deploy"
+    "deploy:cf": "npm run build:cf && npx wrangler pages deploy",
+    "deploy:api": "npm run build:backend && npx wrangler deploy -c apps/backend/wrangler.toml",
+    "init:auth-db": "dotenv -e .env -- node scripts/init-auth-db.mjs"
   },
   "repository": {
     "type": "git",

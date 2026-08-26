@@ -1,0 +1,22 @@
+# Cloudflare Workers 設定（auth API）
+# デプロイ: ルートから `npm run deploy:api`
+
+name = "connective-byte-api"
+main = "src/worker.ts"
+compatibility_date = "2026-08-04"
+compatibility_flags = ["nodejs_compat", "nodejs_compat_populate_process_env"]
+
+# カスタムドメイン（初回デプロイ時に DNS レコードも自動作成される。
+# トークンに Zone DNS:Edit がない場合はこの routes をコメントアウトし、
+# ダッシュボードの Workers > connective-byte-api > Settings > Domains & Routes で手動追加）
+routes = [
+  { pattern = "api.connectivebyte.com", custom_domain = true }
+]
+
+[vars]
+SITE_URL = "https://connectivebyte.com"
+
+# シークレット（環境ごとに `npx wrangler secret put -c apps/backend/wrangler.toml <KEY>`）:
+# - DATABASE_URL   Neon Postgres 接続文字列
+# - JWT_SECRET     JWT 署名鍵
+# - RESEND_API_KEY メール送信

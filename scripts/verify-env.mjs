@@ -46,14 +46,22 @@ results.push([
   'JWT_SECRET',
   isSet('JWT_SECRET')
     ? '✅ 設定済み'
-    : '⚠️ 未設定（安全でないデフォルト値で動く。本番運用前に必須）',
+    : '❌ 未設定（本番では起動時エラーで fail-fast。auth API デプロイ前に必須）',
+]);
+
+// --- auth API（Cloudflare Workers + Neon Postgres） ---
+results.push([
+  'DATABASE_URL',
+  isSet('DATABASE_URL')
+    ? '✅ 設定済み（Neon Postgres — auth API の保存先。npm run init:auth-db でテーブル作成）'
+    : '⚠️ 未設定（auth API はローカルJSON保存モードで動く。本番デプロイ前に Neon の接続文字列を設定）',
 ]);
 
 // --- 手動デプロイ（Cloudflare Pages: 現行） ---
 results.push([
   'CLOUDFLARE_API_TOKEN',
   isSet('CLOUDFLARE_API_TOKEN')
-    ? '✅ 設定済み（npm run deploy:cf が使える）'
+    ? '✅ 設定済み（npm run deploy:cf / deploy:api が使える。APIデプロイには Workers Scripts:Edit + Workers Routes:Edit 権限も必要）'
     : '⚠️ 未設定（Cloudflare Pages デプロイ用。My Profile → API Tokens → Edit Cloudflare Pages テンプレート）',
 ]);
 

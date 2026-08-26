@@ -111,8 +111,14 @@ export class AuthService {
       isVerified: false, // Email verification required
     });
 
-    // Send verification email
+    // 検証トークンをSHA-256ハッシュで保存（24時間有効 — requirements.md仕様）
     const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await this.userRepository.storeEmailVerificationToken(
+      this.hashToken(verificationToken),
+      user.id,
+      verificationExpiry
+    );
     await this.emailService.sendVerificationEmail(user.email, verificationToken);
 
     // Generate tokens
@@ -166,7 +172,7 @@ export class AuthService {
    */
   async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
     // 保存時と同じSHA-256でハッシュして照合（bcryptはソルトが毎回変わるため検索不可能）
-    const tokenHash = this.hashRefreshToken(refreshToken);
+    const tokenHash = this.hashToken(refreshToken);
     const stored = await this.userRepository.findRefreshToken(tokenHash);
     if (!stored) {
       throw new Error('Invalid refresh token');
@@ -204,7 +210,7 @@ export class AuthService {
     refreshTokenExpiry.setDate(refreshTokenExpiry.getDate() + 30);
 
     await this.userRepository.storeRefreshToken(
-      this.hashRefreshToken(refreshTokenRaw),
+      this.hashToken(refreshTokenRaw),
       user.id,
       refreshTokenExpiry
     );
@@ -219,14 +225,14 @@ export class AuthService {
    * Logout user
    */
   async logout(userId: string, refreshToken: string): Promise<void> {
-    await this.userRepository.removeRefreshToken(this.hashRefreshToken(refreshToken));
+    await this.userRepository.removeRefreshToken(this.hashToken(refreshToken));
   }
 
   /**
-   * リフレッシュトークンは256bitの高エントロピー乱数なので、
+   * 検証・リセット・リフレッシュの各トークンは256bitの高エントロピー乱数なので、
    * 保存・照合にはSHA-256で十分（bcryptは毎回ソルトが変わり照合不能）
    */
-  private hashRefreshToken(token: string): string {
+  private hashToken(token: string): string {
     return crypto.createHash('sha256').update(token).digest('hex');
   }
 
@@ -234,9 +240,14 @@ export class AuthService {
    * Verify email
    */
   async verifyEmail(token: string): Promise<void> {
-    // In real implementation, verify token from database
-    // For now, this is a stub that would update user.isVerified
-    throw new Error('Email verification not fully implemented');
+    const tokenHash = this.hashToken(token);
+    const stored = await this.userRepository.findEmailVerificationToken(tokenHash);
+    if (!stored) {
+      throw new Error('Invalid or expired verification token');
+    }
+
+    await this.userRepository.update(stored.userId, { isVerified: true });
+    await this.userRepository.deleteEmailVerificationToken(tokenHash);
   }
 
   /**
@@ -249,7 +260,14 @@ export class AuthService {
       return;
     }
 
+    // リセットトークンをSHA-256ハッシュで保存（1時間有効 — requirements.md仕様）
     const resetToken = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+    await this.userRepository.storePasswordResetToken(
+      this.hashToken(resetToken),
+      user.id,
+      expiresAt
+    );
     await this.emailService.sendPasswordResetEmail(user.email, resetToken);
   }
 
@@ -257,7 +275,27 @@ export class AuthService {
    * Reset password
    */
   async resetPassword(token: string, newPassword: string): Promise<void> {
-    // In real implementation, verify token and update password
-    throw new Error('Password reset not fully implemented');
+    const tokenHash = this.hashToken(token);
+    const stored = await this.userRepository.findPasswordResetToken(tokenHash);
+    if (!stored) {
+      throw new Error('Invalid or expired reset token');
+    }
+
+    const validation = this.validatePassword(newPassword);
+    if (!validation.valid) {
+      throw new Error(validation.errors.join(', '));
+    }
+
+    const passwordHash = await hashPassword(newPassword);
+    await this.userRepository.update(stored.userId, { passwordHash });
+
+    // 全セッション無効化（requirements.md仕様）+ トークン単用途化
+    await this.userRepository.removeAllRefreshTokensForUser(stored.userId);
+    await this.userRepository.deletePasswordResetTokensForUser(stored.userId);
+
+    const user = await this.userRepository.findById(stored.userId);
+    if (user) {
+      await this.emailService.sendPasswordChangedNotification(user.email);
+    }
   }
 }

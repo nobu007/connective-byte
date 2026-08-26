@@ -7,15 +7,25 @@
 import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
-import { UserRepository, User, RefreshToken } from '../interfaces/user-repository';
+import {
+  UserRepository,
+  User,
+  RefreshToken,
+  EmailVerificationToken,
+  PasswordResetToken,
+} from '../interfaces/user-repository';
+
+interface StoredToken {
+  tokenHash: string;
+  userId: string;
+  expiresAt: string;
+}
 
 interface Database {
   users: User[];
-  refreshTokens: Array<{
-    tokenHash: string;
-    userId: string;
-    expiresAt: string;
-  }>;
+  refreshTokens: StoredToken[];
+  emailVerificationTokens: StoredToken[];
+  passwordResetTokens: StoredToken[];
 }
 
 export class JsonUserRepository implements UserRepository {
@@ -26,7 +36,12 @@ export class JsonUserRepository implements UserRepository {
     dbPath: string = process.env.AUTH_DB_PATH || path.join(process.cwd(), 'data/auth', 'users.json')
   ) {
     this.dbPath = dbPath;
-    this.data = { users: [], refreshTokens: [] };
+    this.data = {
+      users: [],
+      refreshTokens: [],
+      emailVerificationTokens: [],
+      passwordResetTokens: [],
+    };
   }
 
   /**
@@ -43,13 +58,25 @@ export class JsonUserRepository implements UserRepository {
         .catch(() => false);
       if (exists) {
         const content = await fs.readFile(this.dbPath, 'utf-8');
-        this.data = JSON.parse(content);
+        const parsed = JSON.parse(content);
+        // 旧形式ファイル（トークン配列なし）への後方互換
+        this.data = {
+          users: parsed.users ?? [],
+          refreshTokens: parsed.refreshTokens ?? [],
+          emailVerificationTokens: parsed.emailVerificationTokens ?? [],
+          passwordResetTokens: parsed.passwordResetTokens ?? [],
+        };
       } else {
         await this.save();
       }
     } catch (error) {
       console.error('Failed to initialize database:', error);
-      this.data = { users: [], refreshTokens: [] };
+      this.data = {
+        users: [],
+        refreshTokens: [],
+        emailVerificationTokens: [],
+        passwordResetTokens: [],
+      };
     }
   }
 
@@ -149,7 +176,79 @@ export class JsonUserRepository implements UserRepository {
   async cleanExpiredTokens(): Promise<void> {
     await this.initialize();
     const now = new Date();
-    this.data.refreshTokens = this.data.refreshTokens.filter((t) => new Date(t.expiresAt) > now);
+    const isAlive = (t: StoredToken) => new Date(t.expiresAt) > now;
+    this.data.refreshTokens = this.data.refreshTokens.filter(isAlive);
+    this.data.emailVerificationTokens = this.data.emailVerificationTokens.filter(isAlive);
+    this.data.passwordResetTokens = this.data.passwordResetTokens.filter(isAlive);
+    await this.save();
+  }
+
+  async storeEmailVerificationToken(
+    tokenHash: string,
+    userId: string,
+    expiresAt: Date
+  ): Promise<void> {
+    await this.initialize();
+    this.data.emailVerificationTokens.push({
+      tokenHash,
+      userId,
+      expiresAt: expiresAt.toISOString(),
+    });
+    await this.save();
+  }
+
+  async findEmailVerificationToken(tokenHash: string): Promise<EmailVerificationToken | null> {
+    await this.initialize();
+    const token = this.data.emailVerificationTokens.find((t) => t.tokenHash === tokenHash);
+    if (!token) return null;
+
+    if (new Date(token.expiresAt) < new Date()) {
+      await this.deleteEmailVerificationToken(tokenHash);
+      return null;
+    }
+
+    return { ...token };
+  }
+
+  async deleteEmailVerificationToken(tokenHash: string): Promise<void> {
+    await this.initialize();
+    this.data.emailVerificationTokens = this.data.emailVerificationTokens.filter(
+      (t) => t.tokenHash !== tokenHash
+    );
+    await this.save();
+  }
+
+  async storePasswordResetToken(tokenHash: string, userId: string, expiresAt: Date): Promise<void> {
+    await this.initialize();
+    this.data.passwordResetTokens.push({
+      tokenHash,
+      userId,
+      expiresAt: expiresAt.toISOString(),
+    });
+    await this.save();
+  }
+
+  async findPasswordResetToken(tokenHash: string): Promise<PasswordResetToken | null> {
+    await this.initialize();
+    const token = this.data.passwordResetTokens.find((t) => t.tokenHash === tokenHash);
+    if (!token) return null;
+
+    if (new Date(token.expiresAt) < new Date()) {
+      this.data.passwordResetTokens = this.data.passwordResetTokens.filter(
+        (t) => t.tokenHash !== tokenHash
+      );
+      await this.save();
+      return null;
+    }
+
+    return { ...token };
+  }
+
+  async deletePasswordResetTokensForUser(userId: string): Promise<void> {
+    await this.initialize();
+    this.data.passwordResetTokens = this.data.passwordResetTokens.filter(
+      (t) => t.userId !== userId
+    );
     await this.save();
   }
 }

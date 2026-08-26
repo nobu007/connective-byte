@@ -15,6 +15,9 @@ import { hashPassword } from '../../../common/utils/password';
 class MockUserRepository implements UserRepository {
   private users: User[] = [];
   private refreshTokens: Array<{ tokenHash: string; userId: string; expiresAt: string }> = [];
+  private emailVerificationTokens: Array<{ tokenHash: string; userId: string; expiresAt: string }> =
+    [];
+  private passwordResetTokens: Array<{ tokenHash: string; userId: string; expiresAt: string }> = [];
 
   async findById(id: string): Promise<User | null> {
     return this.users.find((u) => u.id === id) || null;
@@ -77,6 +80,66 @@ class MockUserRepository implements UserRepository {
   async cleanExpiredTokens(): Promise<void> {
     const now = new Date();
     this.refreshTokens = this.refreshTokens.filter((t) => new Date(t.expiresAt) > now);
+    this.emailVerificationTokens = this.emailVerificationTokens.filter(
+      (t) => new Date(t.expiresAt) > now
+    );
+    this.passwordResetTokens = this.passwordResetTokens.filter((t) => new Date(t.expiresAt) > now);
+  }
+
+  async storeEmailVerificationToken(
+    tokenHash: string,
+    userId: string,
+    expiresAt: Date
+  ): Promise<void> {
+    this.emailVerificationTokens.push({ tokenHash, userId, expiresAt: expiresAt.toISOString() });
+  }
+
+  async findEmailVerificationToken(tokenHash: string): Promise<{
+    tokenHash: string;
+    userId: string;
+    expiresAt: string;
+  } | null> {
+    const token = this.emailVerificationTokens.find((t) => t.tokenHash === tokenHash);
+    if (!token) return null;
+
+    if (new Date(token.expiresAt) < new Date()) {
+      this.emailVerificationTokens = this.emailVerificationTokens.filter(
+        (t) => t.tokenHash !== tokenHash
+      );
+      return null;
+    }
+
+    return { ...token };
+  }
+
+  async deleteEmailVerificationToken(tokenHash: string): Promise<void> {
+    this.emailVerificationTokens = this.emailVerificationTokens.filter(
+      (t) => t.tokenHash !== tokenHash
+    );
+  }
+
+  async storePasswordResetToken(tokenHash: string, userId: string, expiresAt: Date): Promise<void> {
+    this.passwordResetTokens.push({ tokenHash, userId, expiresAt: expiresAt.toISOString() });
+  }
+
+  async findPasswordResetToken(tokenHash: string): Promise<{
+    tokenHash: string;
+    userId: string;
+    expiresAt: string;
+  } | null> {
+    const token = this.passwordResetTokens.find((t) => t.tokenHash === tokenHash);
+    if (!token) return null;
+
+    if (new Date(token.expiresAt) < new Date()) {
+      this.passwordResetTokens = this.passwordResetTokens.filter((t) => t.tokenHash !== tokenHash);
+      return null;
+    }
+
+    return { ...token };
+  }
+
+  async deletePasswordResetTokensForUser(userId: string): Promise<void> {
+    this.passwordResetTokens = this.passwordResetTokens.filter((t) => t.userId !== userId);
   }
 }
 
@@ -368,6 +431,7 @@ describe('AuthService', () => {
       const resetEmail = mockEmailService.sentEmails.find((e) => e.type === 'reset');
       expect(resetEmail).toBeDefined();
       expect(resetEmail?.email).toBe('test@example.com');
+      expect(resetEmail?.token).toMatch(/^[0-9a-f]{64}$/);
     });
 
     it('should not reveal if email exists for password reset', async () => {
@@ -378,17 +442,122 @@ describe('AuthService', () => {
     });
   });
 
-  describe('verifyEmail and resetPassword', () => {
-    it('should indicate email verification is not fully implemented', async () => {
-      await expect(authService.verifyEmail('token')).rejects.toThrow(
-        'Email verification not fully implemented'
-      );
+  describe('verifyEmail', () => {
+    it('should verify user email with valid token', async () => {
+      const result = await authService.register({
+        email: 'verify@example.com',
+        password: 'SecurePass123',
+        fullName: 'Verify User',
+      });
+
+      const verificationEmail = mockEmailService.sentEmails.find((e) => e.type === 'verification');
+      expect(verificationEmail).toBeDefined();
+
+      await authService.verifyEmail(verificationEmail!.token);
+
+      const user = await mockUserRepository.findByEmail('verify@example.com');
+      expect(user?.isVerified).toBe(true);
+      // 検証済みトークンは再利用不可
+      await expect(authService.verifyEmail(verificationEmail!.token)).rejects.toThrow();
     });
 
-    it('should indicate password reset is not fully implemented', async () => {
-      await expect(authService.resetPassword('token', 'NewPass123')).rejects.toThrow(
-        'Password reset not fully implemented'
+    it('should reject invalid verification token', async () => {
+      await expect(authService.verifyEmail('nonexistent-token')).rejects.toThrow();
+    });
+
+    it('should mark user verified in login response after verification', async () => {
+      await authService.register({
+        email: 'verified@example.com',
+        password: 'SecurePass123',
+        fullName: 'Verified User',
+      });
+      const verificationEmail = mockEmailService.sentEmails.find((e) => e.type === 'verification');
+      await authService.verifyEmail(verificationEmail!.token);
+
+      const loginResult = await authService.login({
+        email: 'verified@example.com',
+        password: 'SecurePass123',
+      });
+      expect(loginResult.user.isVerified).toBe(true);
+    });
+  });
+
+  describe('resetPassword', () => {
+    it('should reset password with valid token and invalidate sessions', async () => {
+      await authService.register({
+        email: 'reset@example.com',
+        password: 'SecurePass123',
+        fullName: 'Reset User',
+      });
+
+      // ログインしてセッション（refresh token）を作っておく
+      const loginResult = await authService.login({
+        email: 'reset@example.com',
+        password: 'SecurePass123',
+      });
+      const oldRefreshToken = loginResult.tokens.refreshToken;
+
+      await authService.requestPasswordReset('reset@example.com');
+      const resetEmail = mockEmailService.sentEmails.find((e) => e.type === 'reset');
+      expect(resetEmail).toBeDefined();
+
+      await authService.resetPassword(resetEmail!.token, 'NewSecurePass456');
+
+      // 新パスワードでログイン可能
+      const newLogin = await authService.login({
+        email: 'reset@example.com',
+        password: 'NewSecurePass456',
+      });
+      expect(newLogin.user.email).toBe('reset@example.com');
+
+      // 旧パスワードではログイン不可
+      await expect(
+        authService.login({ email: 'reset@example.com', password: 'SecurePass123' })
+      ).rejects.toThrow('Invalid credentials');
+
+      // 旧refresh tokenは無効化されている
+      await expect(authService.refreshToken(oldRefreshToken)).rejects.toThrow(
+        'Invalid refresh token'
       );
+
+      // パスワード変更通知が送信されている
+      const notification = mockEmailService.sentEmails.find((e) => e.type === 'password_changed');
+      expect(notification?.email).toBe('reset@example.com');
+    });
+
+    it('should reject invalid reset token', async () => {
+      await expect(
+        authService.resetPassword('nonexistent-token', 'NewSecurePass456')
+      ).rejects.toThrow();
+    });
+
+    it('should reject weak new password', async () => {
+      await authService.register({
+        email: 'weak@example.com',
+        password: 'SecurePass123',
+        fullName: 'Weak User',
+      });
+      await authService.requestPasswordReset('weak@example.com');
+      const resetEmail = mockEmailService.sentEmails.find((e) => e.type === 'reset');
+
+      await expect(authService.resetPassword(resetEmail!.token, 'weakpass')).rejects.toThrow();
+    });
+
+    it('should invalidate reset token after use (single use)', async () => {
+      await authService.register({
+        email: 'single@example.com',
+        password: 'SecurePass123',
+        fullName: 'Single Use',
+      });
+      await authService.requestPasswordReset('single@example.com');
+      const resetEmail = mockEmailService.sentEmails.find((e) => e.type === 'reset');
+
+      await authService.resetPassword(resetEmail!.token, 'NewSecurePass456');
+
+      // 同一トークンの再使用は不可
+      await expect(
+        authService.resetPassword(resetEmail!.token, 'AnotherPass789')
+      ).rejects.toThrow();
     });
   });
 });

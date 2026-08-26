@@ -5,12 +5,22 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { AuthService, RegisterData, LoginData } from './services/auth-service';
+import { UserRepository } from './interfaces/user-repository';
+import { EmailService } from './interfaces/email-service';
 import { JsonUserRepository } from './implementations/json-user-repository';
+import { PostgresUserRepository } from './implementations/postgres-user-repository';
 import { ConsoleEmailService } from './services/console-email-service';
+import { ResendEmailService } from './services/resend-email-service';
 
-// Initialize service
-const userRepository = new JsonUserRepository();
-const emailService = new ConsoleEmailService();
+// 本番（DATABASE_URL = Neon Postgres 設定時）は Postgres + Resend、
+// 未設定（ローカル開発・テスト）は Json + Console を使用
+const usePostgres = Boolean(process.env.DATABASE_URL);
+const userRepository: UserRepository = usePostgres
+  ? new PostgresUserRepository()
+  : new JsonUserRepository();
+const emailService: EmailService = usePostgres
+  ? new ResendEmailService()
+  : new ConsoleEmailService();
 const authService = new AuthService(userRepository, emailService);
 
 /**

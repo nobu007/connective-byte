@@ -22,6 +22,18 @@ export interface RefreshToken {
   expiresAt: string;
 }
 
+export interface EmailVerificationToken {
+  tokenHash: string;
+  userId: string;
+  expiresAt: string;
+}
+
+export interface PasswordResetToken {
+  tokenHash: string;
+  userId: string;
+  expiresAt: string;
+}
+
 export interface UserRepository {
   /**
    * Find user by ID
@@ -67,4 +79,34 @@ export interface UserRepository {
    * Clean expired refresh tokens
    */
   cleanExpiredTokens(): Promise<void>;
+
+  /**
+   * Store email verification token (hashed, 24h expiry per spec)
+   */
+  storeEmailVerificationToken(tokenHash: string, userId: string, expiresAt: Date): Promise<void>;
+
+  /**
+   * Find email verification token by hash (returns null if missing or expired)
+   */
+  findEmailVerificationToken(tokenHash: string): Promise<EmailVerificationToken | null>;
+
+  /**
+   * Delete email verification token (after successful verification)
+   */
+  deleteEmailVerificationToken(tokenHash: string): Promise<void>;
+
+  /**
+   * Store password reset token (hashed, 1h expiry per spec)
+   */
+  storePasswordResetToken(tokenHash: string, userId: string, expiresAt: Date): Promise<void>;
+
+  /**
+   * Find password reset token by hash (returns null if missing or expired)
+   */
+  findPasswordResetToken(tokenHash: string): Promise<PasswordResetToken | null>;
+
+  /**
+   * Delete all password reset tokens for user (after successful reset)
+   */
+  deletePasswordResetTokensForUser(userId: string): Promise<void>;
 }

@@ -8,11 +8,11 @@ ConnectiveByteのデプロイ実態を説明するガイド。
 | --------------------------------- | ------------------------------------------------------------------------ | -------- |
 | フロントエンド（`apps/frontend`） | 手動デプロイ（`npm run deploy:cf` → Cloudflare Pages、直接アップロード） | 本番のみ |
 | フォームAPI（`functions/api/`）   | 同上（Cloudflare Pages Functionsとして同時デプロイ）                     | 本番のみ |
-| バックエンド（`apps/backend`）    | 自動デプロイなし（手動）                                                 | なし     |
+| auth API（`apps/backend`）        | 手動デプロイ（`npm run deploy:api` → Cloudflare Workers）                | 本番のみ |
 
-- ホスティングは **Cloudflare Pages**（Netlifyから移行。Netlifyは月枠クレジットでデプロイがブロックされたため）。直接アップロード（`wrangler pages deploy`）はビルド数を消費しない
+- ホスティングは **Cloudflare**（Pages + Workers。Netlifyから移行。Netlifyは月枠クレジットでデプロイがブロックされたため）。Pagesの直接アップロード（`wrangler pages deploy`）はビルド数を消費しない
 - ステージング環境は存在しない
-- フロントエンドはバックエンドを呼び出さない（静的サイトとして完結）
+- フロントエンドは静的サイト。フォームはPages Functions、auth（メール検証・パスワードリセット）はWorkers API（`api.connectivebyte.com`）が処理する
 - フォームAPI（`/api/newsletter`・`/api/contact`）は本番ではPages Functions（`functions/api/`）が処理する（静的エクスポートはPOSTルートを配信できないため）。ロジックは `apps/frontend/lib/api/` のハンドラに集約され、開発用ルート（`app/api/`）と本番用Functionが共用する
 
 ## 前提
@@ -62,14 +62,37 @@ npm run deploy:cf
 - 互換性フラグ: `nodejs_compat`（共有handlerが `process.env` を使用するため）
 - セキュリティヘッダー・アセットキャッシュ: `apps/frontend/public/_headers`（`out/` に焼き込まれ、Cloudflareも同じ形式を解釈する）
 
-## バックエンド
+## バックエンド（auth API: Cloudflare Workers）
 
-現在どこにもホストされていない。必要になった時点で手動デプロイする：
+Expressアプリ（`apps/backend`）のうち **auth + health ルートのみ**を、Cloudflare Workers（`connective-byte-api`）として `https://api.connectivebyte.com` で配信する。labモジュールとswaggerはホスト対象外。
 
-1. `npm run build:backend`（`apps/backend/dist/` に出力）
-2. サーバーに `dist/` と `package.json` を配置し `npm ci --omit=dev`
-3. 環境変数を設定（`PORT`、`DATABASE_URL`、`JWT_SECRET` など）
-4. `node dist/index.js` で起動（pm2等のプロセスマネージャーを推奨）
+- エントリポイント: `apps/backend/src/worker.ts`（`cloudflare:node` の `httpServerHandler` で Express を Workers 化。公式チュートリアル方式）
+- 設定: `apps/backend/wrangler.toml`（`nodejs_compat` + `nodejs_compat_populate_process_env` — 既存コードの `process.env` 参照がそのまま動く）
+- DB: **Neon Postgres**（フリーティア。`@neondatabase/serverless` のHTTP接続。テーブルは `npm run init:auth-db` で作成）
+- メール: Resend（`ResendEmailService`。送信元 `noreply@connectivebyte.com`、ドメイン検証済み）
+- パスワードハッシュ: PBKDF2-SHA256（WorkersフリープランのCPU制限10msに対しbcryptの純JS実装は超過するため。詳細は `apps/backend/src/common/utils/password.ts` のコメント）
+- `DATABASE_URL` 未設定（ローカル/テスト）は JSONファイル保存 + コンソール出力メールの開発モードで動作
+
+### 初回セットアップ（一度だけ）
+
+1. [Neon](https://neon.tech) でアカウント＋プロジェクトを作成（無料・カード不要）し、接続文字列を `.env` の `DATABASE_URL` に設定
+2. `CLOUDFLARE_API_TOKEN` に Workers 権限を追加: Account「Workers Scripts:Edit」+ Zone「Workers Routes:Edit」（+ カスタムドメイン自動作成のため Zone「DNS:Edit」）
+3. テーブル作成: `npm run init:auth-db`
+4. シークレット設定:
+   ```bash
+   npx wrangler secret put DATABASE_URL -c apps/backend/wrangler.toml
+   npx wrangler secret put JWT_SECRET -c apps/backend/wrangler.toml
+   npx wrangler secret put RESEND_API_KEY -c apps/backend/wrangler.toml
+   ```
+5. `npm run deploy:api` — 初回デプロイで `api.connectivebyte.com` のカスタムドメインとDNSレコードが自動作成される（トークンにDNS:Editがない場合は `apps/backend/wrangler.toml` の `routes` をコメントアウトし、dashboard → Workers → connective-byte-api → Settings → Domains & Routes で手動追加）
+
+### デプロイ（開発完了時に）
+
+```bash
+npm run deploy:api
+```
+
+`build:backend`（tsc で型検証）→ `wrangler deploy` まで一括実行。
 
 CI（ci.yml）のbuildジョブがコンパイル検証とビルド成果物（artifact）の生成まで行う。
 
@@ -89,13 +112,14 @@ CI（ci.yml）のbuildジョブがコンパイル検証とビルド成果物（a
 
 ## トラブルシューティング
 
-| 症状                                 | 確認方法                                                                                    |
-| ------------------------------------ | ------------------------------------------------------------------------------------------- |
-| デプロイが失敗する                   | `npm run deploy:cf` の出力とCloudflareのDeployment historyを確認                            |
-| ローカルでビルドを再現               | `npm run build:cf` を実行してエラーを確認                                                   |
-| ローカルでFunction含め動作確認       | リポジトリルートから `npx wrangler pages dev`（`.env` を自動読込。 Functions検出はcwd依存） |
-| デプロイ済みだがページが更新されない | Cloudflareのキャッシュ設定とDeployment historyを確認                                        |
-| フォームが404/エラーになる           | `wrangler tail`（Functionのライブログ）と `RESEND_API_KEY` のVariables設定を確認            |
+| 症状                                 | 確認方法                                                                                                                         |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| デプロイが失敗する                   | `npm run deploy:cf` の出力とCloudflareのDeployment historyを確認                                                                 |
+| ローカルでビルドを再現               | `npm run build:cf` を実行してエラーを確認                                                                                        |
+| ローカルでFunction含め動作確認       | リポジトリルートから `npx wrangler pages dev`（`.env` を自動読込。 Functions検出はcwd依存）                                      |
+| デプロイ済みだがページが更新されない | Cloudflareのキャッシュ設定とDeployment historyを確認                                                                             |
+| フォームが404/エラーになる           | `wrangler tail`（Functionのライブログ）と `RESEND_API_KEY` のVariables設定を確認                                                 |
+| auth APIがエラーを返す               | `npx wrangler tail -c apps/backend/wrangler.toml`（Workersのライブログ）と `DATABASE_URL`・`JWT_SECRET` のシークレット設定を確認 |
 
 ## 旧ホスティング（Netlify）
 

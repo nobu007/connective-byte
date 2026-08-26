@@ -134,8 +134,10 @@ describe('HealthService', () => {
       await healthService.getHealthStatus(false);
       const duration = Date.now() - startTime;
 
-      // Should take roughly the time of the longest check, not the sum
-      expect(duration).toBeLessThan(delays.reduce((a, b) => a + b, 0));
+      // Should take roughly the time of the longest check, not the sum.
+      // Margin of ~90ms absorbs timer/event-loop jitter under load
+      // (sequential execution would take sum(delays) = 225ms+).
+      expect(duration).toBeLessThan(Math.max(...delays) + 90);
     });
 
     it('should include response time for each check', async () => {

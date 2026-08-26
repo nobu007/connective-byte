@@ -21,8 +21,21 @@ declare global {
 
 /**
  * JWT configuration
+ *
+ * 本番でJWT_SECRET未設定は即fail（推測可能なデフォルト鍵の使用を防止）。
+ * 開発/テストのみ既定値へフォールバックする。
  */
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+function resolveJwtSecret(): string {
+  if (process.env.JWT_SECRET) {
+    return process.env.JWT_SECRET;
+  }
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET must be set in production');
+  }
+  return 'dev-only-insecure-secret';
+}
+
+const JWT_SECRET = resolveJwtSecret();
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
 
 /**
@@ -37,9 +50,9 @@ export function generateToken(payload: { id: string; email: string; role: string
 /**
  * Verify JWT token
  */
-export function verifyToken(token: string): any {
+export function verifyToken(token: string): { id: string; email: string; role: string } | null {
   try {
-    return jwt.verify(token, JWT_SECRET);
+    return jwt.verify(token, JWT_SECRET) as { id: string; email: string; role: string };
   } catch (error) {
     return null;
   }
