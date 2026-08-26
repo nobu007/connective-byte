@@ -1,6 +1,8 @@
-# Netlifyへのデプロイガイド
+# Netlifyへのデプロイガイド（旧ホスティング）
 
-Netlifyの月枠クレジット節約のため、このプロジェクトは**pushごとの自動ビルドを行わない**。開発完了時に `npm run deploy` で手動デプロイする。
+> **2026年8月にCloudflare Pagesへ移行済み**。現行の手順は [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)（`npm run deploy:cf`）。本書はNetlify固有の参照用メモ。
+
+クレジット枯渇でNetlifyの新規デプロイがブロックされたため移行した。参考として当時のNetlify固有の補足を残す。
 
 手順・初回セットアップ・トラブルシューティングは [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) に集約している。この文書ではNetlify固有の補足のみ記載する。
 
