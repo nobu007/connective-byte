@@ -18,6 +18,7 @@
     "build:netlify": "dotenv -e .env -- npm run build -w apps/frontend",
     "preview": "cd apps/frontend && npx serve@latest out",
     "env:check": "node scripts/verify-env.mjs",
+    "smoke": "node scripts/smoke-prod.mjs",
     "deploy": "npm run build:netlify && dotenv -e .env -- npx netlify deploy --prod --dir=apps/frontend/out --functions=netlify/functions",
     "deploy:env": "dotenv -e .env -- npx netlify env:import .env",
     "test": "npm-run-all test:frontend test:backend",
@@ -28,7 +29,7 @@
     "lint:frontend": "npm run lint -w apps/frontend",
     "lint:backend": "npm run lint -w apps/backend",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
-    "prepare": "husky install",
+    "prepare": "husky",
     "type-check": "npm run type-check -w apps/frontend",
     "sec:allow-scripts": "npx @lavamoat/allow-scripts auto"
   },
