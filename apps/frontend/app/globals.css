@@ -7,9 +7,11 @@
   --color-accent-bright-orange: #f97316;
   --color-accent-vivid-purple: #a855f7;
 
-  /* Typography */
-  --font-family-heading: 'Inter', 'Noto Sans JP', sans-serif;
-  --font-family-body: 'Inter', 'Noto Sans JP', sans-serif;
+  /* Typography — システムフォントスタック（Webフォント配信なし）。
+     日本語はOSネイティブフォント（iOS/macOS: Hiragino/Yu Gothic、
+     Android: Noto Sans CJK がシステムに同梱）で描画する。 */
+  --font-family-heading: system-ui, -apple-system, 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Noto Sans JP', sans-serif;
+  --font-family-body: system-ui, -apple-system, 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Noto Sans JP', sans-serif;
 
   /* Note: --spacing-xs〜3xl の名前付きトークンは定義しないこと。
      Tailwind v4では --spacing-md 等が max-w-md をコンテナ幅(28rem)ではなく

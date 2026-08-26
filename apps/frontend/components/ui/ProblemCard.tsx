@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import * as Icons from 'lucide-react';
+import { contentIcons } from './icon-map';
 import { Card } from './Card';
 import type { ProblemCard as ProblemCardType } from '@/types/content';
 
@@ -11,7 +11,7 @@ interface ProblemCardProps extends ProblemCardType {
 }
 
 export function ProblemCard({ icon, title, description, index }: ProblemCardProps) {
-  const IconComponent = Icons[icon as keyof typeof Icons] as React.ComponentType<{ size?: number; className?: string }>;
+  const IconComponent = contentIcons[icon];
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },

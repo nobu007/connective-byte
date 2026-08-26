@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Inter, Noto_Sans_JP } from 'next/font/google';
 import './globals.css';
 import { Navigation } from '@/components/layout/Navigation';
 import { Footer } from '@/components/layout/Footer';
@@ -7,18 +6,6 @@ import { siteConfig } from '@/content/site-config';
 import { PlausibleProvider } from '@/lib/analytics/PlausibleProvider';
 import { ErrorTracker } from '@/lib/analytics/ErrorTracker';
 import { getAnalyticsConfig } from '@/lib/analytics/config';
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-});
-
-const notoSansJP = Noto_Sans_JP({
-  subsets: ['latin'],
-  variable: '--font-noto-sans-jp',
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   title: `${siteConfig.name} - ${siteConfig.description}`,
@@ -65,7 +52,7 @@ export default function RootLayout({
   const analyticsConfig = getAnalyticsConfig();
 
   return (
-    <html lang="ja" className={`${inter.variable} ${notoSansJP.variable}`}>
+    <html lang="ja">
       <body>
         <PlausibleProvider config={analyticsConfig.plausible}>
           <ErrorTracker />
