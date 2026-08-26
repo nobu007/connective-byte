@@ -28,7 +28,7 @@ Netlifyの月枠クレジット節約のため、pushごとの自動ビルドは
 
 1. `.env` に以下を設定:
    - `NETLIFY_AUTH_TOKEN` — Netlify → User settings → Applications → New token
-   - `NETLIFY_SITE_ID` — Netlify → Site configuration → Site details → Site ID
+   - `NETLIFY_SITE_ID` — Netlify → Project configuration → General → Project details → Project information → Project ID（UUID形式。Project ID = API の site_id = 環境変数 NETLIFY_SITE_ID はすべて同じ識別子）
    - （`RESEND_API_KEY` / `RESEND_AUDIENCE_ID` — フォーム・ニュースレター用）
 2. `npm run deploy:env` — `.env` の内容をNetlifyサイトの環境変数へ取り込み（本番Functionが `RESEND_API_KEY` 等を読めるようになる）
 3. `npm run env:check` — 設定の検証（RESEND_API_KEYは読み取り専用API呼び出しで有効性確認）
