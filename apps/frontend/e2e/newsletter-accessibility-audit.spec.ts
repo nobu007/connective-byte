@@ -199,8 +199,9 @@ test.describe('Newsletter Signup - Accessibility & Performance Audit', () => {
       await expect(emailInput).toHaveAttribute('aria-required', 'true');
       await expect(consentCheckbox).toHaveAttribute('aria-required', 'true');
 
-      // Verify aria-label on submit button
-      await expect(submitButton).toHaveAttribute('aria-label');
+      // WCAG 2.5.3 Label in Name: アクセシブル名は可視テキスト(登録する)を含むこと。
+      // aria-labelを別文字列で付けると違反になるため、可視テキスト自身が名前になる設計。
+      await expect(submitButton).toHaveAccessibleName(/登録する/);
     });
 
     test('should associate error messages with form fields using aria-describedby', async ({ page }) => {
@@ -348,10 +349,10 @@ test.describe('Newsletter Signup - Accessibility & Performance Audit', () => {
       await page.locator('input[type="checkbox"]').check();
       await page.getByText('登録する').click();
 
-      // Verify loading state is announced - use more specific selector
+      // 送信中は可視テキスト自身がアクセシブル名になる（aria-label不要・2SCV: 2.5.3準拠）
       const submitButton = page.getByRole('button', { name: /送信中/ });
-      const ariaLabel = await submitButton.getAttribute('aria-label');
-      expect(ariaLabel).toContain('送信中');
+      await expect(submitButton).toBeVisible();
+      await expect(submitButton).toBeDisabled();
 
       // Verify button shows loading text
       await expect(page.getByText('送信中')).toBeVisible();
