@@ -117,12 +117,12 @@ describe('HealthService', () => {
 
       // Register slow checks
       service.registerCheck('slow-check-1', async () => {
-        await delay(50);
+        await delay(100);
         return { name: 'slow-check-1', status: 'ok' as const };
       });
 
       service.registerCheck('slow-check-2', async () => {
-        await delay(50);
+        await delay(100);
         return { name: 'slow-check-2', status: 'ok' as const };
       });
 
@@ -130,9 +130,9 @@ describe('HealthService', () => {
       await service.getHealthStatus();
       const duration = Date.now() - startTime;
 
-      // If parallel, should take ~50ms, not ~100ms (sequential)
-      // Allow some overhead for execution
-      expect(duration).toBeLessThan(90);
+      // If parallel, should take ~100ms, not ~200ms (sequential).
+      // Margin of ~70ms absorbs timer/event-loop jitter under load.
+      expect(duration).toBeLessThan(170);
     });
 
     test('should include uptime and memory in checks', async () => {
