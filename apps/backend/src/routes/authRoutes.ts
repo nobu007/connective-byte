@@ -10,7 +10,10 @@ import {
   handleGetProfile,
   handleRefreshToken,
   handleLogout,
-} from '../controllers/authController';
+  handleVerifyEmail,
+  handleForgotPassword,
+  handleResetPassword,
+} from '../modules/auth/auth.controller';
 import { authenticate } from '../middleware/auth';
 import { authLimiter } from '../middleware/rateLimiter';
 
@@ -32,7 +35,7 @@ const router = Router();
  *             required:
  *               - email
  *               - password
- *               - name
+ *               - fullName
  *             properties:
  *               email:
  *                 type: string
@@ -42,8 +45,8 @@ const router = Router();
  *                 type: string
  *                 format: password
  *                 minLength: 8
- *                 example: SecurePass123!
- *               name:
+ *                 example: SecurePass123
+ *               fullName:
  *                 type: string
  *                 example: John Doe
  *     responses:
@@ -73,7 +76,7 @@ router.post('/api/auth/register', authLimiter, handleRegister);
  * /api/auth/login:
  *   post:
  *     summary: Login user
- *     description: Authenticate user and receive JWT token
+ *     description: Authenticate user and receive JWT tokens
  *     tags: [Authentication]
  *     requestBody:
  *       required: true
@@ -88,11 +91,11 @@ router.post('/api/auth/register', authLimiter, handleRegister);
  *               email:
  *                 type: string
  *                 format: email
- *                 example: demo@example.com
+ *                 example: user@example.com
  *               password:
  *                 type: string
  *                 format: password
- *                 example: Demo123!
+ *                 example: SecurePass123
  *     responses:
  *       200:
  *         description: Login successful
@@ -114,6 +117,43 @@ router.post('/api/auth/register', authLimiter, handleRegister);
  *               $ref: '#/components/schemas/Error'
  */
 router.post('/api/auth/login', authLimiter, handleLogin);
+
+/**
+ * @swagger
+ * /api/auth/refresh:
+ *   post:
+ *     summary: Refresh access token
+ *     description: Generate a new access token using refresh token
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Token refreshed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *       401:
+ *         description: Invalid or expired refresh token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post('/api/auth/refresh', handleRefreshToken);
 
 /**
  * @swagger
@@ -145,42 +185,21 @@ router.get('/api/auth/me', authenticate, handleGetProfile);
 
 /**
  * @swagger
- * /api/auth/refresh:
- *   post:
- *     summary: Refresh JWT token
- *     description: Generate a new JWT token using the current valid token
- *     tags: [Authentication]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Token refreshed successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- *       401:
- *         description: Unauthorized - Invalid or missing token
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-router.post('/api/auth/refresh', authenticate, handleRefreshToken);
-
-/**
- * @swagger
  * /api/auth/logout:
  *   post:
  *     summary: Logout user
- *     description: Logout the current user (client should discard the token)
+ *     description: Logout the current user and invalidate refresh token
  *     tags: [Authentication]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Logout successful
@@ -191,14 +210,94 @@ router.post('/api/auth/refresh', authenticate, handleRefreshToken);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Logged out successfully
  *       401:
- *         description: Unauthorized - Invalid or missing token
+ *         description: Unauthorized
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
 router.post('/api/auth/logout', authenticate, handleLogout);
+
+/**
+ * @swagger
+ * /api/auth/verify-email:
+ *   post:
+ *     summary: Verify email address
+ *     description: Verify user email with token
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Email verified successfully
+ *       400:
+ *         description: Invalid or expired token
+ */
+router.post('/api/auth/verify-email', handleVerifyEmail);
+
+/**
+ * @swagger
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: Request password reset
+ *     description: Send password reset email
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: If email exists, reset link sent
+ */
+router.post('/api/auth/forgot-password', handleForgotPassword);
+
+/**
+ * @swagger
+ * /api/auth/reset-password:
+ *   post:
+ *     summary: Reset password
+ *     description: Reset password with token
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - newPassword
+ *             properties:
+ *               token:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       400:
+ *         description: Invalid or expired token
+ */
+router.post('/api/auth/reset-password', handleResetPassword);
 
 export default router;

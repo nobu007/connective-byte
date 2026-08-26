@@ -1,0 +1,25 @@
+/**
+ * Console Email Service (Stub Implementation)
+ * Logs email sending to console for development
+ * Can be replaced with Resend implementation in production
+ */
+
+import { EmailService } from '../interfaces/email-service';
+
+export class ConsoleEmailService implements EmailService {
+  async sendVerificationEmail(email: string, token: string): Promise<void> {
+    console.log(`[EMAIL SERVICE] Verification email sent to: ${email}`);
+    console.log(`[EMAIL SERVICE] Verification token: ${token}`);
+    console.log(`[EMAIL SERVICE] Verification link: http://localhost:3001/verify?token=${token}`);
+  }
+
+  async sendPasswordResetEmail(email: string, token: string): Promise<void> {
+    console.log(`[EMAIL SERVICE] Password reset email sent to: ${email}`);
+    console.log(`[EMAIL SERVICE] Reset token: ${token}`);
+    console.log(`[EMAIL SERVICE] Reset link: http://localhost:3001/reset-password?token=${token}`);
+  }
+
+  async sendPasswordChangedNotification(email: string): Promise<void> {
+    console.log(`[EMAIL SERVICE] Password changed notification sent to: ${email}`);
+  }
+}
