@@ -3,6 +3,7 @@
  * HTTP request handlers for learning content endpoints
  *
  * コンテンツ読み取りは公開（認証不要）。進捗は authenticate 必須。
+ * 管理（admin）はルーター側で authorize('content_administrator','system_admin') 済み。
  */
 
 import { Request, Response, NextFunction } from 'express';
@@ -125,6 +126,178 @@ export async function handleSetProgress(
       status
     );
     res.status(200).json({ success: true, data: { progress: record } });
+  } catch (error) {
+    handleLearningError(res, next, error);
+  }
+}
+
+// --- 管理（content_administrator / system_admin 専用） ---
+
+/**
+ * 未公開込みのカリキュラム全ツリー
+ * GET /api/learning/admin/curriculum
+ */
+export async function handleGetAdminCurriculum(
+  _req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const tree = await learningService.getAdminCurriculum();
+    res.status(200).json({ success: true, data: { phases: tree } });
+  } catch (error) {
+    handleLearningError(res, next, error);
+  }
+}
+
+/**
+ * モジュール作成
+ * POST /api/learning/admin/modules
+ */
+export async function handleCreateModule(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const module = await learningService.createModule(req.body);
+    res.status(201).json({ success: true, data: { module } });
+  } catch (error) {
+    handleLearningError(res, next, error);
+  }
+}
+
+/**
+ * モジュール更新（is_published の切替を含む）
+ * PATCH /api/learning/admin/modules/:id
+ */
+export async function handleUpdateModule(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const module = await learningService.updateModule(String(req.params.id), req.body);
+    res.status(200).json({ success: true, data: { module } });
+  } catch (error) {
+    handleLearningError(res, next, error);
+  }
+}
+
+/**
+ * モジュール削除（配下セッション・進捗は CASCADE）
+ * DELETE /api/learning/admin/modules/:id
+ */
+export async function handleDeleteModule(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    await learningService.deleteModule(String(req.params.id));
+    res.status(204).send();
+  } catch (error) {
+    handleLearningError(res, next, error);
+  }
+}
+
+/**
+ * モジュール表示順入れ替え（up / down）
+ * POST /api/learning/admin/modules/:id/reorder
+ */
+export async function handleReorderModule(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const moved = await learningService.reorderModule(String(req.params.id), req.body?.direction);
+    res.status(200).json({ success: true, data: { moved } });
+  } catch (error) {
+    handleLearningError(res, next, error);
+  }
+}
+
+/**
+ * セッション詳細（管理用・未公開も取得可）
+ * GET /api/learning/admin/sessions/:id
+ */
+export async function handleGetAdminSession(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const session = await learningService.getAdminSession(String(req.params.id));
+    res.status(200).json({ success: true, data: { session } });
+  } catch (error) {
+    handleLearningError(res, next, error);
+  }
+}
+
+/**
+ * セッション作成
+ * POST /api/learning/admin/sessions
+ */
+export async function handleCreateSession(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const session = await learningService.createSession(req.body);
+    res.status(201).json({ success: true, data: { session } });
+  } catch (error) {
+    handleLearningError(res, next, error);
+  }
+}
+
+/**
+ * セッション更新（本文・is_published 切替を含む）
+ * PATCH /api/learning/admin/sessions/:id
+ */
+export async function handleUpdateSession(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const session = await learningService.updateSession(String(req.params.id), req.body);
+    res.status(200).json({ success: true, data: { session } });
+  } catch (error) {
+    handleLearningError(res, next, error);
+  }
+}
+
+/**
+ * セッション削除（進捗は CASCADE）
+ * DELETE /api/learning/admin/sessions/:id
+ */
+export async function handleDeleteSession(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    await learningService.deleteSession(String(req.params.id));
+    res.status(204).send();
+  } catch (error) {
+    handleLearningError(res, next, error);
+  }
+}
+
+/**
+ * セッション表示順入れ替え（up / down）
+ * POST /api/learning/admin/sessions/:id/reorder
+ */
+export async function handleReorderSession(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const moved = await learningService.reorderSession(String(req.params.id), req.body?.direction);
+    res.status(200).json({ success: true, data: { moved } });
   } catch (error) {
     handleLearningError(res, next, error);
   }

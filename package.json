@@ -34,7 +34,9 @@
     "deploy:cf": "npm run build:cf && npx wrangler pages deploy",
     "deploy:api": "npm run build:backend && npx wrangler deploy -c apps/backend/wrangler.toml",
     "init:auth-db": "dotenv -e .env -- node scripts/init-auth-db.mjs",
-    "init:learning-db": "dotenv -e .env -- node scripts/init-learning-db.mjs"
+    "init:learning-db": "dotenv -e .env -- node scripts/init-learning-db.mjs",
+    "import:curriculum": "dotenv -e .env -- node scripts/import-curriculum.mjs",
+    "set-user-role": "dotenv -e .env -- node scripts/set-user-role.mjs"
   },
   "repository": {
     "type": "git",

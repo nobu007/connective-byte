@@ -42,7 +42,7 @@ async function fetchRetry(path, options = {}) {
 }
 
 // --- 静的ページ ---
-for (const path of ['/', '/about/', '/principles/', '/contact/', '/privacy/']) {
+for (const path of ['/', '/about/', '/principles/', '/learning/', '/contact/', '/privacy/']) {
   try {
     const res = await fetchRetry(path);
     const ok = res.status === 200;
@@ -134,6 +134,18 @@ for (const [path, options, expect] of [
   // 無認証での保護リソースは 401 エンベロープで拒否されること
   ['/api/auth/sessions', {}, 401],
   ['/api/auth/me', {}, 401],
+  // learning: 公開カリキュラムは応答、進捗・管理は無認証で 401
+  ['/api/learning/curriculum', {}, 200],
+  ['/api/learning/progress', {}, 401],
+  [
+    '/api/learning/admin/modules',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    },
+    401,
+  ],
 ]) {
   try {
     const res = await fetchRetry(`${apiBase}${path}`, options);

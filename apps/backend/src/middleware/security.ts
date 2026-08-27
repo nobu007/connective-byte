@@ -110,6 +110,15 @@ export const sanitizeInput: RequestHandler = (
     return;
   }
 
+  // learning 管理APIの Markdown 本文も対象外:
+  // コードサンプル中の onChange= 等を sanitizeString が日常的に破壊するため。
+  // 出力は react-markdown が raw HTML を描画しないため安全（rehype-raw 不使用）。
+  // 書き込みは authenticate + authorize(content_administrator) で保護される。
+  if (req.path.startsWith('/api/learning/admin')) {
+    next();
+    return;
+  }
+
   // Sanitize query parameters
   if (req.query) {
     Object.keys(req.query).forEach((key) => {

@@ -6,7 +6,7 @@
  */
 
 import { Router } from 'express';
-import { authenticate } from '../middleware/auth';
+import { authenticate, authorize } from '../middleware/auth';
 import { createRateLimiter } from '../middleware/rateLimiter';
 import {
   handleGetCurriculum,
@@ -14,6 +14,16 @@ import {
   handleGetSession,
   handleGetProgress,
   handleSetProgress,
+  handleGetAdminCurriculum,
+  handleCreateModule,
+  handleUpdateModule,
+  handleDeleteModule,
+  handleReorderModule,
+  handleGetAdminSession,
+  handleCreateSession,
+  handleUpdateSession,
+  handleDeleteSession,
+  handleReorderSession,
 } from '../modules/learning/learning.controller';
 
 const router = Router();
@@ -51,6 +61,77 @@ router.put(
   authenticate,
   learningWriteLimiter,
   handleSetProgress
+);
+
+// --- 管理（content_administrator / system_admin のみ） ---
+// sanitizeInput は security.ts 側で /api/learning/admin を免除
+// （Markdown 本文の onChange= 等が破壊されるのを防ぐ。出力は raw HTML 非描画のため安全）
+
+const adminGuard = [authenticate, authorize('content_administrator', 'system_admin')];
+
+router.get(
+  '/api/learning/admin/curriculum',
+  learningReadLimiter,
+  ...adminGuard,
+  handleGetAdminCurriculum
+);
+
+router.post('/api/learning/admin/modules', learningWriteLimiter, ...adminGuard, handleCreateModule);
+
+router.patch(
+  '/api/learning/admin/modules/:id',
+  learningWriteLimiter,
+  ...adminGuard,
+  handleUpdateModule
+);
+
+router.delete(
+  '/api/learning/admin/modules/:id',
+  learningWriteLimiter,
+  ...adminGuard,
+  handleDeleteModule
+);
+
+router.post(
+  '/api/learning/admin/modules/:id/reorder',
+  learningWriteLimiter,
+  ...adminGuard,
+  handleReorderModule
+);
+
+router.get(
+  '/api/learning/admin/sessions/:id',
+  learningReadLimiter,
+  ...adminGuard,
+  handleGetAdminSession
+);
+
+router.post(
+  '/api/learning/admin/sessions',
+  learningWriteLimiter,
+  ...adminGuard,
+  handleCreateSession
+);
+
+router.patch(
+  '/api/learning/admin/sessions/:id',
+  learningWriteLimiter,
+  ...adminGuard,
+  handleUpdateSession
+);
+
+router.delete(
+  '/api/learning/admin/sessions/:id',
+  learningWriteLimiter,
+  ...adminGuard,
+  handleDeleteSession
+);
+
+router.post(
+  '/api/learning/admin/sessions/:id/reorder',
+  learningWriteLimiter,
+  ...adminGuard,
+  handleReorderSession
 );
 
 export default router;
