@@ -6,6 +6,7 @@ import { siteConfig } from '@/content/site-config';
 import { PlausibleProvider } from '@/lib/analytics/PlausibleProvider';
 import { ErrorTracker } from '@/lib/analytics/ErrorTracker';
 import { getAnalyticsConfig } from '@/lib/analytics/config';
+import { AuthProvider } from '@/components/auth/AuthProvider';
 
 export const metadata: Metadata = {
   title: `${siteConfig.name} - ${siteConfig.description}`,
@@ -56,9 +57,11 @@ export default function RootLayout({
       <body>
         <PlausibleProvider config={analyticsConfig.plausible}>
           <ErrorTracker />
-          <Navigation />
-          {children}
-          <Footer />
+          <AuthProvider>
+            <Navigation />
+            {children}
+            <Footer />
+          </AuthProvider>
         </PlausibleProvider>
       </body>
     </html>

@@ -4,14 +4,18 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { siteConfig } from '@/content/site-config';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
+  const { status, user, logout } = useAuth();
+  // セッション復元中は何も出さない（ログイン↔アカウント表示のちらつき防止）
+  const showAuthSlot = status !== 'loading';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -73,6 +77,36 @@ export function Navigation() {
             ))}
           </ul>
 
+          {/* Auth Slot (Desktop) */}
+          <div className="hidden md:flex items-center space-x-4 ml-8">
+            {!showAuthSlot ? null : status === 'authenticated' && user ? (
+              <>
+                <Link
+                  href="/mypage/"
+                  className={`text-sm font-medium transition-colors hover:text-[#10b981] ${
+                    isActive('/mypage') ? 'text-[#10b981]' : 'text-[#4b5563]'
+                  }`}
+                >
+                  マイページ
+                </Link>
+                <button
+                  onClick={() => void logout()}
+                  className="inline-flex items-center text-sm font-medium text-[#4b5563] hover:text-[#10b981] transition-colors"
+                >
+                  <LogOut size={14} className="mr-1" />
+                  ログアウト
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login/"
+                className="text-sm font-semibold px-4 py-2 rounded-lg bg-[#10b981] text-white hover:bg-[#059669] transition-colors"
+              >
+                ログイン
+              </Link>
+            )}
+          </div>
+
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
@@ -121,6 +155,47 @@ export function Navigation() {
                       </Link>
                     </li>
                   ))}
+
+                  {showAuthSlot &&
+                    (status === 'authenticated' && user ? (
+                      <>
+                        <li className="border-t border-gray-200 pt-4">
+                          <Link
+                            href="/mypage/"
+                            onClick={closeMenu}
+                            className={`block px-4 py-2 text-base font-medium rounded-lg transition-colors ${
+                              isActive('/mypage')
+                                ? 'bg-[#10b981]/10 text-[#10b981]'
+                                : 'text-[#4b5563] hover:bg-[#f3f4f6]'
+                            }`}
+                          >
+                            マイページ
+                          </Link>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => {
+                              closeMenu();
+                              void logout();
+                            }}
+                            className="flex items-center w-full px-4 py-2 text-base font-medium rounded-lg text-[#4b5563] hover:bg-[#f3f4f6] transition-colors"
+                          >
+                            <LogOut size={16} className="mr-2" />
+                            ログアウト
+                          </button>
+                        </li>
+                      </>
+                    ) : (
+                      <li className="border-t border-gray-200 pt-4">
+                        <Link
+                          href="/login/"
+                          onClick={closeMenu}
+                          className="block text-center px-4 py-2 text-base font-semibold rounded-lg bg-[#10b981] text-white hover:bg-[#059669] transition-colors"
+                        >
+                          ログイン
+                        </Link>
+                      </li>
+                    ))}
                 </ul>
               </motion.div>
             </>
