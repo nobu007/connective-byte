@@ -23,6 +23,9 @@ const authService: AuthService = authContainer.authService;
 /** AuthError を HTTP レスポンスへ変換（それ以外は next へ） */
 function handleServiceError(res: Response, next: NextFunction, error: unknown): void {
   if (error instanceof AuthError) {
+    if (error.retryAfterSeconds !== undefined) {
+      res.set('Retry-After', String(error.retryAfterSeconds));
+    }
     res.status(error.httpStatus).json({
       error: {
         code: error.code,

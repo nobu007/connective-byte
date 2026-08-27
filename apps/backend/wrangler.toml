@@ -13,6 +13,12 @@ routes = [
   { pattern = "api.connectivebyte.com", custom_domain = true }
 ]
 
+# Cron Trigger: 毎日 19:17 UTC（04:17 JST）にメンテナンス処理
+# （期限切れセッション・トークン掃除、90日超過ログ削除、Phase 3以降は
+#   アカウント削除猶予の期限処理もここに乗る）
+[triggers]
+crons = ["17 19 * * *"]
+
 [vars]
 SITE_URL = "https://connectivebyte.com"
 

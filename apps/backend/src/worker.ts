@@ -19,6 +19,7 @@ import { securityHeaders, corsConfig, sanitizeInput } from './middleware/securit
 import { notFoundHandler, errorHandler } from './middleware/errorHandler';
 import healthRoutes from './routes/healthRoutes';
 import authRoutes from './routes/authRoutes';
+import { authContainer } from './modules/auth/auth.container';
 
 const app = express();
 app.disable('x-powered-by');
@@ -50,4 +51,32 @@ app.use(errorHandler);
 const PORT = 3001;
 app.listen(PORT);
 
-export default httpServerHandler({ port: PORT });
+// Cron Trigger（wrangler.toml [triggers] crons / 毎日 19:17 UTC = 04:17 JST）:
+// 期限切れセッション・トークン・保持期限超過ログの整理を実行する。
+// scheduled event の型は最小限だけ定義（@cloudflare/workers-types 未導入のため）
+interface ScheduledEvent {
+  scheduledTime: number;
+}
+interface ScheduledController {
+  waitUntil(promise: Promise<unknown>): void;
+}
+
+async function runScheduledMaintenance(event: ScheduledEvent): Promise<void> {
+  const { maintenanceService } = authContainer;
+  const result = await maintenanceService.run();
+  console.log(
+    JSON.stringify({
+      level: 'info',
+      message: 'scheduled maintenance completed',
+      scheduledTime: new Date(event.scheduledTime).toISOString(),
+      ...result,
+    })
+  );
+}
+
+export default {
+  fetch: httpServerHandler({ port: PORT }),
+  async scheduled(event: ScheduledEvent, _env: unknown, ctx: ScheduledController): Promise<void> {
+    ctx.waitUntil(runScheduledMaintenance(event));
+  },
+};

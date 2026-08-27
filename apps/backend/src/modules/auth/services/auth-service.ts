@@ -53,6 +53,10 @@ export interface AuthResponse {
 
 const REFRESH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30日
 
+/** ログインロックアウト: 1時間以内に10回失敗で拒否（requirements.md仕様） */
+const LOGIN_LOCKOUT_THRESHOLD = 10;
+const LOGIN_LOCKOUT_WINDOW_MS = 60 * 60 * 1000;
+
 export class AuthService {
   constructor(
     private userRepository: UserRepository,
@@ -151,19 +155,69 @@ export class AuthService {
 
   /**
    * Login user
+   *
+   * ロックアウト: auth_logs の失敗ログ（1h窓・email毎）で计数し、閾値超過は
+   * パスワード検証の前に拒否する。監査ログ（成功・失敗・ロック）もここで記録。
    */
   async login(data: LoginData, context?: SessionContext): Promise<AuthResponse> {
-    const user = await this.userRepository.findByEmail(data.email);
+    const email = data.email.toLowerCase();
+    const logContext = {
+      email,
+      ipAddress: context?.ipAddress ?? null,
+      userAgent: context?.userAgent ?? null,
+    };
+
+    // ロックアウト判定（DB ベース = isolate を跨いで有効）
+    const failedCount = await this.userRepository.countRecentFailedLogins(
+      email,
+      new Date(this.clock().getTime() - LOGIN_LOCKOUT_WINDOW_MS)
+    );
+    if (failedCount >= LOGIN_LOCKOUT_THRESHOLD) {
+      await this.userRepository.recordAuthLog({
+        eventType: 'login_locked',
+        ...logContext,
+        success: false,
+        failureReason: 'too_many_failures',
+      });
+      throw new AuthError(
+        'AUTH_LOGIN_003',
+        'Too many failed login attempts. Please try again later.',
+        429,
+        Math.ceil(LOGIN_LOCKOUT_WINDOW_MS / 1000)
+      );
+    }
+
+    const user = await this.userRepository.findByEmail(email);
 
     if (!user) {
-      // Generic error (don't reveal if email exists)
+      // 未知emailも既知emailと同形の失敗ログ・応答（列挙対策）
+      await this.userRepository.recordAuthLog({
+        eventType: 'login_failed',
+        ...logContext,
+        success: false,
+        failureReason: 'unknown_email',
+      });
       throw new AuthError('AUTH_LOGIN_002', 'Invalid credentials', 401);
     }
 
     const isValidPassword = await verifyPassword(data.password, user.passwordHash);
     if (!isValidPassword) {
+      await this.userRepository.recordAuthLog({
+        eventType: 'login_failed',
+        ...logContext,
+        userId: user.id,
+        success: false,
+        failureReason: 'invalid_password',
+      });
       throw new AuthError('AUTH_LOGIN_002', 'Invalid credentials', 401);
     }
+
+    await this.userRepository.recordAuthLog({
+      eventType: 'login',
+      ...logContext,
+      userId: user.id,
+      success: true,
+    });
 
     return this.issueSession(user, context);
   }

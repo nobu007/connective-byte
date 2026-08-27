@@ -9,6 +9,7 @@
 // Set JWT_SECRET before importing any auth modules
 process.env.JWT_SECRET = 'test-secret-key';
 
+import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import crypto from 'crypto';
@@ -59,6 +60,14 @@ describe('AuthService', () => {
     mockEmailService = new MockEmailService();
     authService = new AuthService(repository, mockEmailService);
   });
+
+  /** テスト用DBファイルの生の内容（auth_logs 等の検証に使用） */
+  async function readDb(): Promise<{
+    authLogs: Array<{ eventType: string; email: string | null; success: boolean }>;
+    sessions: Array<{ id: string; expiresAt: string }>;
+  }> {
+    return JSON.parse(await fs.readFile(dbPath, 'utf-8'));
+  }
 
   describe('validatePassword', () => {
     it('should accept valid password', () => {
@@ -242,6 +251,118 @@ describe('AuthService', () => {
       });
 
       expect(result.user).toBeDefined();
+    });
+  });
+
+  describe('login lockout & audit logs', () => {
+    it('should record login_failed / login logs', async () => {
+      await authService.register({
+        email: 'audit@example.com',
+        password: 'SecurePass123',
+        fullName: 'Audit User',
+      });
+
+      await expect(
+        authService.login({ email: 'audit@example.com', password: 'WrongPass123' })
+      ).rejects.toMatchObject({ code: 'AUTH_LOGIN_002' });
+      await expect(
+        authService.login({ email: 'unknown@example.com', password: 'Whatever123' })
+      ).rejects.toMatchObject({ code: 'AUTH_LOGIN_002' });
+      await authService.login({ email: 'audit@example.com', password: 'SecurePass123' });
+
+      const db = await readDb();
+      const logTypes = db.authLogs.map((l) => l.eventType);
+      expect(logTypes).toContain('login_failed');
+      expect(logTypes).toContain('login');
+
+      const failed = db.authLogs.filter((l) => l.eventType === 'login_failed');
+      // 未知emailと誤パスワードで同形の失敗ログ（列挙対策）
+      expect(failed).toHaveLength(2);
+      expect(failed.map((l) => l.email)).toEqual(
+        expect.arrayContaining(['audit@example.com', 'unknown@example.com'])
+      );
+      const success = db.authLogs.find((l) => l.eventType === 'login');
+      expect(success?.success).toBe(true);
+    });
+
+    it('should lock out after 10 failures within 1 hour, before password check', async () => {
+      await authService.register({
+        email: 'lock@example.com',
+        password: 'SecurePass123',
+        fullName: 'Lock User',
+      });
+
+      for (let i = 0; i < 10; i++) {
+        await expect(
+          authService.login({ email: 'lock@example.com', password: `WrongPass${i}A` })
+        ).rejects.toMatchObject({ code: 'AUTH_LOGIN_002' });
+      }
+
+      // 正しいパスワードでも拒否（= パスワード検証前にロックアウト判定）
+      await expect(
+        authService.login({ email: 'lock@example.com', password: 'SecurePass123' })
+      ).rejects.toMatchObject({ code: 'AUTH_LOGIN_003', httpStatus: 429, retryAfterSeconds: 3600 });
+
+      const db = await readDb();
+      const locked = db.authLogs.filter((l) => l.eventType === 'login_locked');
+      expect(locked).toHaveLength(1);
+      expect(locked[0].success).toBe(false);
+    });
+
+    it('should unlock after the 1-hour window passes', async () => {
+      // リポジトリのログ created_at は実時間で刻まれるため、基準は実時間+マージン
+      const base = new Date(Date.now() + 1000);
+      let fakeNow = base;
+      const clocked = new AuthService(repository, mockEmailService, () => fakeNow);
+
+      await clocked.register({
+        email: 'window@example.com',
+        password: 'SecurePass123',
+        fullName: 'Window User',
+      });
+
+      for (let i = 0; i < 10; i++) {
+        await expect(
+          clocked.login({ email: 'window@example.com', password: 'WrongPass123' })
+        ).rejects.toMatchObject({ code: 'AUTH_LOGIN_002' });
+      }
+      await expect(
+        clocked.login({ email: 'window@example.com', password: 'SecurePass123' })
+      ).rejects.toMatchObject({ code: 'AUTH_LOGIN_003' });
+
+      // 窓（1h）を過ぎると失敗カウントがリセットされる
+      fakeNow = new Date(base.getTime() + 2 * 60 * 60 * 1000);
+      const result = await clocked.login({
+        email: 'window@example.com',
+        password: 'SecurePass123',
+      });
+      expect(result.user.email).toBe('window@example.com');
+    });
+
+    it('should not lock a different email', async () => {
+      await authService.register({
+        email: 'target@example.com',
+        password: 'SecurePass123',
+        fullName: 'Target User',
+      });
+      await authService.register({
+        email: 'other@example.com',
+        password: 'SecurePass123',
+        fullName: 'Other User',
+      });
+
+      for (let i = 0; i < 10; i++) {
+        await expect(
+          authService.login({ email: 'target@example.com', password: 'WrongPass123' })
+        ).rejects.toMatchObject({ code: 'AUTH_LOGIN_002' });
+      }
+
+      // 別emailは影響を受けない
+      const result = await authService.login({
+        email: 'other@example.com',
+        password: 'SecurePass123',
+      });
+      expect(result.user.email).toBe('other@example.com');
     });
   });
 

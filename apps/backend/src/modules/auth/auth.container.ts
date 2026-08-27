@@ -13,11 +13,14 @@ import { PostgresUserRepository } from './implementations/postgres-user-reposito
 import { ConsoleEmailService } from './services/console-email-service';
 import { ResendEmailService } from './services/resend-email-service';
 import { AuthService } from './services/auth-service';
+import { MaintenanceService } from './services/maintenance-service';
 
 export interface AuthContainer {
   userRepository: UserRepository;
   emailService: EmailService;
   authService: AuthService;
+  /** Cron Trigger（scheduled）から日次実行 */
+  maintenanceService: MaintenanceService;
 }
 
 export function buildAuthContainer(): AuthContainer {
@@ -35,6 +38,7 @@ export function buildAuthContainer(): AuthContainer {
     userRepository,
     emailService,
     authService: new AuthService(userRepository, emailService),
+    maintenanceService: new MaintenanceService(userRepository),
   };
 }
 

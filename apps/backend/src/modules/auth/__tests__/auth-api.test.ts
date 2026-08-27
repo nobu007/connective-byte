@@ -266,6 +266,31 @@ describe('Auth API Endpoints', () => {
         })
         .expect(400);
     });
+
+    it('should return 429 with Retry-After after 10 failed logins', async () => {
+      const email = `lockout-${Date.now()}@example.com`;
+      await request(app).post('/api/auth/register').send({
+        email,
+        password: 'SecurePass123',
+        fullName: 'Lockout User',
+      });
+
+      for (let i = 0; i < 10; i++) {
+        await request(app)
+          .post('/api/auth/login')
+          .send({ email, password: 'WrongPassword123' })
+          .expect(401);
+      }
+
+      // 11回目（正しいパスワードでも）はロックアウト
+      const response = await request(app)
+        .post('/api/auth/login')
+        .send({ email, password: 'SecurePass123' })
+        .expect(429);
+
+      expect(response.body.error.code).toBe('AUTH_LOGIN_003');
+      expect(response.headers['retry-after']).toBe('3600');
+    });
   });
 
   describe('POST /api/auth/refresh (cookie)', () => {
