@@ -12,7 +12,7 @@ ConnectiveByteのデプロイ実態を説明するガイド。
 
 - ホスティングは **Cloudflare**（Pages + Workers。Netlifyから移行。Netlifyは月枠クレジットでデプロイがブロックされたため）。Pagesの直接アップロード（`wrangler pages deploy`）はビルド数を消費しない
 - ステージング環境は存在しない
-- フロントエンドは静的サイト。フォームはPages Functions、auth（メール検証・パスワードリセット）はWorkers API（`api.connectivebyte.com`）が処理する
+- フロントエンドは静的サイト。フォームはPages Functions、auth（登録・ログイン・Google OAuth・セッション管理・マイページ）はWorkers API（`api.connectivebyte.com`）が処理する
 - フォームAPI（`/api/newsletter`・`/api/contact`）は本番ではPages Functions（`functions/api/`）が処理する（静的エクスポートはPOSTルートを配信できないため）。ロジックは `apps/frontend/lib/api/` のハンドラに集約され、開発用ルート（`app/api/`）と本番用Functionが共用する
 
 ## 前提
@@ -77,13 +77,17 @@ Expressアプリ（`apps/backend`）のうち **auth + health ルートのみ**�
 
 1. [Neon](https://neon.tech) でアカウント＋プロジェクトを作成（無料・カード不要）し、接続文字列を `.env` の `DATABASE_URL` に設定
 2. `CLOUDFLARE_API_TOKEN` に Workers 権限を追加: Account「Workers Scripts:Edit」+ Zone「Workers Routes:Edit」（+ カスタムドメイン自動作成のため Zone「DNS:Edit」）
-3. テーブル作成: `npm run init:auth-db`
+3. テーブル作成: `npm run init:auth-db`（冪等。Stage 2 の sessions / auth_logs / oauth_accounts テーブルと users の追加カラムを含む）
 4. シークレット設定:
    ```bash
    npx wrangler secret put DATABASE_URL -c apps/backend/wrangler.toml
    npx wrangler secret put JWT_SECRET -c apps/backend/wrangler.toml
    npx wrangler secret put RESEND_API_KEY -c apps/backend/wrangler.toml
+   npx wrangler secret put GOOGLE_CLIENT_ID -c apps/backend/wrangler.toml
+   npx wrangler secret put GOOGLE_CLIENT_SECRET -c apps/backend/wrangler.toml
    ```
+   - `JWT_SECRET` は32文字未満だと起動時エラーで fail-fast
+   - `GOOGLE_*` 未設定でもデプロイは可能（`/api/auth/google` は `/login/?error=oauth_unavailable` へ302）
 5. `npm run deploy:api` — 初回デプロイで `api.connectivebyte.com` のカスタムドメインとDNSレコードが自動作成される（トークンにDNS:Editがない場合は `apps/backend/wrangler.toml` の `routes` をコメントアウトし、dashboard → Workers → connective-byte-api → Settings → Domains & Routes で手動追加）
 
 ### デプロイ（開発完了時に）
@@ -95,6 +99,44 @@ npm run deploy:api
 `build:backend`（tsc で型検証）→ `wrangler deploy` まで一括実行。
 
 CI（ci.yml）のbuildジョブがコンパイル検証とビルド成果物（artifact）の生成まで行う。
+
+## auth Stage 2（セッション管理・Googleログイン・マイページ）
+
+Workers API + フロント（`/login/` `/register/` `/mypage/`）で構成されるメンバー機能一式。
+
+### トークンとCookie
+
+- **アクセストークン**: JWT 15分。フロントはメモリのみに保持（localStorage 不使用。SSRも無し）
+- **リフレッシュトークン**: 30日。httpOnly Cookie `cb_rt`（`Path=/api/auth`, `SameSite=Lax`, 本番は `Secure` + `Domain=.connectivebyte.com`）。connectivebyte.com ↔ api.connectivebyte.com は同一サイトのためLaxで送られる
+- **ローテーション**: リフレッシュのたびにトークンを更新（原子UPDATE）。旧トークンの再利用を検知した時点で当該ユーザーの全セッションを失効させる
+- **pages.dev プレビューは認証なし**: CORS 許可オリジンは本番ドメインと localhost のみ。pages.dev は未認証の静的プレビューとして割り切る
+
+### Google OAuth設定（ユーザー作業）
+
+[Google Cloud Console](https://console.cloud.google.com/) で:
+
+1. **OAuth同意画面**: User Type「External」、アプリ名 ConnectiveByte、スコープ `openid email profile`。開発中はTestingで自身のメールをテストユーザーに追加、公開時は本番に切り替え
+2. **認証情報 → OAuth client ID（Webアプリ）** にリダイレクトURIを2件登録:
+   - `https://api.connectivebyte.com/api/auth/google/callback`
+   - `http://localhost:3001/api/auth/google/callback`（ローカル開発用）
+3. 発行された Client ID / Client Secret を `wrangler secret put`（上記手順4）
+
+ローカル開発では `.env` に `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `OAUTH_REDIRECT_BASE=http://localhost:3001` を設定し、フロントは `NEXT_PUBLIC_API_URL=http://localhost:3001` でAPIを直指定する。
+
+### メンテナンスCron
+
+`apps/backend/wrangler.toml` の `[triggers] crons = ["17 19 * * *"]`（毎日04:17 JST）で期限切れセッション削除・90日超の監視ログ削除・30日猶予を過ぎたアカウント削除の匿名化処理が走る（`worker.ts` の `scheduled` ハンドラ）。Cronは初回 `deploy:api` 時に有効化される。
+
+### デプロイ後の検証
+
+```bash
+npm run deploy:api   # backend を先に
+npm run deploy:cf    # フロント（NEXT_PUBLIC_API_URL を焼き込む）
+npm run smoke        # 主要ページ + API 生存・無認証401・google 302
+npm run e2e:auth     # 認証フロー全体（register → ローテーション → 削除予約 → cancel → logout）
+```
+
+`e2e:auth` は実APIにテストユーザーを1件作成する（検証メールが1通飛ぶ。宛先は `@resend.dev`）。Googleログインの本番フローは実ブラウザで1往復確認する。
 
 ## CI/CDワークフロー（GitHub Actions）
 

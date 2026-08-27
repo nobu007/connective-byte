@@ -143,6 +143,9 @@ export class AuthService {
    * パスワード検証の前に拒否する。監査ログ（成功・失敗・ロック）もここで記録。
    */
   async login(data: LoginData, context?: SessionContext): Promise<AuthResponse> {
+    // 監査記録: isVerified 未確認ユーザーもログインを許可する（意図的）。
+    // 現状ゲート機能がなく、未確認でも閲覧可能な公開コンテンツと差がないため。
+    // ゲート機能追加時に AUTH_VERIFY_* でブロックする。
     const email = data.email.toLowerCase();
     const logContext = {
       email,

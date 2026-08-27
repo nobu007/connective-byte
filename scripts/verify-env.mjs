@@ -57,6 +57,21 @@ results.push([
     : '⚠️ 未設定（auth API はローカルJSON保存モードで動く。本番デプロイ前に Neon の接続文字列を設定）',
 ]);
 
+// --- Google OAuth（auth Stage 2） ---
+const googleSet = isSet('GOOGLE_CLIENT_ID') && isSet('GOOGLE_CLIENT_SECRET');
+results.push([
+  'GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET',
+  googleSet
+    ? '✅ 設定済み（Googleログインが有効）'
+    : '⚠️ 未設定（Googleログインのみ無効。メール/PW認証は動く。本番は wrangler secret put で設定）',
+]);
+results.push([
+  'OAUTH_REDIRECT_BASE',
+  isSet('OAUTH_REDIRECT_BASE')
+    ? `✅ 設定済み（${env.OAUTH_REDIRECT_BASE} — コールバックURLの基底）`
+    : 'ℹ️ 未設定（既定 https://api.connectivebyte.com。ローカルでOAuthを試す場合は http://localhost:3001）',
+]);
+
 // --- 手動デプロイ（Cloudflare Pages: 現行） ---
 results.push([
   'CLOUDFLARE_API_TOKEN',

@@ -116,6 +116,9 @@ for (const [path, options, expect] of [
     },
     400,
   ],
+  // 無認証での保護リソースは 401 エンベロープで拒否されること
+  ['/api/auth/sessions', {}, 401],
+  ['/api/auth/me', {}, 401],
 ]) {
   try {
     const controller = new AbortController();
@@ -135,6 +138,26 @@ for (const [path, options, expect] of [
   } catch (err) {
     record(`API ${path} → ${expect}`, false, err.message);
   }
+}
+
+// --- auth: Google OAuth 開始エンドポイント（設定済みなら Google へ、未設定でも /login/ へ 302） ---
+try {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+  let res;
+  try {
+    res = await fetch(`${apiBase}/api/auth/google`, {
+      signal: controller.signal,
+      redirect: 'manual',
+      headers: { 'User-Agent': 'connective-byte-smoke/1.0' },
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+  const ok = res.status >= 301 && res.status <= 308;
+  record('API /api/auth/google → 302', ok, ok ? `→ ${res.headers.get('location')?.slice(0, 60)}` : `HTTP ${res.status}`);
+} catch (err) {
+  record('API /api/auth/google → 302', false, err.message);
 }
 
 // --- 結果 ---

@@ -9,6 +9,8 @@
 // Set JWT_SECRET before importing any auth modules
 process.env.JWT_SECRET = 'test-secret-key';
 
+// JSON ストアの分離（AUTH_DB_PATH）は jest.setup.js で全スイート共通で設定
+
 import request from 'supertest';
 import express, { Application } from 'express';
 import crypto from 'crypto';

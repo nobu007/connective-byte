@@ -161,6 +161,7 @@ export function refreshAccessToken(): Promise<boolean> {
       try {
         const response = await fetch(`${API_BASE}/api/auth/refresh`, {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
         });
         if (!response.ok) {
@@ -191,10 +192,13 @@ export function refreshAccessToken(): Promise<boolean> {
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const doFetch = (): Promise<Response> => {
     const token = getAccessToken();
+    const method = (init.method ?? 'GET').toUpperCase();
+    // POST/PUT/PATCH はボディが無くても Content-Type を必須化するミドルウェア対策
+    const needsJsonType = Boolean(init.body) || ['POST', 'PUT', 'PATCH'].includes(method);
     return fetch(`${API_BASE}${path}`, {
       ...init,
       headers: {
-        ...(init.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(needsJsonType ? { 'Content-Type': 'application/json' } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...init.headers,
       },
@@ -266,7 +270,7 @@ export const authApi = {
       await fetch(`${API_BASE}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include',
-        headers: authHeaders(),
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
       });
     } finally {
       setAccessToken(null);

@@ -58,6 +58,10 @@ export const securityHeaders = helmet({
 
 /**
  * CORS configuration middleware
+ *
+ * 許可オリジンは本番ドメインとローカル開発のみ。
+ * pages.dev プレビューは認証なしの静的プレビューとして割り切る
+ * （CORS を開けると credentialed リクエストが通るため）。
  */
 export const corsConfig: RequestHandler = (
   req: Request,
@@ -68,7 +72,6 @@ export const corsConfig: RequestHandler = (
     'http://localhost:3000',
     'http://localhost:3001',
     'https://connectivebyte.com',
-    'https://connective-byte.pages.dev',
   ];
 
   const origin = req.headers.origin;
@@ -99,6 +102,14 @@ export const sanitizeInput: RequestHandler = (
   res: Response,
   next: NextFunction
 ): void => {
+  // プロフィール自由記述欄（bio 等）は対象外:
+  // 出力は React がエスケープするためサニタイズ不要であり、
+  // on\w+= の除去が正当な本文（"ongoing=..." 等）を破壊するため
+  if (req.method === 'PUT' && req.path === '/api/auth/me') {
+    next();
+    return;
+  }
+
   // Sanitize query parameters
   if (req.query) {
     Object.keys(req.query).forEach((key) => {
@@ -131,7 +142,7 @@ function sanitizeString(str: string): string {
 /**
  * Recursively sanitize an object
  */
-function sanitizeObject(obj: any): any {
+function sanitizeObject(obj: unknown): unknown {
   if (typeof obj !== 'object' || obj === null) {
     return obj;
   }
@@ -140,9 +151,10 @@ function sanitizeObject(obj: any): any {
     return obj.map((item) => sanitizeObject(item));
   }
 
-  const sanitized: any = {};
-  Object.keys(obj).forEach((key) => {
-    const value = obj[key];
+  const record = obj as Record<string, unknown>;
+  const sanitized: Record<string, unknown> = {};
+  Object.keys(record).forEach((key) => {
+    const value = record[key];
     if (typeof value === 'string') {
       sanitized[key] = sanitizeString(value);
     } else if (typeof value === 'object') {
@@ -184,9 +196,12 @@ export const validateRequest: RequestHandler = (
   }
 
   // Check Content-Type for POST/PUT/PATCH requests
+  // （ボディを持つリクエストのみ強制。refresh/logout 猶の空ボディ POST は許可）
   if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
     const contentType = req.headers['content-type'];
-    if (!contentType || !contentType.includes('application/json')) {
+    const contentLength = Number(req.headers['content-length'] ?? 0);
+    const hasBody = contentLength > 0 || req.headers['transfer-encoding'] !== undefined;
+    if (hasBody && (!contentType || !contentType.includes('application/json'))) {
       res.status(415).json({
         error: 'Unsupported Media Type',
         message: 'Content-Type must be application/json',
