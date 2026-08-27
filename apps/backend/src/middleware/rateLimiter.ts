@@ -1,9 +1,19 @@
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { Request, Response } from 'express';
 
 /**
  * Rate limiter configuration for different endpoints
  */
+
+// Cloudflare Workers 環境では socket.remoteAddress が提供されず req.ip が
+// undefined になるため、CF が必ず設定する cf-connecting-ip を優先して鍵を生成する
+// （ローカル Express では req.ip が使えるためフォールバック）。IPv6 正規化は
+// express-rate-limit の ipKeyGenerator に委譲（ERR_ERL_KEY_GEN_IPV6 対策）。
+const clientIpKeyGenerator = (req: Request): string => {
+  const header = req.headers['cf-connecting-ip'];
+  if (typeof header === 'string' && header.length > 0) return ipKeyGenerator(header);
+  return ipKeyGenerator(req.ip ?? 'unknown');
+};
 
 // General API rate limiter - 100 requests per 15 minutes
 export const apiLimiter = rateLimit({
@@ -15,6 +25,7 @@ export const apiLimiter = rateLimit({
   },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  keyGenerator: clientIpKeyGenerator,
   handler: (req: Request, res: Response) => {
     res.status(429).json({
       error: 'Too many requests',
@@ -36,6 +47,7 @@ export const authLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: clientIpKeyGenerator,
   skipSuccessfulRequests: true, // Don't count successful requests
   handler: (req: Request, res: Response) => {
     res.status(429).json({
@@ -58,6 +70,7 @@ export const healthCheckLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: clientIpKeyGenerator,
   handler: (req: Request, res: Response) => {
     res.status(429).json({
       error: 'Too many health check requests',
@@ -79,6 +92,7 @@ export const createLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: clientIpKeyGenerator,
   handler: (req: Request, res: Response) => {
     res.status(429).json({
       error: 'Too many create requests',
@@ -108,6 +122,7 @@ export const createRateLimiter = (options: {
     },
     standardHeaders: true,
     legacyHeaders: false,
+    keyGenerator: clientIpKeyGenerator,
     skipSuccessfulRequests: options.skipSuccessfulRequests || false,
     handler: (req: Request, res: Response) => {
       res.status(429).json({

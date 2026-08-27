@@ -23,6 +23,11 @@ import authRoutes from './routes/authRoutes';
 const app = express();
 app.disable('x-powered-by');
 
+// Cloudflare はプロキシ1段（X-Forwarded-For を付与）。これを設定しないと
+// Express の req.ip が undefined になり、express-rate-limit が ValidationError を投げる
+// （Workers の httpServerHandler は socket.remoteAddress を提供しないため）。
+app.set('trust proxy', 1);
+
 // Security middleware (app.ts と同じ適用順・APIに不要なものは省略)
 app.use(securityHeaders);
 app.use(corsConfig);

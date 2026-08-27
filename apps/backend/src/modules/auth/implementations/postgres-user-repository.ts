@@ -94,10 +94,11 @@ export class PostgresUserRepository implements UserRepository {
 
   async create(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
     const { rows } = await this.getPool().query<UserRow>(
-      `INSERT INTO users (email, password_hash, full_name, role, is_verified)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO users (id, email, password_hash, full_name, role, is_verified)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
       [
+        crypto.randomUUID(), // JsonUserRepository と同じくリポジトリが id を生成する
         userData.email.toLowerCase(),
         userData.passwordHash,
         userData.fullName,
