@@ -5,7 +5,7 @@
  * この router が独自の limiter を携帯する（app.ts / worker.ts 両入口で同一挙動）。
  */
 
-import { Router } from 'express';
+import { Router, type RequestHandler } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
 import { createRateLimiter } from '../middleware/rateLimiter';
 import {
@@ -27,6 +27,28 @@ import {
 } from '../modules/learning/learning.controller';
 
 const router = Router();
+
+// Postgres は uuid 列への不正入力で構文エラー（500）を出すためパラメータを事前検証。
+// slug 系パラメータ（moduleSlug/sessionSlug）は対象外。
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const rejectInvalidUuid =
+  (paramName: string): RequestHandler =>
+  (req, res, next) => {
+    if (!UUID_PATTERN.test(String(req.params[paramName]))) {
+      res.status(400).json({
+        error: {
+          code: 'LEARNING_VALIDATION_001',
+          message: `${paramName} は UUID 形式である必要があります`,
+        },
+      });
+      return;
+    }
+    next();
+  };
+
+router.param('id', rejectInvalidUuid('id'));
+router.param('sessionId', rejectInvalidUuid('sessionId'));
 
 // 公開読み取り: 通常利用（ページ表示ごとに数回）で引っかからない程度
 const learningReadLimiter = createRateLimiter({

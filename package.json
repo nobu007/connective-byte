@@ -19,6 +19,7 @@
     "env:check": "node scripts/verify-env.mjs",
     "smoke": "node scripts/smoke-prod.mjs",
     "e2e:auth": "node scripts/e2e-auth.mjs",
+    "e2e:learning": "dotenv -e .env -- node scripts/e2e-learning.mjs",
     "test": "npm-run-all test:frontend test:backend",
     "test:frontend": "npm test -w apps/frontend",
     "test:backend": "npm test -w apps/backend",

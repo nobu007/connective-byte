@@ -351,8 +351,9 @@ export class JsonLearningRepository implements LearningRepository {
     const timestamp = nowIso();
     if (existing) {
       existing.status = status;
-      // 完了→in_progress の「解除」では completed_at をクリア。started_at は初回アクセス時刻を保持
-      existing.completedAt = status === 'completed' ? timestamp : null;
+      // 完了→in_progress の「解除」では completed_at をクリア。started_at は初回アクセス時刻を保持。
+      // completed 再送は upsert 冪等に初回完了時刻を保持（postgres 実装の COALESCE と同期）
+      existing.completedAt = status === 'completed' ? (existing.completedAt ?? timestamp) : null;
       await this.save();
       return this.toRecord(existing);
     }

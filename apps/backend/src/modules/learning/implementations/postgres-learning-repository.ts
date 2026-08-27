@@ -546,7 +546,10 @@ export class PostgresLearningRepository implements LearningRepository {
        VALUES ($1, $2, $3, CASE WHEN $3 = 'completed' THEN now() ELSE NULL END)
        ON CONFLICT (learner_id, session_id) DO UPDATE SET
          status = EXCLUDED.status,
-         completed_at = CASE WHEN EXCLUDED.status = 'completed' THEN now() ELSE NULL END
+         completed_at = CASE
+           WHEN EXCLUDED.status = 'completed' THEN COALESCE(session_progress.completed_at, now())
+           ELSE NULL
+         END
        RETURNING session_id, status, started_at, completed_at`,
       [learnerId, sessionId, status]
     );

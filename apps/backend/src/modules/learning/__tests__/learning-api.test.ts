@@ -12,6 +12,7 @@ import express, { Application } from 'express';
 import crypto from 'crypto';
 import { handleGetCurriculum, handleGetModule, handleGetSession } from '../learning.controller';
 import { learningContainer } from '../learning.container';
+import learningRoutes from '../../../routes/learningRoutes';
 
 // ファイル内で衝突しないユニーク slug 接尾辞
 const unique = () => crypto.randomUUID().slice(0, 8);
@@ -162,6 +163,31 @@ describe('Learning API Endpoints (public read)', () => {
 
       expect(response.body.success).toBeUndefined();
       expect(response.body.error.code).toBe('LEARNING_SESSION_001');
+    });
+  });
+
+  describe('UUID パラメータ検証（実 router マウント）', () => {
+    // Postgres の uuid 構文エラー（500）を路由で防止する router.param の検証。
+    // param 検証はハンドラより先に走るため認証無しでも 400 になる。
+    let routerApp: Application;
+
+    beforeEach(() => {
+      routerApp = express();
+      routerApp.use(express.json());
+      routerApp.use(learningRoutes);
+    });
+
+    it('不正な sessionId への進捗 PUT は 400', async () => {
+      const response = await request(routerApp)
+        .put('/api/learning/progress/sessions/not-a-uuid')
+        .send({ status: 'completed' });
+
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe('LEARNING_VALIDATION_001');
+    });
+
+    it('不正な管理 :id も 400', async () => {
+      await request(routerApp).get('/api/learning/admin/sessions/zzz').expect(400);
     });
   });
 });

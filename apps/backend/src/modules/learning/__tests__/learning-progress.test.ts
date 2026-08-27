@@ -80,6 +80,10 @@ describe('ProgressService', () => {
     const again = await progress.setProgress(otherLearner, day1.id, 'completed');
     expect(again.completedAt).not.toBeNull();
     expect(again.startedAt).toBe(first.startedAt);
+
+    // completed 再送も upsert 冪等: 完了時刻は初回完了時刻を保持する
+    const doneTwice = await progress.setProgress(otherLearner, day1.id, 'completed');
+    expect(doneTwice.completedAt).toBe(again.completedAt);
   });
 
   it('未知の sessionId は 404', async () => {
