@@ -1,7 +1,7 @@
 /**
  * Cloudflare Workers Entry Point
  *
- * authRoutes + healthRoutes のみをマウントする slim 構成。
+ * authRoutes + healthRoutes + learningRoutes のみをマウントする slim 構成。
  * （lab モジュール・swagger は本番ホスト対象外 — 消費者なし）
  *
  * 公式チュートリアル "Deploy an Express.js application on Cloudflare Workers"
@@ -19,6 +19,7 @@ import { securityHeaders, corsConfig, sanitizeInput } from './middleware/securit
 import { notFoundHandler, errorHandler } from './middleware/errorHandler';
 import healthRoutes from './routes/healthRoutes';
 import authRoutes from './routes/authRoutes';
+import learningRoutes from './routes/learningRoutes';
 import { authContainer } from './modules/auth/auth.container';
 
 const app = express();
@@ -33,15 +34,16 @@ app.set('trust proxy', 1);
 app.use(securityHeaders);
 app.use(corsConfig);
 
-// Body parsing (Workers では大きなペイロードを想定しないため 100kb に制限)
-app.use(express.json({ limit: '100kb' }));
-app.use(express.urlencoded({ extended: true, limit: '100kb' }));
+// Body parsing（learning の管理APIは Markdown 本文（最大1MB）を扱うため 1mb まで許可）
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 app.use(sanitizeInput);
 
 // Routes
 app.use(healthRoutes);
 app.use(authRoutes);
+app.use(learningRoutes);
 
 // Error handling
 app.use(notFoundHandler);

@@ -9,3 +9,5 @@
 const os = require('os');
 
 process.env.AUTH_DB_PATH = `${os.tmpdir()}/auth-jest-${process.pid}.json`;
+// learning も同様にテスト実行間で状態を分離（カリキュラム・進捗の蓄積を防ぐ）
+process.env.LEARNING_DB_PATH = `${os.tmpdir()}/learning-jest-${process.pid}.json`;

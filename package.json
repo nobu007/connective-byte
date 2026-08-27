@@ -33,7 +33,8 @@
     "build:cf": "dotenv -e .env -- npm run build -w apps/frontend",
     "deploy:cf": "npm run build:cf && npx wrangler pages deploy",
     "deploy:api": "npm run build:backend && npx wrangler deploy -c apps/backend/wrangler.toml",
-    "init:auth-db": "dotenv -e .env -- node scripts/init-auth-db.mjs"
+    "init:auth-db": "dotenv -e .env -- node scripts/init-auth-db.mjs",
+    "init:learning-db": "dotenv -e .env -- node scripts/init-learning-db.mjs"
   },
   "repository": {
     "type": "git",
