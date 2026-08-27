@@ -326,6 +326,14 @@ async function main() {
   });
   assert('管理 session 作成 → 201', newSession.res.status === 201, `HTTP ${newSession.res.status} ${JSON.stringify(newSession.json)}`);
 
+  // 公開には「セッション公開 かつ モジュール公開」が必要なため、モジュールを公開してから検証
+  const publishModule = await call(`/api/learning/admin/modules/${newModuleId}`, {
+    method: 'PATCH',
+    token,
+    body: { isPublished: true },
+  });
+  assert('作成モジュールの公開化 → 200', publishModule.res.status === 200, `HTTP ${publishModule.res.status}`);
+
   const newSlug = `e2e-sess-${runId}`;
   const dupSlug = await call('/api/learning/admin/sessions', {
     method: 'POST',
@@ -345,7 +353,7 @@ async function main() {
   assert('作成（公開）セッションが公開側で閲覧可', pubNew.res.status === 200, `HTTP ${pubNew.res.status}`);
 
   const delModule = await call(`/api/learning/admin/modules/${newModuleId}`, { method: 'DELETE', token });
-  assert('管理 module 削除 → 200', delModule.res.status === 200, `HTTP ${delModule.res.status}`);
+  assert('管理 module 削除 → 204', delModule.res.status === 204, `HTTP ${delModule.res.status}`);
 
   const pubDeleted = await call(`/api/learning/sessions/${newSlug}`);
   assert('CASCADE 削除後は 404', pubDeleted.res.status === 404, `HTTP ${pubDeleted.res.status}`);
