@@ -21,6 +21,7 @@ export const siteConfig = {
     { name: 'ホーム', href: '/' },
     { name: 'About', href: '/about' },
     { name: '原則', href: '/principles' },
+    { name: 'ラーニング', href: '/learning/' },
     { name: 'お問い合わせ', href: '/contact' },
   ],
 
