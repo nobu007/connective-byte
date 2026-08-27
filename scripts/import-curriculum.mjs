@@ -131,7 +131,8 @@ for (const [index, m] of modules.entries()) {
   );
   if (!phase) fail(m.slug, `weekNumber ${m.weekNumber} がどの Phase にも属しません`);
 
-  const { rows } = await sql.query(
+  // neon() の sql.query() は fullResults:false 既定で行配列を直接返す（{rows} ではない）
+  const rows = await sql.query(
     `INSERT INTO curriculum_modules (id, phase_id, slug, title, description, week_number, order_index, is_published)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      ON CONFLICT (slug) DO UPDATE SET
@@ -147,7 +148,7 @@ for (const [index, m] of modules.entries()) {
   rows[0].inserted ? moduleCreated++ : moduleUpdated++;
 
   for (const [sIndex, s] of m.sessions.entries()) {
-    const { rows: sessionRows } = await sql.query(
+    const sessionRows = await sql.query(
       `INSERT INTO learning_sessions (id, module_id, slug, title, description, content,
                                       duration_minutes, objectives, order_index, is_published)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10)
