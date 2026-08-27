@@ -12,14 +12,77 @@ export interface User {
   fullName: string;
   role: UserRole;
   isVerified: boolean;
+  bio: string | null;
+  timezone: string;
+  githubUsername: string | null;
+  deletionScheduledAt: string | null;
+  deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface RefreshToken {
-  token: string;
+/** セッション一覧表示用の端末情報（User-Agent を軽く分類したもの） */
+export interface DeviceInfo {
+  userAgent: string;
+  browser: string;
+  os: string;
+  device: string;
+}
+
+export interface SessionRecord {
+  id: string;
   userId: string;
+  refreshTokenHash: string;
+  /** ローテーション直前のハッシュ。再利用検知（リプレイ攻撃）に使用 */
+  prevRefreshTokenHash: string | null;
+  deviceInfo: DeviceInfo;
+  ipAddress: string | null;
+  createdAt: string;
+  lastActivityAt: string;
   expiresAt: string;
+}
+
+export type AuthEventType =
+  | 'login'
+  | 'login_failed'
+  | 'login_locked'
+  | 'logout'
+  | 'refresh_reuse_detected'
+  | 'password_change'
+  | 'password_reset'
+  | 'oauth_login'
+  | 'oauth_link'
+  | 'account_deletion_scheduled'
+  | 'account_deletion_cancelled'
+  | 'account_deleted'
+  | 'session_revoked';
+
+export interface AuthLogEntry {
+  eventType: AuthEventType;
+  userId?: string | null;
+  email?: string | null;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  success: boolean;
+  failureReason?: string | null;
+}
+
+export type OAuthProvider = 'google';
+
+export interface OAuthAccountRecord {
+  id: string;
+  userId: string;
+  provider: OAuthProvider;
+  providerUserId: string;
+  providerEmail: string | null;
+  linkedAt: string;
+}
+
+export interface UpdateProfileData {
+  fullName?: string;
+  bio?: string;
+  timezone?: string;
+  githubUsername?: string;
 }
 
 export interface EmailVerificationToken {
@@ -34,14 +97,29 @@ export interface PasswordResetToken {
   expiresAt: string;
 }
 
+export interface CreateSessionInput {
+  userId: string;
+  refreshTokenHash: string;
+  deviceInfo: DeviceInfo;
+  ipAddress: string | null;
+  expiresAt: Date;
+}
+
+export interface LinkOAuthAccountInput {
+  userId: string;
+  provider: OAuthProvider;
+  providerUserId: string;
+  providerEmail: string | null;
+}
+
 export interface UserRepository {
   /**
-   * Find user by ID
+   * Find user by ID（deleted_at が設定されたユーザーは返さない）
    */
   findById(id: string): Promise<User | null>;
 
   /**
-   * Find user by email
+   * Find user by email（deleted_at が設定されたユーザーは返さない）
    */
   findByEmail(email: string): Promise<User | null>;
 
@@ -51,34 +129,115 @@ export interface UserRepository {
   create(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User>;
 
   /**
-   * Update user
+   * Update user（任意フィールドの部分更新）
    */
   update(id: string, data: Partial<Omit<User, 'id' | 'createdAt'>>): Promise<User | null>;
 
-  /**
-   * Store refresh token (hashed)
-   */
-  storeRefreshToken(tokenHash: string, userId: string, expiresAt: Date): Promise<void>;
+  // --- sessions（refresh トークンはセッション行として管理・ローテーション対応） ---
 
   /**
-   * Find refresh token by hash
+   * セッション作成（refresh トークンハッシュを保存）
    */
-  findRefreshToken(tokenHash: string): Promise<RefreshToken | null>;
+  createSession(input: CreateSessionInput): Promise<SessionRecord>;
 
   /**
-   * Remove refresh token
+   * 現行または直前のハッシュでセッションを検索。
+   * 期限切れは惰性削除して null を返す
    */
-  removeRefreshToken(tokenHash: string): Promise<void>;
+  findSessionByTokenHash(tokenHash: string): Promise<SessionRecord | null>;
 
   /**
-   * Remove all refresh tokens for user
+   * ユーザーの有効なセッション一覧（新しい順）
    */
-  removeAllRefreshTokensForUser(userId: string): Promise<void>;
+  findSessionsByUser(userId: string): Promise<SessionRecord[]>;
 
   /**
-   * Clean expired refresh tokens
+   * refresh トークンの原子ローテーション。
+   * presentedTokenHash が現行と一致した場合のみ更新し、
+   * 一致しない（=競合 or 再利用）場合は false を返す
    */
-  cleanExpiredTokens(): Promise<void>;
+  rotateSessionRefreshToken(
+    sessionId: string,
+    presentedTokenHash: string,
+    newTokenHash: string,
+    newExpiresAt: Date
+  ): Promise<boolean>;
+
+  /**
+   * セッション失効（= 行削除）
+   */
+  revokeSession(sessionId: string): Promise<void>;
+
+  /**
+   * ユーザーの全セッション失効（exceptSessionId を除く）
+   */
+  revokeAllSessionsForUser(userId: string, exceptSessionId?: string): Promise<void>;
+
+  /**
+   * 期限切れセッションの削除（メンテナンス用）。削除件数を返す
+   */
+  deleteExpiredSessions(now?: Date): Promise<number>;
+
+  // --- auth logs（監査ログ + ログインロックアウト计数の単一ソース） ---
+
+  /**
+   * 認証関連イベントの記録
+   */
+  recordAuthLog(entry: AuthLogEntry): Promise<void>;
+
+  /**
+   * 指定日時以降の email によるログイン失敗回数（ロックアウト判定）
+   */
+  countRecentFailedLogins(email: string, since: Date): Promise<number>;
+
+  /**
+   * 指定日時より古いログの削除（メンテナンス用）。削除件数を返す
+   */
+  deleteAuthLogsOlderThan(cutoff: Date): Promise<number>;
+
+  // --- oauth accounts ---
+
+  findOAuthAccount(
+    provider: OAuthProvider,
+    providerUserId: string
+  ): Promise<OAuthAccountRecord | null>;
+
+  findOAuthAccountsByUser(userId: string): Promise<OAuthAccountRecord[]>;
+
+  linkOAuthAccount(input: LinkOAuthAccountInput): Promise<OAuthAccountRecord>;
+
+  unlinkOAuthAccount(userId: string, provider: OAuthProvider): Promise<void>;
+
+  unlinkAllOAuthAccountsForUser(userId: string): Promise<void>;
+
+  // --- profile & lifecycle ---
+
+  /**
+   * プロフィール更新（fullName / bio / timezone / githubUsername）
+   */
+  updateProfile(id: string, data: UpdateProfileData): Promise<User | null>;
+
+  /**
+   * アカウント削除を scheduledFor に予約（30日猶予）
+   */
+  scheduleAccountDeletion(id: string, scheduledFor: Date): Promise<void>;
+
+  /**
+   * 削除予約を取り消し
+   */
+  cancelAccountDeletion(id: string): Promise<void>;
+
+  /**
+   * 削除予約日を過ぎて未処理のユーザー（メンテナンス用）
+   */
+  findUsersDueForDeletion(now: Date): Promise<User[]>;
+
+  /**
+   * 論理削除 + 匿名化（email を一意な無効値へ置換、パスワード無効化）
+   */
+  markUserDeletedAndAnonymize(id: string): Promise<void>;
+
+  // --- email verification / password reset tokens ---
 
   /**
    * Store email verification token (hashed, 24h expiry per spec)
@@ -109,4 +268,9 @@ export interface UserRepository {
    * Delete all password reset tokens for user (after successful reset)
    */
   deletePasswordResetTokensForUser(userId: string): Promise<void>;
+
+  /**
+   * Clean expired verification/reset tokens（メンテナンス用）
+   */
+  cleanExpiredTokens(): Promise<void>;
 }

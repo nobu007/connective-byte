@@ -3,8 +3,9 @@
  * Core business logic for user authentication
  */
 
-import { UserRepository, User, UserRole } from '../interfaces/user-repository';
+import { UserRepository, User, UserRole, DeviceInfo } from '../interfaces/user-repository';
 import { EmailService } from '../interfaces/email-service';
+import { AuthError } from '../errors';
 import { hashPassword, verifyPassword } from '../../../common/utils/password';
 import { generateToken } from '../../../middleware/auth';
 import crypto from 'crypto';
@@ -20,26 +21,44 @@ export interface LoginData {
   password: string;
 }
 
-export interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
+/** セッション作成時のコンテキスト（controller がリクエストから抽出） */
+export interface SessionContext {
+  ipAddress: string | null;
+  deviceInfo: DeviceInfo;
+  userAgent?: string | null;
+}
+
+const UNKNOWN_DEVICE: DeviceInfo = {
+  userAgent: '',
+  browser: 'Unknown',
+  os: 'Unknown',
+  device: 'Unknown',
+};
+
+/** API レスポンスの user オブジェクト（パスワードハッシュ等は含めない） */
+export interface PublicUser {
+  id: string;
+  email: string;
+  fullName: string;
+  role: UserRole;
+  isVerified: boolean;
 }
 
 export interface AuthResponse {
-  user: {
-    id: string;
-    email: string;
-    fullName: string;
-    role: UserRole;
-    isVerified: boolean;
-  };
-  tokens: AuthTokens;
+  user: PublicUser;
+  accessToken: string;
+  /** Cookie 設定用。レスポンスJSONには含めない（controller の責務） */
+  refreshToken: string;
 }
+
+const REFRESH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30日
 
 export class AuthService {
   constructor(
     private userRepository: UserRepository,
-    private emailService: EmailService
+    private emailService: EmailService,
+    /** 期限計算をテストで制御可能にする（デフォルトは実時間） */
+    private clock: () => Date = () => new Date()
   ) {}
 
   /**
@@ -81,25 +100,26 @@ export class AuthService {
   /**
    * Register new user
    */
-  async register(data: RegisterData): Promise<AuthResponse> {
+  async register(data: RegisterData, context?: SessionContext): Promise<AuthResponse> {
     // Validate email
     if (!this.validateEmail(data.email)) {
-      throw new Error('Invalid email format');
+      throw new AuthError('AUTH_REG_003', 'Invalid email format');
     }
 
     // Validate password
     const passwordValidation = this.validatePassword(data.password);
     if (!passwordValidation.valid) {
-      throw new Error(passwordValidation.errors.join(', '));
+      throw new AuthError('AUTH_REG_003', passwordValidation.errors.join(', '));
     }
 
     // Check for existing email (generic error for security)
     const existingUser = await this.userRepository.findByEmail(data.email);
     if (existingUser) {
-      throw new Error('Registration failed');
+      throw new AuthError('AUTH_REG_002', 'Registration failed');
     }
 
-    // Hash password (12 rounds per spec)
+    // Hash password（PBKDF2-SHA256 — design.mdのbcrypt仕様からの
+    // Workers CPU制限に伴う逸脱は common/utils/password.ts のコメント参照）
     const passwordHash = await hashPassword(data.password);
 
     // Create user
@@ -109,11 +129,16 @@ export class AuthService {
       fullName: data.fullName,
       role: 'learner', // Default role per spec
       isVerified: false, // Email verification required
+      bio: null,
+      timezone: 'UTC',
+      githubUsername: null,
+      deletionScheduledAt: null,
+      deletedAt: null,
     });
 
     // 検証トークンをSHA-256ハッシュで保存（24時間有効 — requirements.md仕様）
     const verificationToken = crypto.randomBytes(32).toString('hex');
-    const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const verificationExpiry = new Date(this.clock().getTime() + 24 * 60 * 60 * 1000);
     await this.userRepository.storeEmailVerificationToken(
       this.hashToken(verificationToken),
       user.id,
@@ -121,83 +146,106 @@ export class AuthService {
     );
     await this.emailService.sendVerificationEmail(user.email, verificationToken);
 
-    // Generate tokens
-    const tokens = await this.generateTokens(user);
-
-    return {
-      user: {
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        role: user.role,
-        isVerified: user.isVerified,
-      },
-      tokens,
-    };
+    return this.issueSession(user, context);
   }
 
   /**
    * Login user
    */
-  async login(data: LoginData): Promise<AuthResponse> {
+  async login(data: LoginData, context?: SessionContext): Promise<AuthResponse> {
     const user = await this.userRepository.findByEmail(data.email);
 
     if (!user) {
       // Generic error (don't reveal if email exists)
-      throw new Error('Invalid credentials');
+      throw new AuthError('AUTH_LOGIN_002', 'Invalid credentials', 401);
     }
 
     const isValidPassword = await verifyPassword(data.password, user.passwordHash);
     if (!isValidPassword) {
-      throw new Error('Invalid credentials');
+      throw new AuthError('AUTH_LOGIN_002', 'Invalid credentials', 401);
     }
 
-    // Generate tokens
-    const tokens = await this.generateTokens(user);
-
-    return {
-      user: {
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        role: user.role,
-        isVerified: user.isVerified,
-      },
-      tokens,
-    };
+    return this.issueSession(user, context);
   }
 
   /**
-   * Refresh access token
+   * Refresh access token（リフレッシュトークンのローテーション + 再利用検知）
    */
-  async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
-    // 保存時と同じSHA-256でハッシュして照合（bcryptはソルトが毎回変わるため検索不可能）
+  async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
     const tokenHash = this.hashToken(refreshToken);
-    const stored = await this.userRepository.findRefreshToken(tokenHash);
-    if (!stored) {
-      throw new Error('Invalid refresh token');
+    const session = await this.userRepository.findSessionByTokenHash(tokenHash);
+    if (!session) {
+      throw new AuthError('AUTH_TOKEN_002', 'Invalid or expired refresh token', 401);
     }
 
-    const user = await this.userRepository.findById(stored.userId);
+    // 直前のハッシュ（= 一度ローテーション済みのトークン）の再呈示は
+    // トークン窃取・リプレイの強い兆候 → 当該ユーザーの全セッションを失効
+    if (session.prevRefreshTokenHash === tokenHash) {
+      await this.userRepository.revokeAllSessionsForUser(session.userId);
+      await this.userRepository.recordAuthLog({
+        eventType: 'refresh_reuse_detected',
+        userId: session.userId,
+        success: false,
+        failureReason: 'presented_prev_hash',
+      });
+      throw new AuthError('AUTH_TOKEN_002', 'Invalid or expired refresh token', 401);
+    }
+
+    const user = await this.userRepository.findById(session.userId);
     if (!user) {
-      throw new Error('User not found');
+      throw new AuthError('AUTH_TOKEN_002', 'Invalid or expired refresh token', 401);
     }
 
-    // Generate new access token
+    // 原子ローテーション。false = 並行リクエストが先に更新済み（競合）。
+    // 安全側に倒して全セッション失効（競合もう一方のローテーション後トークンも
+    // 対象。single-flightなフロントでは通常起こらない）
+    const newTokenRaw = crypto.randomBytes(32).toString('hex');
+    const rotated = await this.userRepository.rotateSessionRefreshToken(
+      session.id,
+      tokenHash,
+      this.hashToken(newTokenRaw),
+      new Date(this.clock().getTime() + REFRESH_TOKEN_TTL_MS)
+    );
+    if (!rotated) {
+      await this.userRepository.revokeAllSessionsForUser(session.userId);
+      await this.userRepository.recordAuthLog({
+        eventType: 'refresh_reuse_detected',
+        userId: session.userId,
+        success: false,
+        failureReason: 'concurrent_rotation',
+      });
+      throw new AuthError('AUTH_TOKEN_002', 'Invalid or expired refresh token', 401);
+    }
+
     const accessToken = generateToken({
       id: user.id,
       email: user.email,
       role: user.role,
     });
 
-    return { accessToken };
+    return { accessToken, refreshToken: newTokenRaw };
   }
 
   /**
-   * Generate access and refresh tokens
+   * Logout（Cookie のリフレッシュトークンに紐づくセッションを失効）
+   * トークン不正でも例外にしない（冪等）
    */
-  private async generateTokens(user: User): Promise<AuthTokens> {
-    // Access token (1 hour)
+  async logout(refreshToken: string): Promise<void> {
+    const session = await this.userRepository.findSessionByTokenHash(this.hashToken(refreshToken));
+    if (session) {
+      await this.userRepository.revokeSession(session.id);
+      await this.userRepository.recordAuthLog({
+        eventType: 'logout',
+        userId: session.userId,
+        success: true,
+      });
+    }
+  }
+
+  /**
+   * ユーザーにセッションを発行（アクセストークン + リフレッシュCookie用トークン）
+   */
+  private async issueSession(user: User, context?: SessionContext): Promise<AuthResponse> {
     const accessToken = generateToken({
       id: user.id,
       email: user.email,
@@ -206,26 +254,19 @@ export class AuthService {
 
     // Refresh token (30 days)
     const refreshTokenRaw = crypto.randomBytes(32).toString('hex');
-    const refreshTokenExpiry = new Date();
-    refreshTokenExpiry.setDate(refreshTokenExpiry.getDate() + 30);
-
-    await this.userRepository.storeRefreshToken(
-      this.hashToken(refreshTokenRaw),
-      user.id,
-      refreshTokenExpiry
-    );
+    await this.userRepository.createSession({
+      userId: user.id,
+      refreshTokenHash: this.hashToken(refreshTokenRaw),
+      deviceInfo: context?.deviceInfo ?? UNKNOWN_DEVICE,
+      ipAddress: context?.ipAddress ?? null,
+      expiresAt: new Date(this.clock().getTime() + REFRESH_TOKEN_TTL_MS),
+    });
 
     return {
+      user: toPublicUser(user),
       accessToken,
       refreshToken: refreshTokenRaw,
     };
-  }
-
-  /**
-   * Logout user
-   */
-  async logout(userId: string, refreshToken: string): Promise<void> {
-    await this.userRepository.removeRefreshToken(this.hashToken(refreshToken));
   }
 
   /**
@@ -243,7 +284,7 @@ export class AuthService {
     const tokenHash = this.hashToken(token);
     const stored = await this.userRepository.findEmailVerificationToken(tokenHash);
     if (!stored) {
-      throw new Error('Invalid or expired verification token');
+      throw new AuthError('AUTH_VERIFY_002', 'Invalid or expired verification token');
     }
 
     await this.userRepository.update(stored.userId, { isVerified: true });
@@ -262,7 +303,7 @@ export class AuthService {
 
     // リセットトークンをSHA-256ハッシュで保存（1時間有効 — requirements.md仕様）
     const resetToken = crypto.randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+    const expiresAt = new Date(this.clock().getTime() + 60 * 60 * 1000);
     await this.userRepository.storePasswordResetToken(
       this.hashToken(resetToken),
       user.id,
@@ -278,24 +319,39 @@ export class AuthService {
     const tokenHash = this.hashToken(token);
     const stored = await this.userRepository.findPasswordResetToken(tokenHash);
     if (!stored) {
-      throw new Error('Invalid or expired reset token');
+      throw new AuthError('AUTH_RESET_003', 'Invalid or expired reset token');
     }
 
     const validation = this.validatePassword(newPassword);
     if (!validation.valid) {
-      throw new Error(validation.errors.join(', '));
+      throw new AuthError('AUTH_RESET_003', validation.errors.join(', '));
     }
 
     const passwordHash = await hashPassword(newPassword);
     await this.userRepository.update(stored.userId, { passwordHash });
 
     // 全セッション無効化（requirements.md仕様）+ トークン単用途化
-    await this.userRepository.removeAllRefreshTokensForUser(stored.userId);
+    await this.userRepository.revokeAllSessionsForUser(stored.userId);
     await this.userRepository.deletePasswordResetTokensForUser(stored.userId);
+    await this.userRepository.recordAuthLog({
+      eventType: 'password_reset',
+      userId: stored.userId,
+      success: true,
+    });
 
     const user = await this.userRepository.findById(stored.userId);
     if (user) {
       await this.emailService.sendPasswordChangedNotification(user.email);
     }
   }
+}
+
+export function toPublicUser(user: User): PublicUser {
+  return {
+    id: user.id,
+    email: user.email,
+    fullName: user.fullName,
+    role: user.role,
+    isVerified: user.isVerified,
+  };
 }

@@ -24,10 +24,15 @@ declare global {
  *
  * 本番でJWT_SECRET未設定は即fail（推測可能なデフォルト鍵の使用を防止）。
  * 開発/テストのみ既定値へフォールバックする。
+ * 本番ではさらに32文字以上を要求（HS256 の鍵長不足を防ぐ）。
  */
-function resolveJwtSecret(): string {
-  if (process.env.JWT_SECRET) {
-    return process.env.JWT_SECRET;
+export function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (secret) {
+    if (process.env.NODE_ENV === 'production' && secret.length < 32) {
+      throw new Error('JWT_SECRET must be at least 32 characters in production');
+    }
+    return secret;
   }
   if (process.env.NODE_ENV === 'production') {
     throw new Error('JWT_SECRET must be set in production');
@@ -35,8 +40,9 @@ function resolveJwtSecret(): string {
   return 'dev-only-insecure-secret';
 }
 
-const JWT_SECRET = resolveJwtSecret();
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
+const JWT_SECRET = getJwtSecret();
+// アクセストークンは短期（15分）。長期の保持はリフレッシュトークン（Cookie）の役割
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m';
 
 /**
  * Generate JWT token
@@ -73,8 +79,10 @@ export const authenticate: RequestHandler = (
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       res.status(401).json({
-        error: 'Unauthorized',
-        message: 'No token provided',
+        error: {
+          code: 'AUTH_TOKEN_003',
+          message: 'No token provided',
+        },
       });
       return;
     }
@@ -86,8 +94,10 @@ export const authenticate: RequestHandler = (
 
     if (!decoded) {
       res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Invalid or expired token',
+        error: {
+          code: 'AUTH_TOKEN_003',
+          message: 'Invalid or expired token',
+        },
       });
       return;
     }
@@ -102,8 +112,10 @@ export const authenticate: RequestHandler = (
     next();
   } catch (error) {
     res.status(401).json({
-      error: 'Unauthorized',
-      message: 'Authentication failed',
+      error: {
+        code: 'AUTH_TOKEN_003',
+        message: 'Authentication failed',
+      },
     });
   }
 };
@@ -147,16 +159,20 @@ export function authorize(...allowedRoles: string[]): RequestHandler {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication required',
+        error: {
+          code: 'AUTH_TOKEN_003',
+          message: 'Authentication required',
+        },
       });
       return;
     }
 
     if (!allowedRoles.includes(req.user.role)) {
       res.status(403).json({
-        error: 'Forbidden',
-        message: 'Insufficient permissions',
+        error: {
+          code: 'AUTH_002',
+          message: 'Insufficient permissions',
+        },
       });
       return;
     }
@@ -179,8 +195,10 @@ export const authenticateApiKey: RequestHandler = (
 
     if (!apiKey) {
       res.status(401).json({
-        error: 'Unauthorized',
-        message: 'API key required',
+        error: {
+          code: 'AUTH_004',
+          message: 'API key required',
+        },
       });
       return;
     }
@@ -190,8 +208,10 @@ export const authenticateApiKey: RequestHandler = (
 
     if (!validApiKeys.includes(apiKey)) {
       res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Invalid API key',
+        error: {
+          code: 'AUTH_004',
+          message: 'Invalid API key',
+        },
       });
       return;
     }
@@ -199,8 +219,10 @@ export const authenticateApiKey: RequestHandler = (
     next();
   } catch (error) {
     res.status(401).json({
-      error: 'Unauthorized',
-      message: 'API key authentication failed',
+      error: {
+        code: 'AUTH_004',
+        message: 'API key authentication failed',
+      },
     });
   }
 };

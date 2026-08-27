@@ -123,22 +123,12 @@ router.post('/api/auth/login', authLimiter, handleLogin);
  * /api/auth/refresh:
  *   post:
  *     summary: Refresh access token
- *     description: Generate a new access token using refresh token
+ *     description: httpOnly Cookie（cb_rt）のリフレッシュトークンをローテーションし
+ *       新しいアクセストークンを発行する
  *     tags: [Authentication]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - refreshToken
- *             properties:
- *               refreshToken:
- *                 type: string
  *     responses:
  *       200:
- *         description: Token refreshed successfully
+ *         description: Token refreshed successfully（新しい cb_rt Cookie をセット）
  *         content:
  *           application/json:
  *             schema:
@@ -147,7 +137,7 @@ router.post('/api/auth/login', authLimiter, handleLogin);
  *                 accessToken:
  *                   type: string
  *       401:
- *         description: Invalid or expired refresh token
+ *         description: Invalid or expired refresh token（Cookie を破棄）
  *         content:
  *           application/json:
  *             schema:
@@ -188,18 +178,9 @@ router.get('/api/auth/me', authenticate, handleGetProfile);
  * /api/auth/logout:
  *   post:
  *     summary: Logout user
- *     description: Logout the current user and invalidate refresh token
+ *     description: Cookie のリフレッシュトークンに紐づくセッションを失効し Cookie を破棄。
+ *       authenticate 不要・冪等（アクセストークン期限切れ後でもログアウト可能）
  *     tags: [Authentication]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               refreshToken:
- *                 type: string
  *     responses:
  *       200:
  *         description: Logout successful
@@ -210,14 +191,8 @@ router.get('/api/auth/me', authenticate, handleGetProfile);
  *               properties:
  *                 message:
  *                   type: string
- *       401:
- *         description: Unauthorized
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  */
-router.post('/api/auth/logout', authenticate, handleLogout);
+router.post('/api/auth/logout', handleLogout);
 
 /**
  * @swagger

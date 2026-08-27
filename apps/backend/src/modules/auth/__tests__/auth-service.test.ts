@@ -1,147 +1,22 @@
 /**
  * Auth Service Unit Tests
  * Tests core business logic for authentication
+ *
+ * UserRepository は本物の JsonUserRepository（テスト毎の一時ファイル）を使用し、
+ * ハンドメイドの Mock 実装との型ズレを防ぐ（TS implements は実実装にのみ効く）。
  */
 
 // Set JWT_SECRET before importing any auth modules
 process.env.JWT_SECRET = 'test-secret-key';
 
+import os from 'os';
+import path from 'path';
+import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import { AuthService } from '../services/auth-service';
-import { UserRepository, User, UserRole } from '../interfaces/user-repository';
+import { JsonUserRepository } from '../implementations/json-user-repository';
 import { EmailService } from '../interfaces/email-service';
-import { hashPassword } from '../../../common/utils/password';
-
-// Mock implementations
-class MockUserRepository implements UserRepository {
-  private users: User[] = [];
-  private refreshTokens: Array<{ tokenHash: string; userId: string; expiresAt: string }> = [];
-  private emailVerificationTokens: Array<{ tokenHash: string; userId: string; expiresAt: string }> =
-    [];
-  private passwordResetTokens: Array<{ tokenHash: string; userId: string; expiresAt: string }> = [];
-
-  async findById(id: string): Promise<User | null> {
-    return this.users.find((u) => u.id === id) || null;
-  }
-
-  async findByEmail(email: string): Promise<User | null> {
-    return this.users.find((u) => u.email.toLowerCase() === email.toLowerCase()) || null;
-  }
-
-  async create(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
-    const user: User = {
-      id: `user-${Date.now()}`,
-      ...userData,
-      email: userData.email.toLowerCase(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    this.users.push(user);
-    return user;
-  }
-
-  async update(id: string, data: Partial<Omit<User, 'id' | 'createdAt'>>): Promise<User | null> {
-    const index = this.users.findIndex((u) => u.id === id);
-    if (index === -1) return null;
-
-    this.users[index] = {
-      ...this.users[index],
-      ...data,
-      updatedAt: new Date().toISOString(),
-    };
-    return this.users[index];
-  }
-
-  async storeRefreshToken(tokenHash: string, userId: string, expiresAt: Date): Promise<void> {
-    this.refreshTokens.push({ tokenHash, userId, expiresAt: expiresAt.toISOString() });
-  }
-
-  async findRefreshToken(
-    tokenHash: string
-  ): Promise<{ token: string; userId: string; expiresAt: string } | null> {
-    const token = this.refreshTokens.find((t) => t.tokenHash === tokenHash);
-    if (!token) return null;
-
-    if (new Date(token.expiresAt) < new Date()) {
-      await this.removeRefreshToken(tokenHash);
-      return null;
-    }
-
-    return { token: token.tokenHash, userId: token.userId, expiresAt: token.expiresAt };
-  }
-
-  async removeRefreshToken(tokenHash: string): Promise<void> {
-    this.refreshTokens = this.refreshTokens.filter((t) => t.tokenHash !== tokenHash);
-  }
-
-  async removeAllRefreshTokensForUser(userId: string): Promise<void> {
-    this.refreshTokens = this.refreshTokens.filter((t) => t.userId !== userId);
-  }
-
-  async cleanExpiredTokens(): Promise<void> {
-    const now = new Date();
-    this.refreshTokens = this.refreshTokens.filter((t) => new Date(t.expiresAt) > now);
-    this.emailVerificationTokens = this.emailVerificationTokens.filter(
-      (t) => new Date(t.expiresAt) > now
-    );
-    this.passwordResetTokens = this.passwordResetTokens.filter((t) => new Date(t.expiresAt) > now);
-  }
-
-  async storeEmailVerificationToken(
-    tokenHash: string,
-    userId: string,
-    expiresAt: Date
-  ): Promise<void> {
-    this.emailVerificationTokens.push({ tokenHash, userId, expiresAt: expiresAt.toISOString() });
-  }
-
-  async findEmailVerificationToken(tokenHash: string): Promise<{
-    tokenHash: string;
-    userId: string;
-    expiresAt: string;
-  } | null> {
-    const token = this.emailVerificationTokens.find((t) => t.tokenHash === tokenHash);
-    if (!token) return null;
-
-    if (new Date(token.expiresAt) < new Date()) {
-      this.emailVerificationTokens = this.emailVerificationTokens.filter(
-        (t) => t.tokenHash !== tokenHash
-      );
-      return null;
-    }
-
-    return { ...token };
-  }
-
-  async deleteEmailVerificationToken(tokenHash: string): Promise<void> {
-    this.emailVerificationTokens = this.emailVerificationTokens.filter(
-      (t) => t.tokenHash !== tokenHash
-    );
-  }
-
-  async storePasswordResetToken(tokenHash: string, userId: string, expiresAt: Date): Promise<void> {
-    this.passwordResetTokens.push({ tokenHash, userId, expiresAt: expiresAt.toISOString() });
-  }
-
-  async findPasswordResetToken(tokenHash: string): Promise<{
-    tokenHash: string;
-    userId: string;
-    expiresAt: string;
-  } | null> {
-    const token = this.passwordResetTokens.find((t) => t.tokenHash === tokenHash);
-    if (!token) return null;
-
-    if (new Date(token.expiresAt) < new Date()) {
-      this.passwordResetTokens = this.passwordResetTokens.filter((t) => t.tokenHash !== tokenHash);
-      return null;
-    }
-
-    return { ...token };
-  }
-
-  async deletePasswordResetTokensForUser(userId: string): Promise<void> {
-    this.passwordResetTokens = this.passwordResetTokens.filter((t) => t.userId !== userId);
-  }
-}
+import { SessionContext } from '../services/auth-service';
 
 class MockEmailService implements EmailService {
   sentEmails: Array<{ type: string; email: string; token: string }> = [];
@@ -159,15 +34,30 @@ class MockEmailService implements EmailService {
   }
 }
 
+const sha256 = (value: string) => crypto.createHash('sha256').update(value).digest('hex');
+
+const TEST_CONTEXT: SessionContext = {
+  ipAddress: '203.0.113.10',
+  deviceInfo: {
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0) Chrome/120.0',
+    browser: 'Chrome',
+    os: 'Windows',
+    device: 'Desktop',
+  },
+  userAgent: 'Mozilla/5.0 (Windows NT 10.0) Chrome/120.0',
+};
+
 describe('AuthService', () => {
-  let authService: AuthService;
-  let mockUserRepository: MockUserRepository;
+  let repository: JsonUserRepository;
   let mockEmailService: MockEmailService;
+  let authService: AuthService;
+  let dbPath: string;
 
   beforeEach(() => {
-    mockUserRepository = new MockUserRepository();
+    dbPath = path.join(os.tmpdir(), `auth-svc-test-${crypto.randomUUID()}.json`);
+    repository = new JsonUserRepository(dbPath);
     mockEmailService = new MockEmailService();
-    authService = new AuthService(mockUserRepository, mockEmailService);
+    authService = new AuthService(repository, mockEmailService);
   });
 
   describe('validatePassword', () => {
@@ -216,33 +106,54 @@ describe('AuthService', () => {
   });
 
   describe('register', () => {
-    it('should register new user successfully', async () => {
-      const result = await authService.register({
-        email: 'test@example.com',
-        password: 'SecurePass123',
-        fullName: 'Test User',
-      });
+    it('should register new user and issue session', async () => {
+      const result = await authService.register(
+        { email: 'test@example.com', password: 'SecurePass123', fullName: 'Test User' },
+        TEST_CONTEXT
+      );
 
       expect(result.user).toBeDefined();
       expect(result.user.email).toBe('test@example.com');
       expect(result.user.fullName).toBe('Test User');
       expect(result.user.role).toBe('learner');
       expect(result.user.isVerified).toBe(false);
-      expect(result.tokens.accessToken).toBeDefined();
-      expect(result.tokens.refreshToken).toBeDefined();
+      expect(result.accessToken).toBeDefined();
+      // refreshTokenはCookie設定用に返る（レスポンスJSONには含めないのはcontrollerの責務）
+      expect(result.refreshToken).toMatch(/^[0-9a-f]{64}$/);
+
+      // セッションがIP・デバイス情報付きで記録されている
+      const sessions = await repository.findSessionsByUser(result.user.id);
+      expect(sessions).toHaveLength(1);
+      expect(sessions[0].deviceInfo.browser).toBe('Chrome');
+      expect(sessions[0].ipAddress).toBe('203.0.113.10');
+      // 保存されているのはSHA-256ハッシュ（生トークンではない）
+      expect(sessions[0].refreshTokenHash).toBe(sha256(result.refreshToken));
 
       expect(mockEmailService.sentEmails).toHaveLength(1);
       expect(mockEmailService.sentEmails[0].type).toBe('verification');
     });
 
-    it('should reject invalid email format', async () => {
+    it('should issue a 15-minute JWT as access token', async () => {
+      const result = await authService.register({
+        email: 'claims@example.com',
+        password: 'SecurePass123',
+        fullName: 'Claims User',
+      });
+
+      const decoded = jwt.decode(result.accessToken) as { id: string; exp: number; iat: number };
+      expect(decoded.id).toBe(result.user.id);
+      // JWT_EXPIRES_IN 既定 15m = 900秒
+      expect(decoded.exp - decoded.iat).toBe(900);
+    });
+
+    it('should reject invalid email format with AuthError', async () => {
       await expect(
         authService.register({
           email: 'invalid-email',
           password: 'SecurePass123',
           fullName: 'Test User',
         })
-      ).rejects.toThrow('Invalid email format');
+      ).rejects.toMatchObject({ code: 'AUTH_REG_003' });
     });
 
     it('should reject weak password', async () => {
@@ -268,7 +179,7 @@ describe('AuthService', () => {
           password: 'AnotherPass123',
           fullName: 'Another User',
         })
-      ).rejects.toThrow('Registration failed');
+      ).rejects.toMatchObject({ code: 'AUTH_REG_002' });
     });
 
     it('should be case-insensitive for email duplicates', async () => {
@@ -297,33 +208,30 @@ describe('AuthService', () => {
       });
     });
 
-    it('should login with valid credentials', async () => {
-      const result = await authService.login({
-        email: 'test@example.com',
-        password: 'SecurePass123',
-      });
+    it('should login with valid credentials and create a session', async () => {
+      const result = await authService.login(
+        { email: 'test@example.com', password: 'SecurePass123' },
+        TEST_CONTEXT
+      );
 
       expect(result.user).toBeDefined();
       expect(result.user.email).toBe('test@example.com');
-      expect(result.tokens.accessToken).toBeDefined();
-      expect(result.tokens.refreshToken).toBeDefined();
+      expect(result.accessToken).toBeDefined();
+      expect(result.refreshToken).toMatch(/^[0-9a-f]{64}$/);
+
+      const sessions = await repository.findSessionsByUser(result.user.id);
+      expect(sessions.length).toBe(2); // register + login
     });
 
     it('should reject invalid email', async () => {
       await expect(
-        authService.login({
-          email: 'nonexistent@example.com',
-          password: 'SecurePass123',
-        })
-      ).rejects.toThrow('Invalid credentials');
+        authService.login({ email: 'nonexistent@example.com', password: 'SecurePass123' })
+      ).rejects.toMatchObject({ code: 'AUTH_LOGIN_002' });
     });
 
     it('should reject invalid password', async () => {
       await expect(
-        authService.login({
-          email: 'test@example.com',
-          password: 'WrongPassword123',
-        })
+        authService.login({ email: 'test@example.com', password: 'WrongPassword123' })
       ).rejects.toThrow('Invalid credentials');
     });
 
@@ -337,83 +245,166 @@ describe('AuthService', () => {
     });
   });
 
-  describe('refreshToken', () => {
-    it('should refresh token with valid refresh token', async () => {
+  describe('refreshToken (rotation)', () => {
+    it('should rotate refresh token and return new tokens', async () => {
       const registerResult = await authService.register({
         email: 'test@example.com',
         password: 'SecurePass123',
         fullName: 'Test User',
       });
 
-      // リフレッシュトークンは不透明なランダム文字列（JWTではない）
-      const result = await authService.refreshToken(registerResult.tokens.refreshToken);
-
-      expect(result.accessToken).toBeDefined();
-      expect(result.accessToken).toBeTruthy();
+      const oldRefreshToken = registerResult.refreshToken;
+      const result = await authService.refreshToken(oldRefreshToken);
 
       // 新しいアクセストークンはユーザー情報を含むJWTであること
-      const jwt = require('jsonwebtoken');
-      const decoded = jwt.decode(result.accessToken);
+      const decoded = jwt.decode(result.accessToken) as { id: string; email: string };
       expect(decoded.id).toBe(registerResult.user.id);
       expect(decoded.email).toBe(registerResult.user.email);
+
+      // ローテーション: 新しいリフレッシュトークンは旧と異なる
+      expect(result.refreshToken).toMatch(/^[0-9a-f]{64}$/);
+      expect(result.refreshToken).not.toBe(oldRefreshToken);
+    });
+
+    it('should detect reuse of rotated token and revoke all sessions', async () => {
+      const registerResult = await authService.register({
+        email: 'reuse@example.com',
+        password: 'SecurePass123',
+        fullName: 'Reuse User',
+      });
+      const userId = registerResult.user.id;
+
+      // 別セッション（失効されるべき）
+      const secondLogin = await authService.login({
+        email: 'reuse@example.com',
+        password: 'SecurePass123',
+      });
+
+      const first = await authService.refreshToken(registerResult.refreshToken);
+      expect(await repository.findSessionsByUser(userId)).toHaveLength(2);
+
+      // 旧トークン（= prev hash）の再呈示 → 再利用検知
+      const logSpy = jest.spyOn(repository, 'recordAuthLog');
+      await expect(authService.refreshToken(registerResult.refreshToken)).rejects.toMatchObject({
+        code: 'AUTH_TOKEN_002',
+      });
+
+      // 全セッション失効（ローテーション後トークン・第二セッション両方）
+      expect(await repository.findSessionsByUser(userId)).toHaveLength(0);
+      await expect(authService.refreshToken(first.refreshToken)).rejects.toThrow();
+      await expect(authService.refreshToken(secondLogin.refreshToken)).rejects.toThrow();
+
+      // 監査ログ記録
+      expect(logSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: 'refresh_reuse_detected',
+          userId,
+          success: false,
+        })
+      );
     });
 
     it('should reject invalid refresh token', async () => {
-      await expect(authService.refreshToken('invalid-token')).rejects.toThrow(
-        'Invalid refresh token'
-      );
+      await expect(authService.refreshToken('invalid-token')).rejects.toMatchObject({
+        code: 'AUTH_TOKEN_002',
+      });
     });
 
-    it('should reject expired token', async () => {
+    it('should reject expired session token', async () => {
       const registerResult = await authService.register({
-        email: 'test@example.com',
+        email: 'expired@example.com',
         password: 'SecurePass123',
-        fullName: 'Test User',
+        fullName: 'Expired User',
+      });
+      const userId = registerResult.user.id;
+
+      // 期限切れセッションを直接作る（clock非依存にするため）
+      const rawToken = crypto.randomBytes(32).toString('hex');
+      await repository.createSession({
+        userId,
+        refreshTokenHash: sha256(rawToken),
+        deviceInfo: TEST_CONTEXT.deviceInfo,
+        ipAddress: null,
+        expiresAt: new Date(Date.now() - 1000),
       });
 
-      // 保存済みトークンを期限切れに書き換える（SHA-256ハッシュで照合される）
-      const crypto = require('crypto');
-      const expiredRaw = 'expired-refresh-token-raw';
-      const tokenHash = crypto.createHash('sha256').update(expiredRaw).digest('hex');
-      await mockUserRepository.storeRefreshToken(
-        tokenHash,
-        registerResult.user.id,
-        new Date(Date.now() - 1000)
-      );
+      await expect(authService.refreshToken(rawToken)).rejects.toThrow('Invalid or expired');
+    });
 
-      await expect(authService.refreshToken(expiredRaw)).rejects.toThrow('Invalid refresh token');
+    it('should revoke all sessions when atomic rotation fails (concurrent refresh)', async () => {
+      const registerResult = await authService.register({
+        email: 'conflict@example.com',
+        password: 'SecurePass123',
+        fullName: 'Conflict User',
+      });
+      const userId = registerResult.user.id;
+
+      // 並行リクエストが先にローテーションを完了した状況をシミュレート:
+      // findSessionByTokenHash は成功するが rotate が競合で false を返す
+      jest.spyOn(repository, 'rotateSessionRefreshToken').mockResolvedValue(false);
+
+      await expect(authService.refreshToken(registerResult.refreshToken)).rejects.toMatchObject({
+        code: 'AUTH_TOKEN_002',
+      });
+
+      expect(await repository.findSessionsByUser(userId)).toHaveLength(0);
+    });
+
+    it('should extend session expiry from injected clock', async () => {
+      // 実時間より未来にずらす（findSessionsByUser の期限フィルタに掛からないように）
+      const fakeNow = new Date(Date.now() + 60_000);
+      const clockService = new AuthService(repository, mockEmailService, () => fakeNow);
+
+      const result = await clockService.register({
+        email: 'clock@example.com',
+        password: 'SecurePass123',
+        fullName: 'Clock User',
+      });
+
+      const sessions = await repository.findSessionsByUser(result.user.id);
+      // 期限 = 注入した clock の 30日後
+      expect(sessions[0].expiresAt).toBe(
+        new Date(fakeNow.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      );
     });
   });
 
   describe('logout', () => {
-    it('should logout and remove refresh token', async () => {
+    it('should revoke the session tied to the cookie token', async () => {
       const registerResult = await authService.register({
         email: 'test@example.com',
         password: 'SecurePass123',
         fullName: 'Test User',
       });
 
-      const rawToken = registerResult.tokens.refreshToken;
-      await authService.logout(registerResult.user.id, rawToken);
+      const rawToken = registerResult.refreshToken;
+      await authService.logout(rawToken);
 
-      // Verify token was removed（SHA-256ハッシュで照合）
-      const crypto = require('crypto');
-      const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
-      const token = await mockUserRepository.findRefreshToken(tokenHash);
-      expect(token).toBeNull();
+      expect(await repository.findSessionsByUser(registerResult.user.id)).toHaveLength(0);
+      await expect(authService.refreshToken(rawToken)).rejects.toThrow('Invalid or expired');
     });
 
-    it('should invalidate refresh token after logout', async () => {
+    it('should revoke only the presented session, not other sessions', async () => {
       const registerResult = await authService.register({
-        email: 'logout2@example.com',
+        email: 'multi@example.com',
         password: 'SecurePass123',
-        fullName: 'Test User',
+        fullName: 'Multi User',
+      });
+      const secondLogin = await authService.login({
+        email: 'multi@example.com',
+        password: 'SecurePass123',
       });
 
-      const rawToken = registerResult.tokens.refreshToken;
-      await authService.logout(registerResult.user.id, rawToken);
+      await authService.logout(registerResult.refreshToken);
 
-      await expect(authService.refreshToken(rawToken)).rejects.toThrow('Invalid refresh token');
+      const remaining = await repository.findSessionsByUser(registerResult.user.id);
+      expect(remaining).toHaveLength(1);
+      // 残ったセッションは生きている
+      await expect(authService.refreshToken(secondLogin.refreshToken)).resolves.toBeDefined();
+    });
+
+    it('should be idempotent for garbage token', async () => {
+      await expect(authService.logout('garbage-token')).resolves.toBeUndefined();
     });
   });
 
@@ -427,7 +418,6 @@ describe('AuthService', () => {
 
       await authService.requestPasswordReset('test@example.com');
 
-      expect(mockEmailService.sentEmails.length).toBeGreaterThan(0);
       const resetEmail = mockEmailService.sentEmails.find((e) => e.type === 'reset');
       expect(resetEmail).toBeDefined();
       expect(resetEmail?.email).toBe('test@example.com');
@@ -435,7 +425,6 @@ describe('AuthService', () => {
     });
 
     it('should not reveal if email exists for password reset', async () => {
-      // Should not throw even if email doesn't exist
       await expect(
         authService.requestPasswordReset('nonexistent@example.com')
       ).resolves.toBeUndefined();
@@ -444,7 +433,7 @@ describe('AuthService', () => {
 
   describe('verifyEmail', () => {
     it('should verify user email with valid token', async () => {
-      const result = await authService.register({
+      await authService.register({
         email: 'verify@example.com',
         password: 'SecurePass123',
         fullName: 'Verify User',
@@ -455,7 +444,7 @@ describe('AuthService', () => {
 
       await authService.verifyEmail(verificationEmail!.token);
 
-      const user = await mockUserRepository.findByEmail('verify@example.com');
+      const user = await repository.findByEmail('verify@example.com');
       expect(user?.isVerified).toBe(true);
       // 検証済みトークンは再利用不可
       await expect(authService.verifyEmail(verificationEmail!.token)).rejects.toThrow();
@@ -483,19 +472,18 @@ describe('AuthService', () => {
   });
 
   describe('resetPassword', () => {
-    it('should reset password with valid token and invalidate sessions', async () => {
-      await authService.register({
+    it('should reset password with valid token and invalidate all sessions', async () => {
+      const registerResult = await authService.register({
         email: 'reset@example.com',
         password: 'SecurePass123',
         fullName: 'Reset User',
       });
 
-      // ログインしてセッション（refresh token）を作っておく
+      // 複数セッション（register + login）
       const loginResult = await authService.login({
         email: 'reset@example.com',
         password: 'SecurePass123',
       });
-      const oldRefreshToken = loginResult.tokens.refreshToken;
 
       await authService.requestPasswordReset('reset@example.com');
       const resetEmail = mockEmailService.sentEmails.find((e) => e.type === 'reset');
@@ -515,10 +503,9 @@ describe('AuthService', () => {
         authService.login({ email: 'reset@example.com', password: 'SecurePass123' })
       ).rejects.toThrow('Invalid credentials');
 
-      // 旧refresh tokenは無効化されている
-      await expect(authService.refreshToken(oldRefreshToken)).rejects.toThrow(
-        'Invalid refresh token'
-      );
+      // 全セッション無効化（旧トークン両方）
+      await expect(authService.refreshToken(registerResult.refreshToken)).rejects.toThrow();
+      await expect(authService.refreshToken(loginResult.refreshToken)).rejects.toThrow();
 
       // パスワード変更通知が送信されている
       const notification = mockEmailService.sentEmails.find((e) => e.type === 'password_changed');
