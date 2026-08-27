@@ -8,7 +8,7 @@
  * テーブル定義は scripts/init-auth-db.mjs を参照。
  */
 
-import { Pool } from '@neondatabase/serverless';
+import { neon, NeonQueryFunction } from '@neondatabase/serverless';
 import {
   UserRepository,
   User,
@@ -139,7 +139,16 @@ const UPDATE_COLUMNS: Record<string, string> = {
 };
 
 export class PostgresUserRepository implements UserRepository {
-  private pool: Pool | null = null;
+  /**
+   * neon() HTTP ドライバ（クエリ毎に独立した fetch）。
+   *
+   * Pool（WebSocket 接続）をモジュール singleton で保持すると、1リクエスト目で
+   * 確立した接続が別リクエストから再利用され、Workers の
+   * "Cannot perform I/O on behalf of a different request" で2リクエスト目以降が
+   * 全て 500 になる。HTTP ドライバは接続を保持しないためこれを回避できる
+   * （Neon × Workers の公式推奨パターン）。
+   */
+  private sql: NeonQueryFunction<false, false> | null = null;
   private connectionString: string;
 
   constructor(connectionString?: string) {
@@ -149,16 +158,21 @@ export class PostgresUserRepository implements UserRepository {
     }
   }
 
-  /** 遅延初期化（lab/db/client.ts と同じパターン） */
-  private getPool(): Pool {
-    if (!this.pool) {
-      this.pool = new Pool({ connectionString: this.connectionString });
+  /** 遅延初期化。pool.query 互換の { rows, rowCount } を返す（rowCount は
+   *  RETURNING 付き SQL でのみ正確 — 必要な呼び出し側は RETURNING を付ける） */
+  private async query<T>(
+    text: string,
+    params: unknown[] = []
+  ): Promise<{ rows: T[]; rowCount: number }> {
+    if (!this.sql) {
+      this.sql = neon(this.connectionString);
     }
-    return this.pool;
+    const rows = (await this.sql.query(text, params)) as T[];
+    return { rows, rowCount: rows.length };
   }
 
   async findById(id: string): Promise<User | null> {
-    const { rows } = await this.getPool().query<UserRow>(
+    const { rows } = await this.query<UserRow>(
       'SELECT * FROM users WHERE id = $1 AND deleted_at IS NULL',
       [id]
     );
@@ -166,7 +180,7 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const { rows } = await this.getPool().query<UserRow>(
+    const { rows } = await this.query<UserRow>(
       'SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL',
       [email.toLowerCase()]
     );
@@ -174,7 +188,7 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async create(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
-    const { rows } = await this.getPool().query<UserRow>(
+    const { rows } = await this.query<UserRow>(
       `INSERT INTO users (id, email, password_hash, full_name, role, is_verified,
                           bio, timezone, github_username)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -220,7 +234,7 @@ export class PostgresUserRepository implements UserRepository {
     sets.push(`updated_at = now()`);
     values.push(id);
 
-    const { rows } = await this.getPool().query<UserRow>(
+    const { rows } = await this.query<UserRow>(
       `UPDATE users SET ${sets.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
       values
     );
@@ -230,7 +244,7 @@ export class PostgresUserRepository implements UserRepository {
   // --- sessions ---
 
   async createSession(input: CreateSessionInput): Promise<SessionRecord> {
-    const { rows } = await this.getPool().query<SessionRow>(
+    const { rows } = await this.query<SessionRow>(
       `INSERT INTO sessions (id, user_id, refresh_token_hash, device_info, ip_address, expires_at)
        VALUES ($1, $2, $3, $4::jsonb, $5, $6)
        RETURNING *`,
@@ -247,7 +261,7 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async findSessionByTokenHash(tokenHash: string): Promise<SessionRecord | null> {
-    const { rows } = await this.getPool().query<SessionRow>(
+    const { rows } = await this.query<SessionRow>(
       `SELECT * FROM sessions
        WHERE refresh_token_hash = $1 OR prev_refresh_token_hash = $1
        LIMIT 1`,
@@ -257,7 +271,7 @@ export class PostgresUserRepository implements UserRepository {
     if (!row) return null;
 
     if (new Date(toIso(row.expires_at)) < new Date()) {
-      await this.getPool().query('DELETE FROM sessions WHERE id = $1', [row.id]);
+      await this.query('DELETE FROM sessions WHERE id = $1', [row.id]);
       return null;
     }
 
@@ -265,7 +279,7 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async findSessionsByUser(userId: string): Promise<SessionRecord[]> {
-    const { rows } = await this.getPool().query<SessionRow>(
+    const { rows } = await this.query<SessionRow>(
       `SELECT * FROM sessions
        WHERE user_id = $1 AND expires_at > now()
        ORDER BY created_at DESC`,
@@ -281,25 +295,26 @@ export class PostgresUserRepository implements UserRepository {
     newExpiresAt: Date
   ): Promise<boolean> {
     // WHERE 句で現行ハッシュ一致を条件にする原子更新。
-    // rowCount=0 は競合（他のリクエストが先にローテーション）かトークン再利用
-    const result = await this.getPool().query(
+    // 更新0行（rows.length=0）は競合（他のリクエストが先にローテーション）かトークン再利用
+    const { rowCount } = await this.query<{ id: string }>(
       `UPDATE sessions
        SET prev_refresh_token_hash = refresh_token_hash,
            refresh_token_hash = $3,
            expires_at = $4,
            last_activity_at = now()
-       WHERE id = $1 AND refresh_token_hash = $2`,
+       WHERE id = $1 AND refresh_token_hash = $2
+       RETURNING id`,
       [sessionId, presentedTokenHash, newTokenHash, newExpiresAt.toISOString()]
     );
-    return (result.rowCount ?? 0) > 0;
+    return rowCount > 0;
   }
 
   async revokeSession(sessionId: string): Promise<void> {
-    await this.getPool().query('DELETE FROM sessions WHERE id = $1', [sessionId]);
+    await this.query('DELETE FROM sessions WHERE id = $1', [sessionId]);
   }
 
   async revokeAllSessionsForUser(userId: string, exceptSessionId?: string): Promise<void> {
-    await this.getPool().query(
+    await this.query(
       `DELETE FROM sessions
        WHERE user_id = $1 AND ($2::uuid IS NULL OR id <> $2)`,
       [userId, exceptSessionId ?? null]
@@ -307,16 +322,19 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async deleteExpiredSessions(now: Date = new Date()): Promise<number> {
-    const result = await this.getPool().query('DELETE FROM sessions WHERE expires_at <= $1', [
-      now.toISOString(),
-    ]);
-    return result.rowCount ?? 0;
+    // HTTP ドライバは影響行数を返さないため CTE で件数を取得する
+    const { rows } = await this.query<{ count: number }>(
+      `WITH deleted AS (DELETE FROM sessions WHERE expires_at <= $1 RETURNING 1)
+       SELECT count(*)::int AS count FROM deleted`,
+      [now.toISOString()]
+    );
+    return rows[0]?.count ?? 0;
   }
 
   // --- auth logs ---
 
   async recordAuthLog(entry: AuthLogEntry): Promise<void> {
-    await this.getPool().query(
+    await this.query(
       `INSERT INTO auth_logs (id, event_type, user_id, email, ip_address, user_agent, success, failure_reason)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [
@@ -333,7 +351,7 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async countRecentFailedLogins(email: string, since: Date): Promise<number> {
-    const { rows } = await this.getPool().query<{ count: string }>(
+    const { rows } = await this.query<{ count: string }>(
       `SELECT count(*) FROM auth_logs
        WHERE email = $1 AND success = FALSE AND event_type = 'login_failed' AND created_at > $2`,
       [email.toLowerCase(), since.toISOString()]
@@ -342,10 +360,13 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async deleteAuthLogsOlderThan(cutoff: Date): Promise<number> {
-    const result = await this.getPool().query('DELETE FROM auth_logs WHERE created_at < $1', [
-      cutoff.toISOString(),
-    ]);
-    return result.rowCount ?? 0;
+    // HTTP ドライバは影響行数を返さないため CTE で件数を取得する
+    const { rows } = await this.query<{ count: number }>(
+      `WITH deleted AS (DELETE FROM auth_logs WHERE created_at < $1 RETURNING 1)
+       SELECT count(*)::int AS count FROM deleted`,
+      [cutoff.toISOString()]
+    );
+    return rows[0]?.count ?? 0;
   }
 
   // --- oauth accounts ---
@@ -354,7 +375,7 @@ export class PostgresUserRepository implements UserRepository {
     provider: OAuthProvider,
     providerUserId: string
   ): Promise<OAuthAccountRecord | null> {
-    const { rows } = await this.getPool().query<OAuthAccountRow>(
+    const { rows } = await this.query<OAuthAccountRow>(
       `SELECT * FROM oauth_accounts WHERE provider = $1 AND provider_user_id = $2`,
       [provider, providerUserId]
     );
@@ -362,7 +383,7 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async findOAuthAccountsByUser(userId: string): Promise<OAuthAccountRecord[]> {
-    const { rows } = await this.getPool().query<OAuthAccountRow>(
+    const { rows } = await this.query<OAuthAccountRow>(
       `SELECT * FROM oauth_accounts WHERE user_id = $1 ORDER BY linked_at DESC`,
       [userId]
     );
@@ -370,7 +391,7 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async linkOAuthAccount(input: LinkOAuthAccountInput): Promise<OAuthAccountRecord> {
-    const { rows } = await this.getPool().query<OAuthAccountRow>(
+    const { rows } = await this.query<OAuthAccountRow>(
       `INSERT INTO oauth_accounts (id, user_id, provider, provider_user_id, provider_email)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
@@ -380,14 +401,14 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async unlinkOAuthAccount(userId: string, provider: OAuthProvider): Promise<void> {
-    await this.getPool().query('DELETE FROM oauth_accounts WHERE user_id = $1 AND provider = $2', [
+    await this.query('DELETE FROM oauth_accounts WHERE user_id = $1 AND provider = $2', [
       userId,
       provider,
     ]);
   }
 
   async unlinkAllOAuthAccountsForUser(userId: string): Promise<void> {
-    await this.getPool().query('DELETE FROM oauth_accounts WHERE user_id = $1', [userId]);
+    await this.query('DELETE FROM oauth_accounts WHERE user_id = $1', [userId]);
   }
 
   // --- profile & lifecycle ---
@@ -397,21 +418,21 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async scheduleAccountDeletion(id: string, scheduledFor: Date): Promise<void> {
-    await this.getPool().query(
+    await this.query(
       'UPDATE users SET deletion_scheduled_at = $2, updated_at = now() WHERE id = $1',
       [id, scheduledFor.toISOString()]
     );
   }
 
   async cancelAccountDeletion(id: string): Promise<void> {
-    await this.getPool().query(
+    await this.query(
       'UPDATE users SET deletion_scheduled_at = NULL, updated_at = now() WHERE id = $1',
       [id]
     );
   }
 
   async findUsersDueForDeletion(now: Date): Promise<User[]> {
-    const { rows } = await this.getPool().query<UserRow>(
+    const { rows } = await this.query<UserRow>(
       `SELECT * FROM users
        WHERE deleted_at IS NULL
          AND deletion_scheduled_at IS NOT NULL
@@ -422,7 +443,7 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async markUserDeletedAndAnonymize(id: string): Promise<void> {
-    await this.getPool().query(
+    await this.query(
       `UPDATE users
        SET deleted_at = now(),
            email = 'deleted_' || id || '@connectivebyte.invalid',
@@ -443,14 +464,14 @@ export class PostgresUserRepository implements UserRepository {
     userId: string,
     expiresAt: Date
   ): Promise<void> {
-    await this.getPool().query(
+    await this.query(
       'INSERT INTO email_verification_tokens (token_hash, user_id, expires_at) VALUES ($1, $2, $3)',
       [tokenHash, userId, expiresAt.toISOString()]
     );
   }
 
   async findEmailVerificationToken(tokenHash: string): Promise<EmailVerificationToken | null> {
-    const { rows } = await this.getPool().query<TokenRow>(
+    const { rows } = await this.query<TokenRow>(
       'SELECT * FROM email_verification_tokens WHERE token_hash = $1',
       [tokenHash]
     );
@@ -466,20 +487,18 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async deleteEmailVerificationToken(tokenHash: string): Promise<void> {
-    await this.getPool().query('DELETE FROM email_verification_tokens WHERE token_hash = $1', [
-      tokenHash,
-    ]);
+    await this.query('DELETE FROM email_verification_tokens WHERE token_hash = $1', [tokenHash]);
   }
 
   async storePasswordResetToken(tokenHash: string, userId: string, expiresAt: Date): Promise<void> {
-    await this.getPool().query(
+    await this.query(
       'INSERT INTO password_reset_tokens (token_hash, user_id, expires_at) VALUES ($1, $2, $3)',
       [tokenHash, userId, expiresAt.toISOString()]
     );
   }
 
   async findPasswordResetToken(tokenHash: string): Promise<PasswordResetToken | null> {
-    const { rows } = await this.getPool().query<TokenRow>(
+    const { rows } = await this.query<TokenRow>(
       'SELECT * FROM password_reset_tokens WHERE token_hash = $1',
       [tokenHash]
     );
@@ -487,9 +506,7 @@ export class PostgresUserRepository implements UserRepository {
     if (!row) return null;
 
     if (new Date(toIso(row.expires_at)) < new Date()) {
-      await this.getPool().query('DELETE FROM password_reset_tokens WHERE token_hash = $1', [
-        tokenHash,
-      ]);
+      await this.query('DELETE FROM password_reset_tokens WHERE token_hash = $1', [tokenHash]);
       return null;
     }
 
@@ -497,11 +514,11 @@ export class PostgresUserRepository implements UserRepository {
   }
 
   async deletePasswordResetTokensForUser(userId: string): Promise<void> {
-    await this.getPool().query('DELETE FROM password_reset_tokens WHERE user_id = $1', [userId]);
+    await this.query('DELETE FROM password_reset_tokens WHERE user_id = $1', [userId]);
   }
 
   async cleanExpiredTokens(): Promise<void> {
-    await this.getPool().query(`DELETE FROM email_verification_tokens WHERE expires_at < now()`);
-    await this.getPool().query(`DELETE FROM password_reset_tokens WHERE expires_at < now()`);
+    await this.query(`DELETE FROM email_verification_tokens WHERE expires_at < now()`);
+    await this.query(`DELETE FROM password_reset_tokens WHERE expires_at < now()`);
   }
 }

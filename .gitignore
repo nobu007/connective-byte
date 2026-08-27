@@ -266,3 +266,6 @@ yarn-error.log*
 
 # python
 .wrangler/
+
+# Cloudflare Workers ローカル秘密変数（wrangler dev 用）
+apps/backend/.dev.vars

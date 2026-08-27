@@ -47,12 +47,29 @@ async function call(path, { method = 'GET', token, cookie, body } = {}) {
   }
   if (token) headers.Authorization = `Bearer ${token}`;
   if (cookie) headers.Cookie = cookie;
-  const res = await fetch(`${base}${path}`, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-    redirect: 'manual',
-  });
+
+  const doFetch = () =>
+    fetch(`${base}${path}`, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+      redirect: 'manual',
+    });
+
+  // 一時的なネットワークエラー（fetch failed）は短いbackoffで再試行
+  let res;
+  let lastError;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      res = await doFetch();
+      break;
+    } catch (err) {
+      lastError = err;
+      await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+    }
+  }
+  if (!res) throw lastError;
+
   let json = null;
   try {
     json = await res.json();

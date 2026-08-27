@@ -51,6 +51,12 @@ app.use(errorHandler);
 const PORT = 3001;
 app.listen(PORT);
 
+// httpServerHandler() は { fetch } オブジェクトを返す（関数ではない）。
+// scheduled を追加でexportするため、fetch はここでアダプトする。
+// （`{ fetch: httpServerHandler(...) }` と書くと fetch がオブジェクトになり
+//   "Handler does not export a fetch() function" で全route 500になる）
+const serverHandler = httpServerHandler({ port: PORT });
+
 // Cron Trigger（wrangler.toml [triggers] crons / 毎日 19:17 UTC = 04:17 JST）:
 // 期限切れセッション・トークン・保持期限超過ログの整理を実行する。
 // scheduled event の型は最小限だけ定義（@cloudflare/workers-types 未導入のため）
@@ -75,7 +81,7 @@ async function runScheduledMaintenance(event: ScheduledEvent): Promise<void> {
 }
 
 export default {
-  fetch: httpServerHandler({ port: PORT }),
+  fetch: (request: Request): Promise<Response> => serverHandler.fetch(request),
   async scheduled(event: ScheduledEvent, _env: unknown, ctx: ScheduledController): Promise<void> {
     ctx.waitUntil(runScheduledMaintenance(event));
   },

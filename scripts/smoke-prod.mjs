@@ -12,10 +12,11 @@ const results = [];
 const record = (name, ok, detail) => results.push({ name, ok, detail });
 
 async function fetchWithTimeout(path, options = {}) {
+  const url = path.startsWith('http') ? path : `${baseUrl}${path}`;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 15000);
   try {
-    return await fetch(`${baseUrl}${path}`, {
+    return await fetch(url, {
       ...options,
       signal: controller.signal,
       redirect: 'manual',
@@ -26,10 +27,24 @@ async function fetchWithTimeout(path, options = {}) {
   }
 }
 
+/** 一時的なネットワークエラー（fetch failed）は短いbackoffで再試行する */
+async function fetchRetry(path, options = {}) {
+  let lastError;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      return await fetchWithTimeout(path, options);
+    } catch (err) {
+      lastError = err;
+      await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+    }
+  }
+  throw lastError;
+}
+
 // --- 静的ページ ---
 for (const path of ['/', '/about/', '/principles/', '/contact/', '/privacy/']) {
   try {
-    const res = await fetchWithTimeout(path);
+    const res = await fetchRetry(path);
     const ok = res.status === 200;
     record(`GET ${path}`, ok, ok ? '' : `HTTP ${res.status}`);
     if (ok && path === '/') {
@@ -44,7 +59,7 @@ for (const path of ['/', '/about/', '/principles/', '/contact/', '/privacy/']) {
 
 // --- trailingSlash リダイレクト（/about → /about/） ---
 try {
-  const res = await fetchWithTimeout('/about');
+  const res = await fetchRetry('/about');
   const ok = res.status === 200 || (res.status >= 301 && res.status <= 308);
   record('GET /about（リダイレクト許容）', ok, `HTTP ${res.status}`);
 } catch (err) {
@@ -53,7 +68,7 @@ try {
 
 // --- 404処理 ---
 try {
-  const res = await fetchWithTimeout('/__smoke_not_found__');
+  const res = await fetchRetry('/__smoke_not_found__');
   record('GET /__smoke_not_found__ → 404', res.status === 404, `HTTP ${res.status}`);
 } catch (err) {
   record('GET /__smoke_not_found__ → 404', false, err.message);
@@ -62,7 +77,7 @@ try {
 // --- sitemap / robots ---
 for (const path of ['/sitemap.xml', '/robots.txt']) {
   try {
-    const res = await fetchWithTimeout(path);
+    const res = await fetchRetry(path);
     const ok = res.status === 200;
     record(`GET ${path}`, ok, ok ? '' : `HTTP ${res.status}`);
   } catch (err) {
@@ -72,7 +87,7 @@ for (const path of ['/sitemap.xml', '/robots.txt']) {
 
 // --- セキュリティヘッダ（public/_headers 由来） ---
 try {
-  const res = await fetchWithTimeout('/');
+  const res = await fetchRetry('/');
   const h = res.headers;
   const expected = ['x-frame-options', 'x-content-type-options', 'referrer-policy'];
   const missing = expected.filter((k) => !h.get(k));
@@ -87,7 +102,7 @@ for (const [path, payload] of [
   ['/api/newsletter', { email: 'not-an-email' }],
 ]) {
   try {
-    const res = await fetchWithTimeout(path, {
+    const res = await fetchRetry(path, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -121,18 +136,7 @@ for (const [path, options, expect] of [
   ['/api/auth/me', {}, 401],
 ]) {
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 15000);
-    let res;
-    try {
-      res = await fetch(`${apiBase}${path}`, {
-        ...options,
-        signal: controller.signal,
-        headers: { 'User-Agent': 'connective-byte-smoke/1.0', ...(options.headers || {}) },
-      });
-    } finally {
-      clearTimeout(timer);
-    }
+    const res = await fetchRetry(`${apiBase}${path}`, options);
     const ok = res.status === expect;
     record(`API ${path} → ${expect}`, ok, ok ? '' : `HTTP ${res.status}`);
   } catch (err) {
@@ -142,18 +146,7 @@ for (const [path, options, expect] of [
 
 // --- auth: Google OAuth 開始エンドポイント（設定済みなら Google へ、未設定でも /login/ へ 302） ---
 try {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 15000);
-  let res;
-  try {
-    res = await fetch(`${apiBase}/api/auth/google`, {
-      signal: controller.signal,
-      redirect: 'manual',
-      headers: { 'User-Agent': 'connective-byte-smoke/1.0' },
-    });
-  } finally {
-    clearTimeout(timer);
-  }
+  const res = await fetchRetry(`${apiBase}/api/auth/google`);
   const ok = res.status >= 301 && res.status <= 308;
   record('API /api/auth/google → 302', ok, ok ? `→ ${res.headers.get('location')?.slice(0, 60)}` : `HTTP ${res.status}`);
 } catch (err) {
