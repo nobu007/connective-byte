@@ -16,6 +16,7 @@ import { AuthService } from './services/auth-service';
 import { MaintenanceService } from './services/maintenance-service';
 import { SessionService } from './services/session-service';
 import { UserService } from './services/user-service';
+import { OAuthService } from './services/oauth-service';
 
 export interface AuthContainer {
   userRepository: UserRepository;
@@ -25,6 +26,8 @@ export interface AuthContainer {
   sessionService: SessionService;
   /** マイページ: プロフィール・パスワード変更・アカウント削除 */
   userService: UserService;
+  /** Google ログイン（provider 汎用） */
+  oauthService: OAuthService;
   /** Cron Trigger（scheduled）から日次実行 */
   maintenanceService: MaintenanceService;
 }
@@ -40,12 +43,15 @@ export function buildAuthContainer(): AuthContainer {
     ? new ResendEmailService()
     : new ConsoleEmailService();
 
+  const authService = new AuthService(userRepository, emailService);
+
   return {
     userRepository,
     emailService,
-    authService: new AuthService(userRepository, emailService),
+    authService,
     sessionService: new SessionService(userRepository),
     userService: new UserService(userRepository, emailService),
+    oauthService: new OAuthService(userRepository, authService),
     maintenanceService: new MaintenanceService(userRepository, emailService),
   };
 }

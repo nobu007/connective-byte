@@ -21,6 +21,7 @@ import {
   handleForgotPassword,
   handleResetPassword,
 } from '../modules/auth/auth.controller';
+import { handleOAuthStart, handleOAuthCallback } from '../modules/auth/oauth.controller';
 import { authenticate } from '../middleware/auth';
 import { authLimiter } from '../middleware/rateLimiter';
 
@@ -374,6 +375,42 @@ router.post('/api/auth/delete-account', authLimiter, authenticate, handleDeleteA
  *               $ref: '#/components/schemas/Error'
  */
 router.post('/api/auth/delete-account/cancel', authenticate, handleCancelAccountDeletion);
+
+/**
+ * @swagger
+ * /api/auth/google:
+ *   get:
+ *     summary: Start Google OAuth login
+ *     description: 署名 state + cb_oauth_state Cookie を発行し Google の同意画面へ 302。
+ *       未設定時は /login/?error=oauth_unavailable へリダイレクト
+ *     tags: [Authentication]
+ *     parameters:
+ *       - in: query
+ *         name: redirect
+ *         required: false
+ *         description: 認証後に戻るフロントパス（'/' 始まり・'//' でない）
+ *         schema:
+ *           type: string
+ *     responses:
+ *       302:
+ *         description: Google consent screen（または error リダイレクト）
+ */
+router.get('/api/auth/google', handleOAuthStart('google'));
+
+/**
+ * @swagger
+ * /api/auth/google/callback:
+ *   get:
+ *     summary: Google OAuth callback
+ *     description: state 検証（署名 + double-submit cookie）→ code 交換 →
+ *       セッション発行。成功時 cb_rt を設定し state.redirect へ 302。
+ *       失敗時は /login/?error=oauth_state|oauth_failed|oauth_email_unverified|oauth_cancelled
+ *     tags: [Authentication]
+ *     responses:
+ *       302:
+ *         description: Frontend redirect（常に302・JSONなし）
+ */
+router.get('/api/auth/google/callback', handleOAuthCallback('google'));
 
 /**
  * @swagger

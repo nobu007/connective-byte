@@ -282,7 +282,8 @@ export class AuthService {
   /**
    * ユーザーにセッションを発行（アクセストークン + リフレッシュCookie用トークン）
    */
-  private async issueSession(user: User, context?: SessionContext): Promise<AuthResponse> {
+  /** セッション発行（register/login/OAuth 共用。OAuth からも呼ばれるため public） */
+  async issueSession(user: User, context?: SessionContext): Promise<AuthResponse> {
     const accessToken = generateToken({
       id: user.id,
       email: user.email,
