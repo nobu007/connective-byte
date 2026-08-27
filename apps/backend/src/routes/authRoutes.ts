@@ -8,6 +8,13 @@ import {
   handleRegister,
   handleLogin,
   handleGetProfile,
+  handleUpdateProfile,
+  handleChangePassword,
+  handleListSessions,
+  handleRevokeSession,
+  handleRevokeOtherSessions,
+  handleDeleteAccount,
+  handleCancelAccountDeletion,
   handleRefreshToken,
   handleLogout,
   handleVerifyEmail,
@@ -172,6 +179,201 @@ router.post('/api/auth/refresh', handleRefreshToken);
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/api/auth/me', authenticate, handleGetProfile);
+
+/**
+ * @swagger
+ * /api/auth/me:
+ *   put:
+ *     summary: Update current user profile
+ *     description: fullName / bio / timezone / githubUsername を更新する
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               fullName:
+ *                 type: string
+ *                 maxLength: 100
+ *               bio:
+ *                 type: string
+ *                 maxLength: 500
+ *               timezone:
+ *                 type: string
+ *                 maxLength: 64
+ *               githubUsername:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *       400:
+ *         description: Invalid input (AUTH_PROFILE_001)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.put('/api/auth/me', authenticate, handleUpdateProfile);
+
+/**
+ * @swagger
+ * /api/auth/change-password:
+ *   post:
+ *     summary: Change password
+ *     description: 現在パスワード検証後に変更。現在セッション以外をすべて失効させる
+ *       （OAuth専用アカウントは現在パスワード不要）
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - newPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 format: password
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *       400:
+ *         description: Invalid current or new password (AUTH_PASSWORD_001)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post('/api/auth/change-password', authLimiter, authenticate, handleChangePassword);
+
+/**
+ * @swagger
+ * /api/auth/sessions:
+ *   get:
+ *     summary: List active sessions
+ *     description: アクティブなセッション一覧（Cookie のセッションに isCurrent を付与）
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Session list
+ *       401:
+ *         description: Refresh cookie missing
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.get('/api/auth/sessions', authenticate, handleListSessions);
+
+/**
+ * @swagger
+ * /api/auth/sessions/revoke-others:
+ *   post:
+ *     summary: Revoke all other sessions
+ *     description: 現在セッション以外をすべて失効させる
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Number of revoked sessions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 revokedCount:
+ *                   type: integer
+ */
+router.post('/api/auth/sessions/revoke-others', authenticate, handleRevokeOtherSessions);
+
+/**
+ * @swagger
+ * /api/auth/sessions/{sessionId}:
+ *   delete:
+ *     summary: Revoke a session
+ *     description: 指定セッションを失効（他ユーザーのセッションは 404）
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Session revoked successfully
+ *       404:
+ *         description: Session not found (AUTH_SESSION_001)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.delete('/api/auth/sessions/:sessionId', authenticate, handleRevokeSession);
+
+/**
+ * @swagger
+ * /api/auth/delete-account:
+ *   post:
+ *     summary: Schedule account deletion
+ *     description: アカウント削除を30日後に予約。全セッションを失効し Cookie を破棄する
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Deletion scheduled
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 deletionScheduledFor:
+ *                   type: string
+ *                   format: date-time
+ *       409:
+ *         description: Already scheduled (AUTH_DELETE_001)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post('/api/auth/delete-account', authLimiter, authenticate, handleDeleteAccount);
+
+/**
+ * @swagger
+ * /api/auth/delete-account/cancel:
+ *   post:
+ *     summary: Cancel scheduled account deletion
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Deletion cancelled
+ *       409:
+ *         description: No deletion scheduled (AUTH_DELETE_002)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post('/api/auth/delete-account/cancel', authenticate, handleCancelAccountDeletion);
 
 /**
  * @swagger

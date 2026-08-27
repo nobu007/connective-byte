@@ -24,4 +24,16 @@ export class ConsoleEmailService implements EmailService {
   async sendPasswordChangedNotification(email: string): Promise<void> {
     console.log(`[EMAIL SERVICE] Password changed notification sent to: ${email}`);
   }
+
+  async sendAccountDeletionNotification(email: string, scheduledFor: string): Promise<void> {
+    console.log(`[EMAIL SERVICE] Account deletion scheduled for: ${email} at ${scheduledFor}`);
+  }
+
+  async sendAccountDeletionCancelledNotification(email: string): Promise<void> {
+    console.log(`[EMAIL SERVICE] Account deletion cancelled for: ${email}`);
+  }
+
+  async sendAccountDeletionCompletedNotification(email: string): Promise<void> {
+    console.log(`[EMAIL SERVICE] Account deletion completed for: ${email}`);
+  }
 }

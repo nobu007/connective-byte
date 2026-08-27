@@ -6,7 +6,11 @@
 import { UserRepository, User, UserRole, DeviceInfo } from '../interfaces/user-repository';
 import { EmailService } from '../interfaces/email-service';
 import { AuthError } from '../errors';
-import { hashPassword, verifyPassword } from '../../../common/utils/password';
+import {
+  hashPassword,
+  verifyPassword,
+  validatePasswordStrength,
+} from '../../../common/utils/password';
 import { generateToken } from '../../../middleware/auth';
 import crypto from 'crypto';
 
@@ -66,31 +70,10 @@ export class AuthService {
   ) {}
 
   /**
-   * Validate password strength (spec requirements)
+   * Validate password strength（規則は common/utils/password.ts に単一化）
    */
   validatePassword(password: string): { valid: boolean; errors: string[] } {
-    const errors: string[] = [];
-
-    if (password.length < 8) {
-      errors.push('Password must be at least 8 characters long');
-    }
-
-    if (!/[A-Z]/.test(password)) {
-      errors.push('Password must contain at least one uppercase letter');
-    }
-
-    if (!/[a-z]/.test(password)) {
-      errors.push('Password must contain at least one lowercase letter');
-    }
-
-    if (!/[0-9]/.test(password)) {
-      errors.push('Password must contain at least one number');
-    }
-
-    return {
-      valid: errors.length === 0,
-      errors,
-    };
+    return validatePasswordStrength(password);
   }
 
   /**

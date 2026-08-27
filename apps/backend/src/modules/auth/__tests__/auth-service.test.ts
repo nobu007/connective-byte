@@ -33,6 +33,18 @@ class MockEmailService implements EmailService {
   async sendPasswordChangedNotification(email: string): Promise<void> {
     this.sentEmails.push({ type: 'password_changed', email, token: '' });
   }
+
+  async sendAccountDeletionNotification(email: string, scheduledFor: string): Promise<void> {
+    this.sentEmails.push({ type: 'deletion_scheduled', email, token: scheduledFor });
+  }
+
+  async sendAccountDeletionCancelledNotification(email: string): Promise<void> {
+    this.sentEmails.push({ type: 'deletion_cancelled', email, token: '' });
+  }
+
+  async sendAccountDeletionCompletedNotification(email: string): Promise<void> {
+    this.sentEmails.push({ type: 'deletion_completed', email, token: '' });
+  }
 }
 
 const sha256 = (value: string) => crypto.createHash('sha256').update(value).digest('hex');

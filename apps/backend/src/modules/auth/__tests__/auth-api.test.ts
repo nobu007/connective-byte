@@ -11,18 +11,27 @@ process.env.JWT_SECRET = 'test-secret-key';
 
 import request from 'supertest';
 import express, { Application } from 'express';
+import crypto from 'crypto';
 
 // Import handlers directly to avoid rate limiter in tests
 import {
   handleRegister,
   handleLogin,
   handleGetProfile,
+  handleUpdateProfile,
+  handleChangePassword,
+  handleListSessions,
+  handleRevokeSession,
+  handleRevokeOtherSessions,
+  handleDeleteAccount,
+  handleCancelAccountDeletion,
   handleRefreshToken,
   handleLogout,
   handleVerifyEmail,
   handleForgotPassword,
   handleResetPassword,
 } from '../auth.controller';
+import { authenticate } from '../../../middleware/auth';
 
 /** set-cookie から指定Cookie名の "name=value" ペアを取り出す */
 function extractCookie(response: request.Response, name: string): string | null {
@@ -47,11 +56,19 @@ describe('Auth API Endpoints', () => {
     app = express();
     app.use(express.json());
 
-    // Register routes without rate limiter for testing
+    // Register routes without rate limiter for testing.
+    // 保護対象には本物の authenticate をマウント（Bearer 認証を実経路で検証）
     app.post('/api/auth/register', handleRegister);
     app.post('/api/auth/login', handleLogin);
     app.post('/api/auth/refresh', handleRefreshToken);
-    app.get('/api/auth/me', handleGetProfile);
+    app.get('/api/auth/me', authenticate, handleGetProfile);
+    app.put('/api/auth/me', authenticate, handleUpdateProfile);
+    app.post('/api/auth/change-password', authenticate, handleChangePassword);
+    app.get('/api/auth/sessions', authenticate, handleListSessions);
+    app.post('/api/auth/sessions/revoke-others', authenticate, handleRevokeOtherSessions);
+    app.delete('/api/auth/sessions/:sessionId', authenticate, handleRevokeSession);
+    app.post('/api/auth/delete-account', authenticate, handleDeleteAccount);
+    app.post('/api/auth/delete-account/cancel', authenticate, handleCancelAccountDeletion);
     app.post('/api/auth/logout', handleLogout);
     app.post('/api/auth/verify-email', handleVerifyEmail);
     app.post('/api/auth/forgot-password', handleForgotPassword);
@@ -464,9 +481,236 @@ describe('Auth API Endpoints', () => {
     });
   });
 
-  describe('Protected endpoints', () => {
-    it('should return 401 for GET /api/auth/me without user context', async () => {
-      await request(app).get('/api/auth/me').expect(401);
+  describe('Protected endpoints (Bearer + authenticate)', () => {
+    /** register して accessToken とリフレッシュCookieを取得 */
+    async function registerUser(label: string) {
+      const email = `protected-${label}-${Date.now()}@example.com`;
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({ email, password: 'SecurePass123', fullName: 'Protected User' })
+        .expect(201);
+      return {
+        email,
+        accessToken: res.body.data.accessToken as string,
+        refreshCookie: extractCookie(res, 'cb_rt') as string,
+      };
+    }
+
+    const bearer = (token: string) => ({ Authorization: `Bearer ${token}` });
+
+    it('should return the 401 envelope without a token', async () => {
+      const response = await request(app).get('/api/auth/me').expect(401);
+      expect(response.body.error.code).toBe('AUTH_TOKEN_003');
+    });
+
+    it('should return 401 for a garbage token', async () => {
+      const response = await request(app)
+        .get('/api/auth/me')
+        .set(bearer('garbage-token'))
+        .expect(401);
+      expect(response.body.error.code).toBe('AUTH_TOKEN_003');
+    });
+
+    it('GET /me should return the profile with an empty oauth list', async () => {
+      const user = await registerUser('me');
+
+      const response = await request(app)
+        .get('/api/auth/me')
+        .set(bearer(user.accessToken))
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.user.email).toBe(user.email);
+      expect(response.body.data.user).not.toHaveProperty('passwordHash');
+      expect(response.body.data.oauthAccounts).toEqual([]);
+    });
+
+    it('PUT /me should update the profile', async () => {
+      const user = await registerUser('update');
+
+      const response = await request(app)
+        .put('/api/auth/me')
+        .set(bearer(user.accessToken))
+        .send({ fullName: 'Updated Name', bio: 'hello', timezone: 'Asia/Tokyo' })
+        .expect(200);
+
+      expect(response.body.data.user.fullName).toBe('Updated Name');
+      expect(response.body.data.user.bio).toBe('hello');
+      expect(response.body.data.user.timezone).toBe('Asia/Tokyo');
+    });
+
+    it('PUT /me should reject invalid input with AUTH_PROFILE_001', async () => {
+      const user = await registerUser('invalid');
+
+      const response = await request(app)
+        .put('/api/auth/me')
+        .set(bearer(user.accessToken))
+        .send({ fullName: 'a'.repeat(101) })
+        .expect(400);
+
+      expect(response.body.error.code).toBe('AUTH_PROFILE_001');
+    });
+
+    it('POST /change-password should reject a wrong current password', async () => {
+      const user = await registerUser('wrongpw');
+
+      const response = await request(app)
+        .post('/api/auth/change-password')
+        .set(bearer(user.accessToken))
+        .set('Cookie', user.refreshCookie)
+        .send({ currentPassword: 'WrongPass123', newPassword: 'NewPass123' })
+        .expect(400);
+
+      expect(response.body.error.code).toBe('AUTH_PASSWORD_001');
+    });
+
+    it('POST /change-password should keep the current session and revoke others', async () => {
+      // register でセッションA、login でセッションB
+      const user = await registerUser('keepcurrent');
+      const loginResponse = await request(app)
+        .post('/api/auth/login')
+        .send({ email: user.email, password: 'SecurePass123' })
+        .expect(200);
+      const sessionBCookie = extractCookie(loginResponse, 'cb_rt') as string;
+      const sessionBToken = loginResponse.body.data.accessToken as string;
+
+      await request(app)
+        .post('/api/auth/change-password')
+        .set(bearer(sessionBToken))
+        .set('Cookie', sessionBCookie)
+        .send({ currentPassword: 'SecurePass123', newPassword: 'NewPass456' })
+        .expect(200);
+
+      // 他セッション（A）は失効
+      await request(app).post('/api/auth/refresh').set('Cookie', user.refreshCookie).expect(401);
+      // 現在セッション（B）は維持
+      await request(app).post('/api/auth/refresh').set('Cookie', sessionBCookie).expect(200);
+    });
+
+    it('GET /sessions should require the refresh cookie', async () => {
+      const user = await registerUser('sessions-nocookie');
+
+      const response = await request(app)
+        .get('/api/auth/sessions')
+        .set(bearer(user.accessToken))
+        .expect(401);
+
+      expect(response.body.error.code).toBe('AUTH_TOKEN_002');
+    });
+
+    it('GET /sessions should list sessions with isCurrent', async () => {
+      const user = await registerUser('sessions');
+      await request(app)
+        .post('/api/auth/login')
+        .send({ email: user.email, password: 'SecurePass123' })
+        .expect(200);
+
+      const response = await request(app)
+        .get('/api/auth/sessions')
+        .set(bearer(user.accessToken))
+        .set('Cookie', user.refreshCookie)
+        .expect(200);
+
+      expect(response.body.data.sessions).toHaveLength(2);
+      expect(
+        response.body.data.sessions.filter((s: { isCurrent: boolean }) => s.isCurrent)
+      ).toHaveLength(1);
+      expect(response.body.data.sessions[0].deviceInfo).toBeDefined();
+    });
+
+    it('DELETE /sessions/:id should revoke an owned session', async () => {
+      const user = await registerUser('revoke');
+      const loginResponse = await request(app)
+        .post('/api/auth/login')
+        .send({ email: user.email, password: 'SecurePass123' })
+        .expect(200);
+      const otherCookie = extractCookie(loginResponse, 'cb_rt') as string;
+
+      const list = await request(app)
+        .get('/api/auth/sessions')
+        .set(bearer(user.accessToken))
+        .set('Cookie', user.refreshCookie)
+        .expect(200);
+      const otherSession = list.body.data.sessions.find(
+        (s: { isCurrent: boolean }) => !s.isCurrent
+      );
+
+      await request(app)
+        .delete(`/api/auth/sessions/${otherSession.id}`)
+        .set(bearer(user.accessToken))
+        .expect(200);
+
+      // 失効したセッションのCookieでは refresh 不可
+      await request(app).post('/api/auth/refresh').set('Cookie', otherCookie).expect(401);
+    });
+
+    it('DELETE /sessions/:id should return 404 for an unknown session', async () => {
+      const user = await registerUser('revoke-unknown');
+
+      const response = await request(app)
+        .delete(`/api/auth/sessions/${crypto.randomUUID()}`)
+        .set(bearer(user.accessToken))
+        .expect(404);
+
+      expect(response.body.error.code).toBe('AUTH_SESSION_001');
+    });
+
+    it('POST /sessions/revoke-others should revoke all but the current session', async () => {
+      const user = await registerUser('revokeothers');
+      await request(app)
+        .post('/api/auth/login')
+        .send({ email: user.email, password: 'SecurePass123' })
+        .expect(200);
+
+      const response = await request(app)
+        .post('/api/auth/sessions/revoke-others')
+        .set(bearer(user.accessToken))
+        .set('Cookie', user.refreshCookie)
+        .expect(200);
+
+      expect(response.body.data.revokedCount).toBe(1);
+      // 現在セッションは使える
+      await request(app).post('/api/auth/refresh').set('Cookie', user.refreshCookie).expect(200);
+    });
+
+    it('POST /delete-account should schedule deletion, clear cookie and allow cancel', async () => {
+      const user = await registerUser('delete');
+
+      const response = await request(app)
+        .post('/api/auth/delete-account')
+        .set(bearer(user.accessToken))
+        .set('Cookie', user.refreshCookie)
+        .expect(200);
+
+      // 30日後の日時が返る
+      const scheduledFor = new Date(response.body.data.deletionScheduledFor);
+      const delta = scheduledFor.getTime() - Date.now();
+      expect(delta).toBeGreaterThan(29 * 24 * 3600 * 1000);
+      expect(delta).toBeLessThan(31 * 24 * 3600 * 1000);
+
+      // 全セッション失効 + Cookie破棄
+      expect(setCookieHeader(response)).toMatch(/Expires=Thu, 01 Jan 1970/);
+      await request(app).post('/api/auth/refresh').set('Cookie', user.refreshCookie).expect(401);
+
+      // 二重予約は409
+      const again = await request(app)
+        .post('/api/auth/delete-account')
+        .set(bearer(user.accessToken))
+        .expect(409);
+      expect(again.body.error.code).toBe('AUTH_DELETE_001');
+
+      // アクセストークン（15分）は有効なので取り消せる
+      await request(app)
+        .post('/api/auth/delete-account/cancel')
+        .set(bearer(user.accessToken))
+        .expect(200);
+
+      // 取り消し済みでの再取り消しは409
+      const cancelAgain = await request(app)
+        .post('/api/auth/delete-account/cancel')
+        .set(bearer(user.accessToken))
+        .expect(409);
+      expect(cancelAgain.body.error.code).toBe('AUTH_DELETE_002');
     });
   });
 });

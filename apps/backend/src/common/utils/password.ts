@@ -91,7 +91,10 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 }
 
 /**
- * Validate password strength
+ * Validate password strength（パスワード規則の単一定義点）
+ *
+ * 要件: 8文字以上・大文字・小文字・数字を各1つ（requirements.md）。
+ * 記号要求は登録導線の離脱要因となるため仕様上も要求しない。
  * @param password Password to validate
  * @returns Validation result with errors
  */
@@ -115,10 +118,6 @@ export function validatePasswordStrength(password: string): {
 
   if (!/[0-9]/.test(password)) {
     errors.push('Password must contain at least one number');
-  }
-
-  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-    errors.push('Password must contain at least one special character');
   }
 
   return {

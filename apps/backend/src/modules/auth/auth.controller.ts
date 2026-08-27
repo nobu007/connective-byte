@@ -163,6 +163,9 @@ export async function handleRefreshToken(
 /**
  * Get current user profile
  * GET /api/auth/me
+ *
+ * JWTクレームではなくDBの最新状態を返す（プロフィール編集・削除猶予の反映）。
+ * OAuth連携一覧も併せて返す。
  */
 export async function handleGetProfile(
   req: Request,
@@ -170,38 +173,227 @@ export async function handleGetProfile(
   next: NextFunction
 ): Promise<void> {
   try {
-    // JWTクレームではなくDBの最新状態を返す（プロフィール編集・削除猶予の反映）
-    const user = req.user ? await authContainer.userRepository.findById(req.user.id) : null;
+    const profile = await authContainer.userService.getProfile(req.user!.id);
+    res.status(200).json({
+      success: true,
+      data: profile,
+    });
+  } catch (error) {
+    handleServiceError(res, next, error);
+  }
+}
 
-    if (!user) {
-      res.status(401).json({
+/**
+ * Update current user profile
+ * PUT /api/auth/me
+ */
+export async function handleUpdateProfile(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    // 文字列のみ通す（明示的な null はクリア、それ以外の混入は無視）
+    const data: Record<string, string | null> = {};
+    for (const key of ['fullName', 'bio', 'timezone', 'githubUsername'] as const) {
+      const value = req.body[key];
+      if (typeof value === 'string' || value === null) {
+        data[key] = value;
+      }
+    }
+
+    const profile = await authContainer.userService.updateProfile(req.user!.id, data);
+    res.status(200).json({
+      success: true,
+      data: profile,
+    });
+  } catch (error) {
+    handleServiceError(res, next, error);
+  }
+}
+
+/**
+ * Change password
+ * POST /api/auth/change-password
+ *
+ * 現在セッション（Cookie）は維持し、他の全セッションを失効させる。
+ */
+export async function handleChangePassword(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { currentPassword, newPassword } = req.body as {
+      currentPassword?: string;
+      newPassword?: string;
+    };
+
+    if (!newPassword) {
+      res.status(400).json({
         error: {
-          code: 'AUTH_TOKEN_003',
-          message: 'User not found',
+          code: 'AUTH_PASSWORD_001',
+          message: 'New password is required',
         },
       });
       return;
     }
 
+    const refreshToken = getCookie(req, REFRESH_COOKIE_NAME);
+    const currentSession = refreshToken
+      ? await authContainer.sessionService.findCurrentSession(req.user!.id, refreshToken)
+      : null;
+
+    await authContainer.userService.changePassword(
+      req.user!.id,
+      currentPassword,
+      newPassword,
+      currentSession?.id
+    );
+
     res.status(200).json({
       success: true,
       data: {
-        user: {
-          id: user.id,
-          email: user.email,
-          fullName: user.fullName,
-          role: user.role,
-          isVerified: user.isVerified,
-          bio: user.bio,
-          timezone: user.timezone,
-          githubUsername: user.githubUsername,
-          deletionScheduledAt: user.deletionScheduledAt,
-          createdAt: user.createdAt,
-        },
+        message: 'Password changed successfully',
       },
     });
   } catch (error) {
-    next(error);
+    handleServiceError(res, next, error);
+  }
+}
+
+/**
+ * List active sessions
+ * GET /api/auth/sessions
+ */
+export async function handleListSessions(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const refreshToken = getCookie(req, REFRESH_COOKIE_NAME);
+    if (!refreshToken) {
+      res.status(401).json({
+        error: {
+          code: 'AUTH_TOKEN_002',
+          message: 'Refresh token is required',
+        },
+      });
+      return;
+    }
+
+    const sessions = await authContainer.sessionService.listSessions(req.user!.id, refreshToken);
+    res.status(200).json({
+      success: true,
+      data: { sessions },
+    });
+  } catch (error) {
+    handleServiceError(res, next, error);
+  }
+}
+
+/**
+ * Revoke a specific session
+ * DELETE /api/auth/sessions/:sessionId
+ */
+export async function handleRevokeSession(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    await authContainer.sessionService.revokeSession(req.user!.id, String(req.params.sessionId));
+    res.status(200).json({
+      success: true,
+      data: {
+        message: 'Session revoked successfully',
+      },
+    });
+  } catch (error) {
+    handleServiceError(res, next, error);
+  }
+}
+
+/**
+ * Revoke all sessions except the current one
+ * POST /api/auth/sessions/revoke-others
+ */
+export async function handleRevokeOtherSessions(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const refreshToken = getCookie(req, REFRESH_COOKIE_NAME);
+    if (!refreshToken) {
+      res.status(401).json({
+        error: {
+          code: 'AUTH_TOKEN_002',
+          message: 'Refresh token is required',
+        },
+      });
+      return;
+    }
+
+    const revokedCount = await authContainer.sessionService.revokeOthers(
+      req.user!.id,
+      refreshToken
+    );
+    res.status(200).json({
+      success: true,
+      data: { revokedCount },
+    });
+  } catch (error) {
+    handleServiceError(res, next, error);
+  }
+}
+
+/**
+ * Schedule account deletion (30日猶予)
+ * POST /api/auth/delete-account
+ *
+ * 全セッションが失効するため Cookie も破棄する。
+ */
+export async function handleDeleteAccount(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const deletionScheduledFor = await authContainer.userService.scheduleAccountDeletion(
+      req.user!.id
+    );
+
+    clearRefreshTokenCookie(res);
+    res.status(200).json({
+      success: true,
+      data: { deletionScheduledFor },
+    });
+  } catch (error) {
+    handleServiceError(res, next, error);
+  }
+}
+
+/**
+ * Cancel scheduled account deletion
+ * POST /api/auth/delete-account/cancel
+ */
+export async function handleCancelAccountDeletion(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    await authContainer.userService.cancelAccountDeletion(req.user!.id);
+    res.status(200).json({
+      success: true,
+      data: {
+        message: 'Account deletion cancelled',
+      },
+    });
+  } catch (error) {
+    handleServiceError(res, next, error);
   }
 }
 

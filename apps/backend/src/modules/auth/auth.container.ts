@@ -14,11 +14,17 @@ import { ConsoleEmailService } from './services/console-email-service';
 import { ResendEmailService } from './services/resend-email-service';
 import { AuthService } from './services/auth-service';
 import { MaintenanceService } from './services/maintenance-service';
+import { SessionService } from './services/session-service';
+import { UserService } from './services/user-service';
 
 export interface AuthContainer {
   userRepository: UserRepository;
   emailService: EmailService;
   authService: AuthService;
+  /** マイページ: セッション一覧・失効 */
+  sessionService: SessionService;
+  /** マイページ: プロフィール・パスワード変更・アカウント削除 */
+  userService: UserService;
   /** Cron Trigger（scheduled）から日次実行 */
   maintenanceService: MaintenanceService;
 }
@@ -38,7 +44,9 @@ export function buildAuthContainer(): AuthContainer {
     userRepository,
     emailService,
     authService: new AuthService(userRepository, emailService),
-    maintenanceService: new MaintenanceService(userRepository),
+    sessionService: new SessionService(userRepository),
+    userService: new UserService(userRepository, emailService),
+    maintenanceService: new MaintenanceService(userRepository, emailService),
   };
 }
 

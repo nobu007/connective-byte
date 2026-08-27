@@ -80,9 +80,11 @@ export interface OAuthAccountRecord {
 
 export interface UpdateProfileData {
   fullName?: string;
-  bio?: string;
+  /** null でクリア */
+  bio?: string | null;
   timezone?: string;
-  githubUsername?: string;
+  /** null でクリア */
+  githubUsername?: string | null;
 }
 
 export interface EmailVerificationToken {
