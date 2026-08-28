@@ -1,5 +1,13 @@
 # AGENTS.md - 汎用開発指示書
 
+# プロダクト方針 - 学習コンテンツ公開・課金（絶対遵守）
+
+- **無料公開は Week 1（導入・概論）まで**。それ以上の無料公開は「売れるものがなくなる」ため禁止
+- **Weeks 2-12（実践・統合）は支払い基盤構築まで `is_published=false` のまま取込む**（import script は `--publish` なしで実行）
+- **価格破壊禁止**: 「ちょっといいやつをちょっと安く」— 相場よりやや安 + 品質で差別化。ダンピングは同業破壊のため不可
+- 支払い基盤（Stripe等）は未構築。構築まで無料範囲を広げない
+- 制御手段: `curriculum_modules.is_published` / `learning_sessions.is_published`（module/session 単位・コード変更不要）
+
 # エラー予防プロトコル - SDEC×2SCV×ACR統合版
 
 ## 1. SDEC×2SCV×ACR コアロジック
@@ -76,16 +84,16 @@
    ```bash
    # 必ず実行してログに残すこと
    echo "=== 実装前検証: [機能名] ==="
-   
+
    # 類似機能の検索
    grep -r "機能キーワード" src/utils/ src/common/ --include="*.py"
-   
+
    # 既存プロセッサの確認
    grep -r "class.*Processor" src/ --include="*.py" | grep -E "キーワード"
-   
+
    # 実行可能スクリプトの確認
    find scripts_python* -name "*.py" | xargs grep -l "キーワード"
-   
+
    # 共通処理の一覧
    ls -la src/utils/*.py src/common/*.py | grep -v __pycache__
    ```
@@ -160,7 +168,6 @@
 
 証拠なしの推測禁止。検証なしの実装禁止。質問前の自律補完必須。
 
-
 # N. プロジェクト基本情報・メタデータ - 統合版
 
 ## 2.1 メタデータ情報
@@ -176,7 +183,7 @@
 ### 2.1.2 プロジェクト基本情報
 
 - **目的**: 言語非依存の汎用開発思想とプロジェクト構成ルール
-- **対象**: Python、TypeScript、その他言語での開発プロジェクト  
+- **対象**: Python、TypeScript、その他言語での開発プロジェクト
 - **専門特化**: 言語特化版は各言語フォルダ参照
 - **上位文書**: SYSTEM_CONSTITUTION.md・CLAUDE.md
 
@@ -221,7 +228,7 @@
 - **開発フェーズ**: 設計・実装・テスト・保守全段階
 - **チーム適用**: 全開発者・関係者共通基準
 
-### 2.4.2 制約・前提条件  
+### 2.4.2 制約・前提条件
 
 - **標準遵守**: プロジェクト標準への完全準拠
 - **後方互換性**: 既存システムとの整合性確保
@@ -253,7 +260,7 @@
 ### 2.6.1 更新プロセス
 
 1. **変更要求分析** - 影響範囲・必要性評価
-2. **整合性確認** - 関連文書との一貫性チェック  
+2. **整合性確認** - 関連文書との一貫性チェック
 3. **品質検証** - 更新内容の品質確認
 4. **統合テスト** - システム全体への影響確認
 5. **文書更新** - 関連文書の同期更新
@@ -264,7 +271,6 @@
 - **自動検証**: 整合性チェックの自動化
 - **フィードバック統合**: 利用者からの改善要求反映
 - **継続改善**: 品質向上サイクルの確立
-
 
 # 基本原則 - 実装強制版
 
@@ -322,6 +328,7 @@
   - オプション値の変更 → 全レイヤーで自動的に見える
 
 **実装チェックリスト：**
+
 - ❌ deepcopy(options) は禁止
 - ❌ copy.deepcopy(options) は禁止
 - ❌ オプションのコピー作成は禁止
@@ -330,6 +337,7 @@
 - ✅ instruction_dataで層間通信を行う
 
 **コード審査での指摘パターン：**
+
 ```python
 # ❌ これを見つけたら必ず指摘（deepcopyパターン）
 processor_options = deepcopy(options)
@@ -415,14 +423,14 @@ def process(self) -> ProcessingResult:
 
 ### 3.1 実装パターン禁止
 
-| ❌ 絶対禁止 | ✅ 強制使用 |
-|------------|------------|
-| `logging.getLogger(__name__)` | `logging.Logger(module_name)` |
-| `filename_{timestamp}` | 固定ファイル名 |
-| 独自argparse実装 | CLIProcessor継承 |
-| 独自ループ（for/while） | execute_with_rate_limit_protection |
-| 車輪の再発明 | 既存処理拡張 |
-| `deepcopy(options)` | 参照ベース設計（reference passing） |
+| ❌ 絶対禁止                   | ✅ 強制使用                         |
+| ----------------------------- | ----------------------------------- |
+| `logging.getLogger(__name__)` | `logging.Logger(module_name)`       |
+| `filename_{timestamp}`        | 固定ファイル名                      |
+| 独自argparse実装              | CLIProcessor継承                    |
+| 独自ループ（for/while）       | execute_with_rate_limit_protection  |
+| 車輪の再発明                  | 既存処理拡張                        |
+| `deepcopy(options)`           | 参照ベース設計（reference passing） |
 
 ### 3.2 レポート作成禁止(日付NG、新規md種別NG: .moduleの8個のmdのみ許可)
 
@@ -506,7 +514,6 @@ echo "✅ 品質チェック合格"
 **重要**: この原則は「推奨」「検討」「できれば」ではない。**絶対遵守**である。
 違反した実装は不合格とみなし、修正完了まで次の作業に移ってはならない。
 
-
 ## 4. 開発哲学
 
 ### 4.1. 基本思想
@@ -526,6 +533,7 @@ echo "✅ 品質チェック合格"
 ### 4.3. プロジェクト共通ルール
 
 #### 絶対禁止事項
+
 ❌ ハードコードされた設定値
 ❌ 循環依存の作成  
 ❌ テストなしでの実装
@@ -533,6 +541,7 @@ echo "✅ 品質チェック合格"
 ❌ 適切な例外処理なし
 
 #### 必須事項
+
 ✅ 設定ファイル活用
 ✅ 明確なディレクトリ構造
 ✅ 統一された命名規則
@@ -645,7 +654,6 @@ Domain ← Application ← Infrastructure
 └── [実装ファイル]
 ```
 
-
 ## 6. 共通情報
 
 全Agentが把握すべき共通情報。技術的根拠に基づき分析・推論・実行・修正を行うこと。
@@ -673,7 +681,7 @@ graph TD
     B -->|No| D{CLI処理?}
     D -->|Yes| E[CLIProcessor]
     D -->|No| F[BaseProcessor or 独自実装]
-    
+
     C --> G[自動で以下が利用可能:<br/>・全共通オプション<br/>・レートリミット<br/>・リトライ制御<br/>・Codexフォールバック]
     E --> H[自動で以下が利用可能:<br/>・全共通オプション<br/>・ロギング<br/>・結果管理]
 ```
@@ -690,7 +698,7 @@ class MyProcessor(RateLimitAwareCLIProcessor):
             module_name="my_processor",
             option_groups=["execute", "monitor"]  # 必要なグループのみ指定
         )
-    
+
     def process(self) -> ProcessingResult:
         # self.configから全オプション自動アクセス可能
         return ProcessingResult(success=True)
@@ -714,21 +722,21 @@ src/
       retry/*_retry.py           # リトライ制御
     discovery/*_finder.py        # 探索・発見
     validation/*_validator.py    # 検証処理
-    
-  utils/                        # 技術的ユーティリティ  
+
+  utils/                        # 技術的ユーティリティ
     patterns/mixin/*_mixin.py   # Mixinパターン
     helpers/*_utils.py           # ヘルパー関数
 ```
 
 #### 6.2.2 自動カテゴリ判定（ファイル名で自動振り分け）
 
-| 接尾辞 | 自動配置先 | 例 |
-|--------|-----------|-----|
+| 接尾辞           | 自動配置先               | 例                   |
+| ---------------- | ------------------------ | -------------------- |
 | `*_processor.py` | `common/cli/processors/` | `batch_processor.py` |
-| `*_options.py` | `common/cli/options/` | `custom_options.py` |
-| `*_handler.py` | `common/execution/` | `error_handler.py` |
-| `*_mixin.py` | `utils/patterns/mixin/` | `retry_mixin.py` |
-| `*_finder.py` | `common/discovery/` | `module_finder.py` |
+| `*_options.py`   | `common/cli/options/`    | `custom_options.py`  |
+| `*_handler.py`   | `common/execution/`      | `error_handler.py`   |
+| `*_mixin.py`     | `utils/patterns/mixin/`  | `retry_mixin.py`     |
+| `*_finder.py`    | `common/discovery/`      | `module_finder.py`   |
 
 詳細: [`docs/COMMON_MODULE_CATEGORIZATION.md`](../../COMMON_MODULE_CATEGORIZATION.md)
 
@@ -741,12 +749,12 @@ src/
 option_groups=["execute", "monitor", "output"]
 ```
 
-| グループ | 自動追加されるオプション | 用途 |
-|---------|------------------------|------|
-| execute | `--dry-run`, `--cycles`, `--interval`, `--timeout` | 実行制御 |
-| monitor | `--verbose`, `--log-level`, `--progress` | 出力制御 |
-| output | `--output-format`, `--output-file` | 結果出力 |
-| retry | `--max-retries`, `--retry-interval` | リトライ |
+| グループ | 自動追加されるオプション                           | 用途     |
+| -------- | -------------------------------------------------- | -------- |
+| execute  | `--dry-run`, `--cycles`, `--interval`, `--timeout` | 実行制御 |
+| monitor  | `--verbose`, `--log-level`, `--progress`           | 出力制御 |
+| output   | `--output-format`, `--output-file`                 | 結果出力 |
+| retry    | `--max-retries`, `--retry-interval`                | リトライ |
 
 #### 6.3.2 オプションアクセス（フラット辞書）
 
@@ -777,16 +785,16 @@ ls src/common/*/  # カテゴリ確認
 
 #### 6.5.1 絶対にやってはいけないこと
 
-| ❌ アンチパターン | ✅ 正しい方法 |
-|-----------------|-------------|
-| 独自argparse実装 | CLIProcessorを継承 |
-| 独自ロガー設定 | self.loggerを使用 |
-| 独自レートリミット | RateLimitAwareCLIProcessor使用 |
-| for文でリトライ | execute_with_rate_limit_protection使用 |
-| 階層的config参照 | フラット辞書として参照 |
-| **共通オプションの反復抽出** | **一度だけ抽出して再利用** |
-| **深い関数チェーン** | **直接呼び出しに簡素化** |
-| **重複した引数渡し** | **インスタンス変数で保持** |
+| ❌ アンチパターン            | ✅ 正しい方法                          |
+| ---------------------------- | -------------------------------------- |
+| 独自argparse実装             | CLIProcessorを継承                     |
+| 独自ロガー設定               | self.loggerを使用                      |
+| 独自レートリミット           | RateLimitAwareCLIProcessor使用         |
+| for文でリトライ              | execute_with_rate_limit_protection使用 |
+| 階層的config参照             | フラット辞書として参照                 |
+| **共通オプションの反復抽出** | **一度だけ抽出して再利用**             |
+| **深い関数チェーン**         | **直接呼び出しに簡素化**               |
+| **重複した引数渡し**         | **インスタンス変数で保持**             |
 
 #### 6.5.2 重要：オプション処理の最適化原則
 
@@ -848,6 +856,7 @@ execute_file_processing() → _handle_standard_file()
 ```
 
 **判定基準**:
+
 - 関数呼び出しレベルは最大2段階まで
 - 各関数は明確な単一責務を持つ
 - 同じデータの多重渡しを避ける
@@ -860,7 +869,7 @@ class MyProcessor(RateLimitAwareCLIProcessor):
     def process(self):
         def _execute_single_cycle(cycle: int) -> bool:
             return executor.execute()  # ビジネスロジック呼び出し
-        
+
         return self.execute_with_rate_limit_protection(
             cycle_executor=_execute_single_cycle
         )
@@ -913,13 +922,13 @@ head -10 target_file.md  # 内容も確認
 
 #### 6.6.2 動作確認チェックリスト
 
-| 確認項目 | チェック方法 | OK条件 |
-|---------|-----------|--------|
-| **既存ファイル処理** | 既存ファイルで実行 | スキップされる |
-| **新規ファイル生成** | ファイル削除後実行 | ファイルが生成される |
-| **内容検証** | 生成ファイルの中身確認 | 正しいテンプレート内容 |
-| **エラーハンドリング** | 異常ケースでの実行 | 適切なエラー処理 |
-| **パフォーマンス** | 処理時間計測 | 許容範囲内 |
+| 確認項目               | チェック方法           | OK条件                 |
+| ---------------------- | ---------------------- | ---------------------- |
+| **既存ファイル処理**   | 既存ファイルで実行     | スキップされる         |
+| **新規ファイル生成**   | ファイル削除後実行     | ファイルが生成される   |
+| **内容検証**           | 生成ファイルの中身確認 | 正しいテンプレート内容 |
+| **エラーハンドリング** | 異常ケースでの実行     | 適切なエラー処理       |
+| **パフォーマンス**     | 処理時間計測           | 許容範囲内             |
 
 #### 6.6.3 実践的動作確認手順
 
@@ -955,7 +964,6 @@ cat test_file.md | grep -E "Generated by module document processor"
 
 **重要:** 新規実装前に必ず既存処理を検索すること。車輪の再発明は禁止。
 
-
 # 最終指示
 
 ## 7. システムの完全自律開発・品質向上を実行せよ
@@ -976,8 +984,8 @@ cat test_file.md | grep -E "Generated by module document processor"
 
 対象サブモジュールの基本情報を取得します。
 例えば次のようなコマンドが有効です。
-find {対象サブモジュール}/ -name ".module" -type d     # .module ディレクトリ確認
-find {対象サブモジュール}/ -name "README.md"          # サブモジュール README 確認
+find {対象サブモジュール}/ -name ".module" -type d # .module ディレクトリ確認
+find {対象サブモジュール}/ -name "README.md" # サブモジュール README 確認
 cat README.md(作業目的から必要に応じて全文参照)
 ・・・
 
@@ -996,31 +1004,36 @@ cat README.md(作業目的から必要に応じて全文参照)
 ユーザーへの分かりやすい報告を出力する
 
 ```markdown
-   ## 作業報告書
+## 作業報告書
 
-   ### 対象サブモジュール
-   - **リポジトリ**: [repository_name]
-   - **対象モジュール**: [module_path]
-   - **主要機能**: [core_functionality]
+### 対象サブモジュール
 
-   ### SDEC サイクル実行結果
+- **リポジトリ**: [repository_name]
+- **対象モジュール**: [module_path]
+- **主要機能**: [core_functionality]
 
-   #### Spec（仕様理解）
-   - 要求分解: [分解された主張一覧]
-   - サブモジュール思想: [module philosophy]
+### SDEC サイクル実行結果
 
-   #### Data（証拠収集）
-   - 既存実装: [implementation_evidence]
-   - 依存関係: [dependency_analysis]
+#### Spec（仕様理解）
 
-   #### Eval（双方向検証）
-   - E→S検証: [evidence_to_spec_validation]
-   - S→E検証: [spec_to_evidence_validation]
+- 要求分解: [分解された主張一覧]
+- サブモジュール思想: [module philosophy]
 
-   #### Change（変更実施）
-   - 実装内容: [implemented_changes]
-   - 品質確認: [quality_metrics]
- ```
+#### Data（証拠収集）
+
+- 既存実装: [implementation_evidence]
+- 依存関係: [dependency_analysis]
+
+#### Eval（双方向検証）
+
+- E→S検証: [evidence_to_spec_validation]
+- S→E検証: [spec_to_evidence_validation]
+
+#### Change（変更実施）
+
+- 実装内容: [implemented_changes]
+- 品質確認: [quality_metrics]
+```
 
 **次アクション提案**
 
