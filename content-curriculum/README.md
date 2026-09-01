@@ -3,6 +3,23 @@
 12週カリキュラムの本文原稿を置く場所。`npm run import:curriculum` で
 Neon Postgres へ取込み、`/learning/` から配信する。
 
+## 元ネタ（必須参照）
+
+原稿は**作り込まず、既存資産を組み合わせて書く**。判断の正本:
+
+- `~/tas_bizplan_refiner/businesses/04_ConnectiveByte(メイン)/wiki/concepts/`
+  — ビジネスプランの概念正本（752ファイル）。主要なもの:
+  - `thinking_os-tactics.md` — **12週カリキュラムの週割り正本**
+    （W1思考プロセス可視化 / W2論理構造強化 / W3他者との同期練習 /
+    W4 AI協働システム / W5-8チーム / W9-12組織）
+  - `connective_thinking_framework-core.md` — 接続思考の定義・4基本要素
+    （限界認識・AI協働・人間連携・外部接続）・個人脳完結の4限界
+  - `program_curriculum-tactics.md` — 3フェーズ構成・学習負荷（週3-5時間）
+  - `digital_twin_thinking_methodology-tactics.md` — 判断履歴の完全記録・
+    思考パターン抽出・接続可能性の設計
+- 注意: concepts内の**実績数値（800名・AAA認定等）は未検証の想定値**。
+  未ローンチのβ教材には載せない（概念・フレームワークのみ使う）
+
 ## 構成
 
 ```
