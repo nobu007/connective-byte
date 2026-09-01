@@ -509,9 +509,22 @@ npm run dev          # TypeScript execution (ts-node)
 
 ### Deployment Strategy
 
-- **Frontend**: Static export to Cloudflare Pages
-- **Backend**: Node.js server deployment
+- **Frontend**: Static export to Cloudflare Pages（project `connective-byte` = connectivebyte.com）
+- **Backend**: Cloudflare Workers（`connective-byte-api`・custom domain api.connectivebyte.com・`npm run deploy:api`）
 - **Configuration**: Environment variables for API URLs
+
+### 本番 Cloudflare ルーティング（手動管理・IaC外・2026-09-01時点）
+
+zone `connectivebyte.com` の Workers routes は**ダッシュボード/APIでの手動管理**（wrangler.toml外）:
+
+- `api.connectivebyte.com/events` → `cb-events-receiver`（labサイト計測・POST専用）
+- `api.connectivebyte.com/subscribe` → `cb-events-receiver`（newsletter登録→D1+Buttondown転投）
+- `inbox.connectivebyte.com/*` → `cb-email-inbox`
+- 上記以外の `api.connectivebyte.com`（`/api/*` 全部）→ custom domain 経由で `connective-byte-api`
+
+**教訓（2026-09-01発生）**: `api.connectivebyte.com/*` の広域routeがevents-receiverに向いたままdeployすると、
+custom domain より zone route が優先されAPI workerが**全route 404**になる（8/27の初回deployから無言で発生していた）。
+広域routeは`/events`・`/subscribe`の2本の狭域routeに置換して解消。deploy後に `/api/health` 200を必ず確認すること。
 
 ## Key Files Reference
 
