@@ -82,7 +82,7 @@ export function SessionEditor({ session, moduleId, onSaved, onCancel }: Props) {
         <div className="grid grid-cols-2 gap-4">
           <label className="block">
             <span className="block text-sm font-medium text-gray-700 mb-1">
-              slug <span className="text-gray-400">（URL名: day-01 等）</span>
+              slug <span className="text-gray-400">（URL名: week-01-day-01 等）</span>
             </span>
             <input
               value={slug}

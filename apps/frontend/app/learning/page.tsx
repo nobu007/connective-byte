@@ -7,7 +7,7 @@
  * 単一ページ + クエリパラメータで3ビューを切替える:
  *   /learning/                          → カリキュラム一覧
  *   /learning/?module=week-01          → モジュール詳細
- *   /learning/?module=week-01&session=day-01 → セッション本文
+ *   /learning/?module=week-01&session=week-01-day-01 → セッション本文
  *
  * useSearchParams は <Suspense> 内で使う（静的exportのビルド要件）。
  * コンテンツは全公開。進捗はログイン時のみ取得・表示。

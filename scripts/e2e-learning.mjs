@@ -99,15 +99,17 @@ async function main() {
   const phases = cur.json?.data?.phases ?? [];
   assert('Phase が3件', phases.length === 3, `${phases.length}件`);
   const module = phases.flatMap((p) => p.modules).find((m) => m.slug === 'week-01');
-  const session = module?.sessions?.find((s) => s.slug === 'day-01');
-  assert('week-01 / day-01 が公開ツリーに存在', Boolean(session));
+  const session = module?.sessions?.find((s) => s.slug === 'week-01-day-01');
+  assert('week-01 / week-01-day-01 が公開ツリーに存在', Boolean(session));
+  // 公開セッション総数（進捗の分母はこの値に一致する）
+  const pubTotal = phases.flatMap((p) => p.modules).flatMap((m) => m.sessions).length;
 
   const mod = await call('/api/learning/modules/week-01');
   assert('GET /modules/week-01 → 200', mod.res.status === 200, `HTTP ${mod.res.status}`);
   assert('module がセッション要約を返す', (mod.json?.data?.module?.sessions ?? []).length >= 1);
 
-  const pub = await call('/api/learning/sessions/day-01');
-  assert('GET /sessions/day-01（匿名）→ 200', pub.res.status === 200, `HTTP ${pub.res.status}`);
+  const pub = await call('/api/learning/sessions/week-01-day-01');
+  assert('GET /sessions/week-01-day-01（匿名）→ 200', pub.res.status === 200, `HTTP ${pub.res.status}`);
   const originalContent = pub.json?.data?.session?.content ?? '';
   assert('本文が空でない', originalContent.length > 0);
 
@@ -127,8 +129,8 @@ async function main() {
   const prog0 = await call('/api/learning/progress', { token });
   assert('GET /progress（learner）→ 200', prog0.res.status === 200, `HTTP ${prog0.res.status}`);
   assert(
-    '初期進捗は 0/1',
-    prog0.json?.data?.overall?.totalSessions === 1 && prog0.json?.data?.overall?.completedSessions === 0,
+    `初期進捗は 0/${pubTotal}`,
+    prog0.json?.data?.overall?.totalSessions === pubTotal && prog0.json?.data?.overall?.completedSessions === 0,
     JSON.stringify(prog0.json?.data?.overall),
   );
 
@@ -160,7 +162,7 @@ async function main() {
   await call(`/api/learning/progress/sessions/${session.id}`, { method: 'PUT', token, body: { status: 'completed' } });
   const prog1 = await call('/api/learning/progress', { token });
   assert(
-    '進捗 1/1・モジュール別も 1/1',
+    `進捗 1/${pubTotal}・モジュール別も 1/3`,
     prog1.json?.data?.overall?.completedSessions === 1 &&
       prog1.json?.data?.modules?.[0]?.completedSessions === 1,
     JSON.stringify(prog1.json?.data?.overall),
@@ -268,13 +270,14 @@ async function main() {
   });
   assert('セッション非公開化 → 200', unpublish.res.status === 200, `HTTP ${unpublish.res.status}`);
 
-  const pubAfterUnpublish = await call('/api/learning/sessions/day-01');
+  const pubAfterUnpublish = await call('/api/learning/sessions/week-01-day-01');
   assert('非公開 slug は公開側で 404', pubAfterUnpublish.res.status === 404, `HTTP ${pubAfterUnpublish.res.status}`);
 
   const progUnpub = await call('/api/learning/progress', { token });
   assert(
-    '非公開セッションは分母から除外（0/0）',
-    progUnpub.json?.data?.overall?.totalSessions === 0 && progUnpub.json?.data?.overall?.completedSessions === 0,
+    `非公開セッションは分母から除外（0/${pubTotal - 1}）`,
+    progUnpub.json?.data?.overall?.totalSessions === pubTotal - 1 &&
+      progUnpub.json?.data?.overall?.completedSessions === 0,
     JSON.stringify(progUnpub.json?.data?.overall),
   );
 
@@ -287,7 +290,7 @@ async function main() {
 
   const progRepub = await call('/api/learning/progress', { token });
   assert(
-    '再公開で進捗は保持される（1/1）',
+    `再公開で進捗は保持される（1/${pubTotal}）`,
     progRepub.json?.data?.overall?.completedSessions === 1,
     JSON.stringify(progRepub.json?.data?.overall),
   );

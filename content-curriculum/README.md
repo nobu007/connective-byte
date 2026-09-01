@@ -27,7 +27,7 @@ content-curriculum/
 ├── README.md          ← この仕様書
 └── week-01/           ← モジュール単位のディレクトリ（slug = ディレクトリ名）
     ├── _module.md     ← モジュール定義（frontmatter 必須）
-    ├── day-01.md      ← セッション本文（slug = ファイル名から .md を除いたもの）
+    ├── day-01.md      ← セッション本文（slug = ディレクトリ名-ファイル名 = week-01-day-01）
     └── day-02.md
 ```
 
@@ -39,7 +39,7 @@ frontmatter のみ使用（body は読まない）:
 ---
 title: 接続思考の基礎
 description: 最初の1週間で全体像を掴む
-weekNumber: 1 # 1-52。Phase（W1-3/4-8/9-12）の自動振り分けに使う
+weekNumber: 1 # 1-52。Phase（W1-4/5-8/9-12）の自動振り分けに使う
 ---
 ```
 
@@ -82,6 +82,10 @@ npm run import:curriculum -- --publish
 
 - **冪等**: 何度実行しても同一結果。既存slugは title/description/本文等を
   上書き更新するが `is_published` と `order_index` は変更しない
+- **セッションslug = `<ディレクトリ名>-<ファイル名>`**（例: `week-02-day-01`）。
+  slugはDBで全一意のため、ファイル名だけ（`day-01`）だと週が増えた時点で
+  衝突して既存行を上書き奪取する（2026-09-02の事故。取込み結果が
+  「作成0」のときはslug衝突を疑うこと）
 - モジュールの並び順 = ディレクトリ名順、セッションの並び順 = ファイル名順
 - `day-*.md` 以外のファイル（`_module.md`・README 以外の dotファイル等）は無視
 

@@ -83,11 +83,12 @@ for (const statement of STATEMENTS) {
   await sql.query(statement);
 }
 
-// Phase シード（要件glossary: Phase1=W1-3, Phase2=W4-8, Phase3=W9-12）
+// Phase シード（正本 thinking_os-tactics.md: Phase1=W1-4 個人思考OS構築 /
+// Phase2=W5-8 チーム協働システム / Phase3=W9-12 組織実装・スケール）
 const PHASES = [
-  [1, '基礎確立・接続思考導入', '接続思考の基礎から技術統合まで', 1, 3],
-  [2, '実践・システム構築', 'APIコスト効率とチーム協働の実践', 4, 8],
-  [3, '統合・リーダーシップ', '学びの統合と協創リーダーへの転換', 9, 12],
+  [1, '個人思考OS構築', '思考プロセスの可視化からAI協働まで、個人の思考基盤を築く', 1, 4],
+  [2, 'チーム協働システム', '思考の共有とプロトコル統一でチーム協働を実現する', 5, 8],
+  [3, '組織実装・スケール', '部門間連携と継続改善システムで組織に展開する', 9, 12],
 ];
 
 for (const [number, title, description, startWeek, endWeek] of PHASES) {

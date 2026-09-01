@@ -65,7 +65,9 @@ async function loadCurriculum() {
 
     const sessions = [];
     for (const fileName of files) {
-      const slug = fileName.replace(/\.md$/, '');
+      // slug は learning_sessions で全DB一意（UNIQUE制約）のため
+      // ディレクトリ名を接頭辞にして週間の衝突を防ぐ（例: week-02-day-01）
+      const slug = `${dirName}-${fileName.replace(/\.md$/, '')}`;
       if (!SLUG_PATTERN.test(slug)) fail(path.join(dirPath, fileName), `slug 形式が不正: ${slug}`);
       const { data, content } = matter(await fs.readFile(path.join(dirPath, fileName), 'utf-8'));
       if (!data.title) fail(path.join(dirPath, fileName), 'frontmatter に title がありません');
