@@ -1,0 +1,3 @@
+# カリキュラム原稿は prettier の対象外:
+# js fence 内のコードが勝手に再フォーマットされ、意図的な改行が失われるため
+content-curriculum/

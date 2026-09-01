@@ -7,6 +7,7 @@
 - **価格破壊禁止**: 「ちょっといいやつをちょっと安く」— 相場よりやや安 + 品質で差別化。ダンピングは同業破壊のため不可
 - 支払い基盤（Stripe等）は未構築。構築まで無料範囲を広げない
 - 制御手段: `curriculum_modules.is_published` / `learning_sessions.is_published`（module/session 単位・コード変更不要）
+- **コンテンツ公開前は本番ブラウザで全文自己レビュー**（手順は `content-curriculum/README.md`）: コードブロックの読みやすさ（80桁目安で改行）・全体デザインを確認してから公開
 
 # エラー予防プロトコル - SDEC×2SCV×ACR統合版
 
