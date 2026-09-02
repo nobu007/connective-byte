@@ -20,6 +20,7 @@
     "smoke": "node scripts/smoke-prod.mjs",
     "e2e:auth": "node scripts/e2e-auth.mjs",
     "e2e:learning": "dotenv -e .env -- node scripts/e2e-learning.mjs",
+    "e2e:payments": "dotenv -e .env -- node scripts/e2e-payments.mjs",
     "test": "npm-run-all test:frontend test:backend",
     "test:frontend": "npm test -w apps/frontend",
     "test:backend": "npm test -w apps/backend",
@@ -36,8 +37,10 @@
     "deploy:api": "npm run build:backend && npx wrangler deploy -c apps/backend/wrangler.toml",
     "init:auth-db": "dotenv -e .env -- node scripts/init-auth-db.mjs",
     "init:learning-db": "dotenv -e .env -- node scripts/init-learning-db.mjs",
+    "init:payments-db": "dotenv -e .env -- node scripts/init-payments-db.mjs",
     "import:curriculum": "dotenv -e .env -- node scripts/import-curriculum.mjs",
-    "set-user-role": "dotenv -e .env -- node scripts/set-user-role.mjs"
+    "set-user-role": "dotenv -e .env -- node scripts/set-user-role.mjs",
+    "grant-purchase": "dotenv -e .env -- node scripts/grant-purchase.mjs"
   },
   "repository": {
     "type": "git",

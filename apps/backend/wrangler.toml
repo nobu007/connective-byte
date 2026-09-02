@@ -23,6 +23,7 @@ crons = ["17 19 * * *"]
 SITE_URL = "https://connectivebyte.com"
 
 # シークレット（環境ごとに `npx wrangler secret put -c apps/backend/wrangler.toml <KEY>`）:
-# - DATABASE_URL   Neon Postgres 接続文字列
-# - JWT_SECRET     JWT 署名鍵
-# - RESEND_API_KEY メール送信
+# - DATABASE_URL          Neon Postgres 接続文字列
+# - JWT_SECRET            JWT 署名鍵
+# - RESEND_API_KEY        メール送信
+# - STRIPE_WEBHOOK_SECRET Stripe webhook 署名検証秘密鍵（whsec_…・エンドポイント毎に別値）

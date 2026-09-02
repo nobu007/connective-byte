@@ -138,6 +138,59 @@ npm run e2e:auth     # 認証フロー全体（register → ローテーショ�
 
 `e2e:auth` は実APIにテストユーザーを1件作成する（検証メールが1通飛ぶ。宛先は `@resend.dev`）。Googleログインの本番フローは実ブラウザで1往復確認する。
 
+## Payments（Stripe受講登録・Weeks 2-12 購入ゲーティング）
+
+SKUは **12週一括買い切り 29,800円（税込・免税事業者）** の1つのみ。決済は **Stripe Payment Link**（ダッシュボードで作成・サーバー側Checkout Session生成なし・stripe SDK依存なし）で、サーバーは Webhook で付与/取り消しを行うのみ。
+
+- 付与: `checkout.session.completed`（`amount_total===29800 && currency==='jpy'`・`payment_status==='paid'` ガード）→ `purchases` 行 upsert（`stripe_checkout_session_id` で冪等）+ `users.purchased_at` 更新
+- 取り消し: `charge.refunded` → `purchases.status='refunded'` + active購入が無ければ `users.purchased_at=NULL`
+- ユーザー解決: `client_reference_id`（フロントが Payment Link に付与）→ fallback `prefilled_email`。解決不可・金額不一致は **log+200**（5xxを返すとStripeが無限リトライするため）
+- ゲーティング: Week 1 無料 / Week 2+ は `GET /api/learning/sessions/:slug` と `PUT progress` が 403 `PAYMENT_001`。目次・タイトルは全員公開（セールスコピー）
+
+### Stripe ダッシュボード設定（ユーザー作業・一度だけ）
+
+1. **商品**: 「ConnectiveByte 12週間カリキュラム」+ Price **one-time 29,800 JPY（税込）**
+2. **Payment Link 作成** → URL をフロント環境変数へ:
+   - ローカル `.env`: `NEXT_PUBLIC_STRIPE_PAYMENT_LINK`（未設定だと CTA が「準備中」になり壊れた導線が出ない）
+   - 本番: Cloudflare Pages の Environment variables に同じキー（`deploy:cf` のビルド時埋め込み）
+3. **Webhook エンドポイント**: `https://api.connectivebyte.com/api/payments/webhook`、イベントは `checkout.session.completed` + `charge.refunded` の2つのみ
+4. 発行された `whsec_…` を本番Workersへ: `npx wrangler secret put -c apps/backend/wrangler.toml STRIPE_WEBHOOK_SECRET`
+   - テストモードの `whsec_` は `.env` の `STRIPE_WEBHOOK_SECRET` のみに置く（エンドポイント・モード毎に別値。本番値を `.env` に書かない）
+
+### テストモード検証（ローカル）
+
+```bash
+npm run init:payments-db                                   # purchases テーブル + users.purchased_at
+npx stripe listen --forward-to localhost:3001/api/payments/webhook   # .env のテスト用 whsec_ を標示
+npm run dev                                                # フロントの CTA → 4242 4242 4242 4242 で決済
+# → Stripe CLI に配送ログ / マイページ ?purchase=success でポーリング反映（3秒×最大20回）
+```
+
+### 本番リリース順序（Weeks 2-12 公開フリップが最後）
+
+```bash
+npm run init:payments-db          # 1. DB スキーマ
+npx wrangler secret put -c apps/backend/wrangler.toml STRIPE_WEBHOOK_SECRET   # 2. 本番 whsec_
+npm run deploy:api                # 3. backend（webhook 受付開始）
+# 4. Stripe 本番 webhook エンドポイント作成（上記）
+# 5. Pages に NEXT_PUBLIC_STRIPE_PAYMENT_LINK を設定
+npm run deploy:cf                 # 6. フロント
+npm run e2e:payments              # 7. ゲーティング・status・署名拒否・grant/revoke の通し検証
+# 8. 最後に Weeks 2-12 を管理UI（/learning/admin/）で is_published=true に
+#    （公開前の本番ブラウザ全文レビューはプロダクト方針で必須・content-curriculum/README.md 参照）
+```
+
+### 運用ランブック
+
+| 状況                             | 対処                                                                                                            |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Webhook がユーザー解決に失敗した | `npx wrangler tail -c apps/backend/wrangler.toml` で `unmatched` ログ確認 → `npm run grant-purchase -- <email>` |
+| 返金・振込不能で取り消したい     | `npm run grant-purchase -- <email> --revoke`（Stripe側返金とセットで。部分返金も全取り消しが仕様）              |
+| 手動付与の監査                   | `purchases.stripe_checkout_session_id` が `manual_<userId>` の行が手動付与                                      |
+| Stripe配送失敗が続く             | ダッシュボードの webhook delivery を確認。Workers の `!req.rawBody` ガード（400）が出ていないか tail で確認     |
+
+`e2e:payments` は有料週の公開モジュール/セッションを一時作成して 403→grant→200→revoke→403 を検証し、最後に全削除する（実ユーザー・実購入への影響なし。Webhook署名の正常系は単体テストとローカル `stripe listen` で検証済みのため、本番e2eは署名なし400の拒否のみ確認）。
+
 ## CI/CDワークフロー（GitHub Actions）
 
 | ワークフロー | トリガー             | 内容                                               |
