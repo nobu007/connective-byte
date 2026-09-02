@@ -1,0 +1,98 @@
+- generic [active] [ref=f11e1]:
+    - banner [ref=f11e2]:
+        - navigation "Main navigation" [ref=f11e3]:
+            - generic [ref=f11e4]:
+                - link [ref=f11e5] [cursor=pointer]:
+                    - /url: /
+                    - img "ConnectiveByte" [ref=f11e6]
+                - button "Open menu" [ref=f11e7]
+    - main [ref=f11e9]:
+        - generic [ref=f11e10]:
+            - generic [ref=f11e11]:
+                - paragraph [ref=f11e12]: 12週間βカリキュラム
+                - heading "ラーニング" [level=1] [ref=f11e13]
+                - paragraph [ref=f11e14]: コンテンツは全員に公開。ログインすると進捗を記録できます。
+            - generic [ref=f11e15]:
+                - link "カリキュラム一覧へ" [ref=f11e16] [cursor=pointer]:
+                    - /url: /learning/
+                - generic [ref=f11e19]:
+                    - paragraph [ref=f11e20]: Week 1
+                    - heading "接続思考入門 — 思考プロセスの可視化" [level=1] [ref=f11e21]
+                    - paragraph [ref=f11e22]: 接続思考の定義と4つの基本要素を学び、判断ログと差異分析で自分の思考プロセスを可視化する最初の1週間
+                - list [ref=f11e23]:
+                    - listitem [ref=f11e24]:
+                        - link "1. 接続思考とは何か — 個人脳完結の限界 接続思考の定義と4つの基本要素を理解し、1人の脳で完結する思考の限界を自分の問題として認識する 90分 未着手" [ref=f11e25] [cursor=pointer]:
+                            - /url: /learning/?module=week-01&session=day-01
+                            - generic [ref=f11e26]:
+                                - generic [ref=f11e27]: 1. 接続思考とは何か — 個人脳完結の限界
+                                - generic [ref=f11e28]: 接続思考の定義と4つの基本要素を理解し、1人の脳で完結する思考の限界を自分の問題として認識する
+                                - generic [ref=f11e29]: 90分
+                            - generic [ref=f11e33]: 未着手
+                    - listitem [ref=f11e36]:
+                        - link "2. 判断ログの構築 — 思考プロセスの可視化 重要判断を記録し5W1Hで分解する「デジタルツイン思考」の最初の技法を習得する 90分 未着手" [ref=f11e37] [cursor=pointer]:
+                            - /url: /learning/?module=week-01&session=day-02
+                            - generic [ref=f11e38]:
+                                - generic [ref=f11e39]: 2. 判断ログの構築 — 思考プロセスの可視化
+                                - generic [ref=f11e40]: 重要判断を記録し5W1Hで分解する「デジタルツイン思考」の最初の技法を習得する
+                                - generic [ref=f11e41]: 90分
+                            - generic [ref=f11e45]: 未着手
+                    - listitem [ref=f11e48]:
+                        - link "3. 差異分析と思考パターンの抽出 — 接続可能性の設計 予測と実際の差異から思考パターンを抽出し、判断を3つの粒度で共有可能な形に設計する 90分 未着手" [ref=f11e49] [cursor=pointer]:
+                            - /url: /learning/?module=week-01&session=day-03
+                            - generic [ref=f11e50]:
+                                - generic [ref=f11e51]: 3. 差異分析と思考パターンの抽出 — 接続可能性の設計
+                                - generic [ref=f11e52]: 予測と実際の差異から思考パターンを抽出し、判断を3つの粒度で共有可能な形に設計する
+                                - generic [ref=f11e53]: 90分
+                            - generic [ref=f11e57]: 未着手
+    - contentinfo [ref=f11e60]:
+        - generic [ref=f11e61]:
+            - generic [ref=f11e62]:
+                - generic [ref=f11e63]:
+                    - heading "ConnectiveByte" [level=3] [ref=f11e64]
+                    - paragraph [ref=f11e65]: 個を超え、知が立ち上がる場所
+                - generic [ref=f11e66]:
+                    - heading "ナビゲーション" [level=4] [ref=f11e67]
+                    - list [ref=f11e68]:
+                        - listitem [ref=f11e69]:
+                            - link "ホーム" [ref=f11e70] [cursor=pointer]:
+                                - /url: /
+                        - listitem [ref=f11e71]:
+                            - link "About" [ref=f11e72] [cursor=pointer]:
+                                - /url: /about/
+                        - listitem [ref=f11e73]:
+                            - link "原則" [ref=f11e74] [cursor=pointer]:
+                                - /url: /principles/
+                        - listitem [ref=f11e75]:
+                            - link "ラーニング" [ref=f11e76] [cursor=pointer]:
+                                - /url: /learning/
+                        - listitem [ref=f11e77]:
+                            - link "お問い合わせ" [ref=f11e78] [cursor=pointer]:
+                                - /url: /contact/
+                - generic [ref=f11e79]:
+                    - heading "フォロー" [level=4] [ref=f11e80]
+                    - generic [ref=f11e81]:
+                        - link "Twitter" [ref=f11e82] [cursor=pointer]:
+                            - /url: https://twitter.com/connectivebyte
+                        - link "Threads" [ref=f11e85] [cursor=pointer]:
+                            - /url: https://threads.net/@connectivebyte
+                    - list [ref=f11e88]:
+                        - listitem [ref=f11e89]:
+                            - link "プライバシーポリシー" [ref=f11e90] [cursor=pointer]:
+                                - /url: /privacy/
+            - generic [ref=f11e92]:
+                - heading "ニュースレター登録" [level=3] [ref=f11e93]
+                - paragraph [ref=f11e94]: AI時代の協創リーダーシップに関する最新情報をお届けします（月1-2回程度）
+                - generic [ref=f11e96]:
+                    - generic [ref=f11e97]:
+                        - generic [ref=f11e98]: メールアドレス*
+                        - textbox "メールアドレスrequired" [ref=f11e103]:
+                            - /placeholder: your@email.com
+                    - generic [ref=f11e105] [cursor=pointer]:
+                        - checkbox "プライバシーポリシーに同意しますrequired" [ref=f11e106]
+                        - generic [ref=f11e107]:
+                            - link "プライバシーポリシー" [ref=f11e108]:
+                                - /url: /privacy
+                            - text: に同意します*
+                    - button "登録する" [ref=f11e109]
+            - paragraph [ref=f11e111]: © 2026 ConnectiveByte. All rights reserved.
+    - alert [ref=f11e112]
