@@ -100,6 +100,8 @@ export interface AuthUser {
   fullName: string;
   role: string;
   isVerified: boolean;
+  /** 12週カリキュラムの購入（受講登録）日。未購入は null（Weeks 2-12 の解錠に使用） */
+  purchasedAt: string | null;
   bio: string | null;
   timezone: string;
   githubUsername: string | null;

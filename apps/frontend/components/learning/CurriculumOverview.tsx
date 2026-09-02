@@ -3,13 +3,14 @@
 /**
  * カリキュラム一覧（Phase → Module → Session）
  *
- * 全公開: 未ログインでも閲覧できる。progress はログイン時のみ渡す
- * （セッションに StatusBadge、全体/モジュールに ProgressBar を表示）。
+ * 目次・タイトルはセールスコピーとして全公開。Weeks 2-12（requiresPurchase）
+ * は未購入なら本文がロックされるため locked バッジと「有料」チップを表示。
+ * progress はログイン時のみ渡す。
  */
 
 import React from 'react';
 import Link from 'next/link';
-import { BookOpen, Clock } from 'lucide-react';
+import { BookOpen, Clock, Lock } from 'lucide-react';
 import type { PhaseWithModules, ProgressOverview, SessionProgressStatus } from '@/lib/api/learning-api';
 import { ProgressBar } from './ProgressBar';
 import { StatusBadge } from './StatusBadge';
@@ -17,9 +18,11 @@ import { StatusBadge } from './StatusBadge';
 interface Props {
   phases: PhaseWithModules[];
   progress: ProgressOverview | null;
+  /** 受講登録（購入）済みか。未購入だと Week 2 以降がロック表示になる */
+  purchased: boolean;
 }
 
-export function CurriculumOverview({ phases, progress }: Props) {
+export function CurriculumOverview({ phases, progress, purchased }: Props) {
   const statusOf = (sessionId: string): SessionProgressStatus | 'not_started' =>
     progress?.sessions.find((s) => s.sessionId === sessionId)?.status ?? 'not_started';
   const moduleEntry = (moduleId: string) => progress?.modules.find((m) => m.moduleId === moduleId);
@@ -41,6 +44,7 @@ export function CurriculumOverview({ phases, progress }: Props) {
           <div className="space-y-4">
             {phase.modules.map((module) => {
               const entry = moduleEntry(module.id);
+              const locked = Boolean(module.requiresPurchase) && !purchased;
               return (
                 <article
                   key={module.id}
@@ -55,6 +59,17 @@ export function CurriculumOverview({ phases, progress }: Props) {
                         <BookOpen size={16} className="inline mr-1.5 text-[#1e3a8a]" aria-hidden />
                         Week {module.weekNumber}: {module.title}
                       </Link>
+                      <span
+                        className={`inline-flex items-center gap-1 ml-2 align-middle text-[11px] font-semibold px-1.5 py-0.5 rounded ${locked ? 'text-[#1e3a8a] bg-[#1e3a8a]/5' : 'text-[#10b981] bg-[#10b981]/5'}`}
+                      >
+                        {locked ? (
+                          <>
+                            <Lock size={10} aria-hidden /> 有料
+                          </>
+                        ) : (
+                          '無料'
+                        )}
+                      </span>
                       {module.description && <p className="mt-1 text-sm text-gray-600">{module.description}</p>}
                     </div>
                     {entry && (
@@ -80,7 +95,7 @@ export function CurriculumOverview({ phases, progress }: Props) {
                           <span className="inline-flex items-center gap-1 text-xs text-gray-400">
                             <Clock size={12} aria-hidden /> {session.durationMinutes}分
                           </span>
-                          <StatusBadge status={statusOf(session.id)} />
+                          <StatusBadge status={locked ? 'locked' : statusOf(session.id)} />
                         </span>
                       </li>
                     ))}

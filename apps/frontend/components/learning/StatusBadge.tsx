@@ -1,14 +1,14 @@
 'use client';
 
 /**
- * セッションの進捗バッジ（未着手 / 進行中 / 完了）
+ * セッションの進捗バッジ（未着手 / 進行中 / 完了 / ロック）
  */
 
 import React from 'react';
-import { Circle, CircleDot, CheckCircle2 } from 'lucide-react';
+import { Circle, CircleDot, CheckCircle2, Lock } from 'lucide-react';
 import type { SessionProgressStatus } from '@/lib/api/learning-api';
 
-export function StatusBadge({ status }: { status: SessionProgressStatus | 'not_started' }) {
+export function StatusBadge({ status }: { status: SessionProgressStatus | 'not_started' | 'locked' }) {
   if (status === 'completed') {
     return (
       <span className="inline-flex items-center gap-1 text-xs font-medium text-[#10b981]">
@@ -20,6 +20,13 @@ export function StatusBadge({ status }: { status: SessionProgressStatus | 'not_s
     return (
       <span className="inline-flex items-center gap-1 text-xs font-medium text-[#f97316]">
         <CircleDot size={14} aria-hidden /> 進行中
+      </span>
+    );
+  }
+  if (status === 'locked') {
+    return (
+      <span className="inline-flex items-center gap-1 text-xs font-medium text-[#1e3a8a]">
+        <Lock size={14} aria-hidden /> 受講登録が必要
       </span>
     );
   }

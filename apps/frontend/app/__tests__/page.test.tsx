@@ -9,10 +9,10 @@ describe('Home Page', () => {
 
     expect(screen.getByRole('heading', { level: 1, name: /個を超え、知が立ち上がる場所/i })).toBeInTheDocument();
     expect(screen.getByText(/AI時代の知的共創圏 ConnectiveByte/i)).toBeInTheDocument();
-    // CTA は Hero と finalCTA の2箇所に表示される
-    const ctaLinks = screen.getAllByRole('link', { name: /無料相談に申し込む/i });
+    // CTA は Hero と finalCTA の2箇所に表示される（Week 1 無料体験への導線）
+    const ctaLinks = screen.getAllByRole('link', { name: /無料で Week 1 を始める/i });
     expect(ctaLinks.length).toBeGreaterThanOrEqual(1);
-    ctaLinks.forEach((link) => expect(link).toHaveAttribute('href', '/contact'));
+    ctaLinks.forEach((link) => expect(link).toHaveAttribute('href', '/learning'));
   });
 
   it('renders the main content sections', () => {

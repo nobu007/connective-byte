@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * ラーニング: カリキュラム配信 + 進捗トラッキング
+ * ラーニング: カリキュラム配信 + 進捗トラッキング + 購入ゲーティング
  *
  * 静的エクスポート（output:'export'）のため動的ルートは使えない。
  * 単一ページ + クエリパラメータで3ビューを切替える:
@@ -9,11 +9,12 @@
  *   /learning/?module=week-01          → モジュール詳細
  *   /learning/?module=week-01&session=week-01-day-01 → セッション本文
  *
+ * 公開ポリシー: Week 1 は無料公開。Weeks 2-12 は受講登録（購入）済みのみ
+ * 本文を表示し、未購入は LockedSessionView（受講登録へ導く）になる。
  * useSearchParams は <Suspense> 内で使う（静的exportのビルド要件）。
- * コンテンツは全公開。進捗はログイン時のみ取得・表示。
  */
 
-import React, { Suspense, useCallback, useEffect, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -25,13 +26,15 @@ import {
   type ProgressOverview,
 } from '@/lib/api/learning-api';
 import { ApiError as AuthApiError, AUTH_SESSION_EXPIRED } from '@/lib/api/auth-api';
+import { PURCHASE_PRICE_LABEL } from '@/lib/api/payments-api';
 import { CurriculumOverview } from '@/components/learning/CurriculumOverview';
 import { ModuleView } from '@/components/learning/ModuleView';
 import { SessionView } from '@/components/learning/SessionView';
+import { LockedSessionView } from '@/components/learning/LockedSessionView';
 import { ProgressBar } from '@/components/learning/ProgressBar';
 
 function LearningContent() {
-  const { status: authStatus } = useAuth();
+  const { user, status: authStatus } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
   const moduleSlug = searchParams.get('module');
@@ -40,8 +43,13 @@ function LearningContent() {
   const [phases, setPhases] = useState<PhaseWithModules[] | null>(null);
   const [module, setModule] = useState<ModuleWithSessions | null>(null);
   const [session, setSession] = useState<SessionDetail | null>(null);
+  /** 403 PAYMENT_001 で弾かれたセッションslug（LockedSessionView 表示の判定） */
+  const [lockedSlug, setLockedSlug] = useState<string | null>(null);
   const [progress, setProgress] = useState<ProgressOverview | null>(null);
   const [error, setError] = useState('');
+
+  // 受講登録済みか（webhook 付与で users.purchasedAt が反映される）
+  const purchased = Boolean(user?.purchasedAt);
 
   // カリキュラムツリーは全ビューの骨格のため常に取得
   useEffect(() => {
@@ -85,6 +93,7 @@ function LearningContent() {
     let cancelled = false;
     setModule(null);
     setSession(null);
+    setLockedSlug(null);
     setError('');
     if (!moduleSlug) return;
 
@@ -103,6 +112,11 @@ function LearningContent() {
       .catch((err) => {
         if (cancelled) return;
         if (err instanceof AuthApiError && err.code === AUTH_SESSION_EXPIRED) return;
+        // 有料週はセッション自体は存在するため、404リダイレクトより先に判定する
+        if (err instanceof AuthApiError && err.code === 'PAYMENT_001') {
+          setLockedSlug(sessionSlug);
+          return;
+        }
         // セッションが別モジュールの場合も moduleSlug を正として再誘導
         if (err instanceof AuthApiError && err.code === 'LEARNING_SESSION_001') {
           router.replace(`/learning/?module=${encodeURIComponent(moduleSlug)}`);
@@ -115,6 +129,18 @@ function LearningContent() {
     };
   }, [moduleSlug, sessionSlug, router]);
 
+  // ロック表示に使う概要（タイトル・目標）は全員同一の curriculum ツリーから引く
+  const lockedSummary = useMemo(() => {
+    if (!lockedSlug || !phases) return null;
+    for (const phase of phases) {
+      for (const m of phase.modules) {
+        const s = m.sessions.find((x) => x.slug === lockedSlug);
+        if (s) return { session: s, module: m };
+      }
+    }
+    return null;
+  }, [lockedSlug, phases]);
+
   const handleProgressChanged = useCallback(() => {
     loadProgress();
   }, [loadProgress]);
@@ -123,9 +149,11 @@ function LearningContent() {
     <main className="pt-24 pb-16">
       <div className="max-w-3xl mx-auto px-4">
         <header className="mb-10 text-center">
-          <p className="text-xs font-semibold tracking-wider text-[#10b981] uppercase mb-2">12週間βカリキュラム</p>
+          <p className="text-xs font-semibold tracking-wider text-[#10b981] uppercase mb-2">12週間カリキュラム</p>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">ラーニング</h1>
-          <p className="text-gray-600">コンテンツは全員に公開。ログインすると進捗を記録できます。</p>
+          <p className="text-gray-600">
+            Week 1 は無料公開。Weeks 2-12 は受講登録（{PURCHASE_PRICE_LABEL}）で解放されます。
+          </p>
           {progress && progress.overall.totalSessions > 0 && (
             <div className="mt-4 max-w-sm mx-auto">
               <ProgressBar completed={progress.overall.completedSessions} total={progress.overall.totalSessions} />
@@ -145,7 +173,17 @@ function LearningContent() {
           </p>
         )}
 
-        {session && module ? (
+        {lockedSlug && module ? (
+          <LockedSessionView
+            title={lockedSummary?.session.title ?? null}
+            description={lockedSummary?.session.description ?? null}
+            objectives={lockedSummary?.session.objectives ?? []}
+            moduleTitle={lockedSummary?.module.title ?? module.title}
+            moduleSlug={moduleSlug ?? ''}
+            sessionSlug={lockedSlug}
+            user={user}
+          />
+        ) : session && module ? (
           <SessionView
             session={session}
             module={module}
@@ -153,9 +191,9 @@ function LearningContent() {
             onProgressChanged={handleProgressChanged}
           />
         ) : module ? (
-          <ModuleView module={module} progress={progress} />
+          <ModuleView module={module} progress={progress} purchased={purchased} />
         ) : phases ? (
-          <CurriculumOverview phases={phases} progress={progress} />
+          <CurriculumOverview phases={phases} progress={progress} purchased={purchased} />
         ) : !error ? (
           <div className="flex justify-center py-16" role="status" aria-label="読み込み中">
             <Loader2 size={40} className="text-[#1e3a8a] animate-spin" />

@@ -28,6 +28,8 @@ export interface ModuleSummary {
   weekNumber: number;
   orderIndex: number;
   isPublished: boolean;
+  /** Week 2 以降（有料週）で true。未設定＝無料扱い */
+  requiresPurchase?: boolean;
 }
 
 export interface SessionSummary {
@@ -54,6 +56,8 @@ export interface SessionDetail extends SessionSummary {
   content: string;
   moduleSlug: string;
   moduleTitle: string;
+  /** 親モジュールの週番号（未設定時は無料扱い） */
+  moduleWeekNumber?: number;
 }
 
 export interface SessionProgressRecord {

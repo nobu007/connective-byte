@@ -5,6 +5,7 @@
  * - ?module= でモジュール詳細
  * - ?module=&session= でセッション本文（ログイン時: 完了ボタン→PUT progress→進捗再取得）
  * - 未ログインのセッション本文: ログインCTA（進捗APIは呼ばない）
+ * - 有料週（Weeks 2-12）のゲーティング: 403 PAYMENT_001 → ロック表示→受講登録CTA
  * - APIエラーの表示
  */
 
@@ -15,7 +16,13 @@ import { rest } from 'msw';
 import { server } from '../../../mocks/server';
 import LearningPage from '../page';
 import type { PhaseWithModules, ModuleWithSessions, SessionDetail } from '@/lib/api/learning-api';
+import type { AuthUser } from '@/lib/api/auth-api';
 import { setAccessToken } from '@/lib/auth/token-store';
+
+// LockedSessionView は render 時に useTrackEvent（Plausible context）を呼ぶため差し替え
+jest.mock('../../../lib/analytics/useTrackEvent', () => ({
+  useTrackEvent: () => jest.fn(),
+}));
 
 // ---- next/navigation モック（クエリパラメータをテストごとに差し替え） ----
 // router は毎レンダー同一オブジェクトを返すこと（本物の useRouter は stable。
@@ -29,8 +36,23 @@ jest.mock('next/navigation', () => ({
 }));
 
 // ---- 認証状態モック ----
+const baseUser = (purchasedAt: string | null): AuthUser => ({
+  id: 'user-1',
+  email: 'learner@example.com',
+  fullName: 'Learner',
+  role: 'learner',
+  isVerified: true,
+  purchasedAt,
+  bio: null,
+  timezone: 'UTC',
+  githubUsername: null,
+  deletionScheduledAt: null,
+  createdAt: '2026-08-01T00:00:00Z',
+  updatedAt: '2026-08-01T00:00:00Z',
+});
 const authState = {
   status: 'unauthenticated' as 'loading' | 'authenticated' | 'unauthenticated',
+  user: null as AuthUser | null,
 };
 // 注意: jest.mock のモジュール解決は @/ エイリアスを辿れないため相対パスで指定
 // （Navigation.test.tsx と同じ慣行。コンポーネント側の @/ import は同一ファイルへ解決される）
@@ -82,6 +104,52 @@ const sessionDetail: SessionDetail = {
   moduleTitle: moduleDetail.title,
 };
 
+// ---- 有料週（Weeks 2-12）フィクスチャ ----
+const paidPhase: PhaseWithModules = {
+  id: 'phase-2',
+  number: 2,
+  title: '協働深化期',
+  description: 'Week 4-8',
+  startWeek: 4,
+  endWeek: 8,
+  modules: [
+    {
+      id: 'mod-5',
+      phaseId: 'phase-2',
+      slug: 'week-05',
+      title: 'エージェント設計',
+      description: '有料週のサンプル',
+      weekNumber: 5,
+      orderIndex: 1,
+      isPublished: true,
+      requiresPurchase: true,
+      sessions: [
+        {
+          id: 'sess-5',
+          moduleId: 'mod-5',
+          slug: 'day-05',
+          title: 'エージェントの構成要素',
+          description: '有料本文の入り口',
+          durationMinutes: 45,
+          objectives: ['エージェントを設計できる'],
+          orderIndex: 1,
+          isPublished: true,
+        },
+      ],
+    },
+  ],
+};
+
+const paidModuleDetail: ModuleWithSessions = paidPhase.modules[0];
+
+const paidSessionDetail: SessionDetail = {
+  ...paidModuleDetail.sessions[0],
+  content: '# 有料本文',
+  moduleSlug: 'week-05',
+  moduleTitle: paidModuleDetail.title,
+  moduleWeekNumber: 5,
+};
+
 function mockLearningApis(overrides?: { curriculumStatus?: number }) {
   server.use(
     rest.get('**/api/learning/curriculum', (_req, res, ctx) =>
@@ -90,7 +158,7 @@ function mockLearningApis(overrides?: { curriculumStatus?: number }) {
             ctx.status(overrides.curriculumStatus),
             ctx.json({ error: { code: 'INTERNAL_001', message: 'サーバーエラー' } }),
           )
-        : res(ctx.status(200), ctx.json({ success: true, data: { phases: [phase] } })),
+        : res(ctx.status(200), ctx.json({ success: true, data: { phases: [phase, paidPhase] } })),
     ),
     rest.get('**/api/learning/modules/week-01', (_req, res, ctx) =>
       res(ctx.status(200), ctx.json({ success: true, data: { module: moduleDetail } })),
@@ -98,13 +166,26 @@ function mockLearningApis(overrides?: { curriculumStatus?: number }) {
     rest.get('**/api/learning/sessions/day-01', (_req, res, ctx) =>
       res(ctx.status(200), ctx.json({ success: true, data: { session: sessionDetail } })),
     ),
+    rest.get('**/api/learning/modules/week-05', (_req, res, ctx) =>
+      res(ctx.status(200), ctx.json({ success: true, data: { module: paidModuleDetail } })),
+    ),
+    // 有料セッション本文は未購入だと 403 PAYMENT_001（購入済みテストは個別に上書き）
+    rest.get('**/api/learning/sessions/day-05', (_req, res, ctx) =>
+      res(
+        ctx.status(403),
+        ctx.json({ error: { code: 'PAYMENT_001', message: 'このセッションは受講登録（購入）が必要です' } }),
+      ),
+    ),
   );
 }
 
 describe('LearningPage', () => {
   beforeEach(() => {
+    // buildPaymentLink は呼び出し毎に env を読む（未設定ケースは tests/payments-api 参照）
+    process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/test_link';
     queryParams = {};
     authState.status = 'unauthenticated';
+    authState.user = null;
     setAccessToken(null);
     routerState.replace.mockClear();
     mockLearningApis();
@@ -121,6 +202,10 @@ describe('LearningPage', () => {
     expect(screen.getByRole('link', { name: /AIとは何か/ })).toBeInTheDocument();
     // 未ログインは未着手バッジ（進捗APIを呼ばない）
     expect(screen.getByText('未着手')).toBeInTheDocument();
+    // 目次はセールスコピー: 無料/有料のチップとロックバッジで出し分け
+    expect(screen.getByText('無料')).toBeInTheDocument();
+    expect(screen.getByText('有料')).toBeInTheDocument();
+    expect(screen.getByText('受講登録が必要')).toBeInTheDocument();
   });
 
   it('does not call the progress API when unauthenticated', async () => {
@@ -252,6 +337,67 @@ describe('LearningPage', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent('サーバーエラー');
+    });
+  });
+
+  describe('paid weeks gating (PAYMENT_001)', () => {
+    it('anonymous: 有料セッションはロック表示でログインCTA（404リダイレクトしない）', async () => {
+      queryParams = { module: 'week-05', session: 'day-05' };
+      render(<LearningPage />);
+
+      const cta = await screen.findByRole('link', { name: /ログインして受講登録する/ });
+      expect(cta).toHaveAttribute(
+        'href',
+        '/login?next=' + encodeURIComponent('/learning/?module=week-05&session=day-05'),
+      );
+      // 目次（全員同一）からタイトルと目標をセールスコピーとして表示
+      expect(screen.getByRole('heading', { name: 'エージェントの構成要素' })).toBeInTheDocument();
+      expect(screen.getByText('エージェントを設計できる')).toBeInTheDocument();
+      expect(routerState.replace).not.toHaveBeenCalled();
+    });
+
+    it('authenticated & 未購入: Payment Link CTA（外部リンク・新規タブ）', async () => {
+      authState.status = 'authenticated';
+      authState.user = baseUser(null);
+      setAccessToken('test-token');
+      server.use(
+        rest.get('**/api/learning/progress', (_req, res, ctx) =>
+          res(ctx.status(200), ctx.json({ success: true, data: emptyOverview() })),
+        ),
+      );
+
+      queryParams = { module: 'week-05', session: 'day-05' };
+      render(<LearningPage />);
+
+      const cta = await screen.findByRole('link', { name: /受講登録する/ });
+      expect(cta).toHaveAttribute(
+        'href',
+        'https://buy.stripe.com/test_link?client_reference_id=user-1&prefilled_email=learner%40example.com',
+      );
+      expect(cta).toHaveAttribute('target', '_blank');
+      expect(cta).toHaveAttribute('rel', 'noopener noreferrer');
+    });
+
+    it('authenticated & 購入済み: 有料本文が表示される', async () => {
+      authState.status = 'authenticated';
+      authState.user = baseUser('2026-08-30T00:00:00Z');
+      setAccessToken('test-token');
+      server.use(
+        rest.get('**/api/learning/progress', (_req, res, ctx) =>
+          res(ctx.status(200), ctx.json({ success: true, data: emptyOverview() })),
+        ),
+        rest.get('**/api/learning/sessions/day-05', (_req, res, ctx) =>
+          res(ctx.status(200), ctx.json({ success: true, data: { session: paidSessionDetail } })),
+        ),
+      );
+
+      queryParams = { module: 'week-05', session: 'day-05' };
+      render(<LearningPage />);
+
+      expect(await screen.findByRole('heading', { name: 'エージェントの構成要素' })).toBeInTheDocument();
+      expect(screen.getByText('有料本文', { selector: 'h1,h2,h3' })).toBeInTheDocument();
+      // ロック表示にはならない
+      expect(screen.queryByText(/受講登録（購入）が必要です/)).not.toBeInTheDocument();
     });
   });
 });

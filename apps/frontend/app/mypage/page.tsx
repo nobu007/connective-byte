@@ -1,11 +1,16 @@
 'use client';
 
 /**
- * マイページ: プロフィール / セキュリティ / セッション / アカウント の4タブ
+ * マイページ: 受講登録 / プロフィール / セキュリティ / セッション / アカウント
+ *
+ * ?purchase=success（Stripe Payment Link からのリターン）では Webhook 付与の
+ * 反映を PurchaseStatusCard がポーリングする。useSearchParams 使用のため
+ * <Suspense> 内にコンテンツを置く（静的exportのビルド要件）。
  */
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { AlertTriangle, Loader2 } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { RequireAuth } from '@/components/auth/RequireAuth';
 import { authApi } from '@/lib/api/auth-api';
@@ -13,6 +18,7 @@ import { ProfileForm } from '@/components/mypage/ProfileForm';
 import { PasswordChangeForm } from '@/components/mypage/PasswordChangeForm';
 import { SessionList } from '@/components/mypage/SessionList';
 import { AccountDeletion } from '@/components/mypage/AccountDeletion';
+import { PurchaseStatusCard } from '@/components/mypage/PurchaseStatusCard';
 
 type Tab = 'profile' | 'security' | 'sessions' | 'account';
 
@@ -25,9 +31,12 @@ const TABS: Array<{ key: Tab; label: string }> = [
 
 function MyPageContent() {
   const { user, setUser, refreshUser } = useAuth();
+  const searchParams = useSearchParams();
   const [tab, setTab] = useState<Tab>('profile');
   const [bannerError, setBannerError] = useState('');
   const [bannerBusy, setBannerBusy] = useState(false);
+  // 決済リターン直後のみポーリング（通常時は1回の取得で十分）
+  const pollPurchase = searchParams.get('purchase') === 'success';
 
   if (!user) {
     return (
@@ -82,6 +91,8 @@ function MyPageContent() {
         )}
         {bannerError && <p className="mb-4 text-sm text-[#ef4444]">{bannerError}</p>}
 
+        <PurchaseStatusCard user={user} onPurchased={refreshUser} poll={pollPurchase} />
+
         <div className="flex border-b border-gray-200 mb-8 overflow-x-auto" role="tablist" aria-label="マイページ">
           {TABS.map(({ key, label }) => (
             <button
@@ -112,7 +123,15 @@ function MyPageContent() {
 export default function MyPage() {
   return (
     <RequireAuth>
-      <MyPageContent />
+      <Suspense
+        fallback={
+          <div className="pt-24 pb-16 flex justify-center" role="status" aria-label="読み込み中">
+            <Loader2 size={40} className="text-[#1e3a8a] animate-spin" />
+          </div>
+        }
+      >
+        <MyPageContent />
+      </Suspense>
     </RequireAuth>
   );
 }
