@@ -9,7 +9,7 @@ test.describe('Homepage', () => {
     await expect(page.getByRole('heading', { name: /個を超え、知が立ち上がる場所/i })).toBeVisible();
     // exact: the <title> also contains this phrase (substring match would hit both)
     await expect(page.getByText('AI時代の知的共創圏 ConnectiveByte', { exact: true })).toBeVisible();
-    await expect(page.getByRole('link', { name: /無料相談に申し込む/i }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /無料で Week 1 を始める/i }).first()).toBeVisible();
   });
 
   test('should display problem statement section', async ({ page }) => {
@@ -31,21 +31,25 @@ test.describe('Homepage', () => {
 
   test('should display social proof section', async ({ page }) => {
     await expect(page.getByText(/Version 0/i)).toBeVisible();
-    await expect(page.getByText(/参加者募集中/i)).toBeVisible();
+    await expect(page.getByText(/受講受付中/i)).toBeVisible();
   });
 
   test('should display final CTA section', async ({ page }) => {
-    await expect(page.getByText(/まずは無料相談から/i)).toBeVisible();
-    await expect(page.getByRole('link', { name: /無料相談に申し込む/i }).last()).toBeVisible();
+    await expect(page.getByText(/まずは Week 1 を無料で/i)).toBeVisible();
+    await expect(page.getByRole('link', { name: /無料で Week 1 を始める/i }).last()).toBeVisible();
   });
 
   test('should have working CTA buttons', async ({ page }) => {
-    // Click hero CTA
-    await page
-      .getByRole('link', { name: /無料相談に申し込む/i })
-      .first()
-      .click();
-    await expect(page).toHaveURL(/\/contact/);
+    // Hero CTA は framer-motion の出現アニメーション（opacity 0→1）で描画される。
+    // opacity が 1 になるのは hydration + アニメーション完了後のみなので、これを
+    // hydration 完了のシグナルとして待つ（前にもクリックすると next/link が
+    // 未ハイドレートで遷移しない）
+    const cta = page.getByRole('link', { name: /無料で Week 1 を始める/i }).first();
+    await expect(cta).toBeVisible();
+    await expect(cta).toHaveCSS('opacity', '1');
+    // Click hero CTA（受講導線: /learning/ へ）
+    await cta.click();
+    await expect(page).toHaveURL(/\/learning/);
   });
 });
 
