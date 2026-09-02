@@ -6,7 +6,7 @@
  */
 
 import { Router, type RequestHandler } from 'express';
-import { authenticate, authorize } from '../middleware/auth';
+import { authenticate, authorize, optionalAuthenticate } from '../middleware/auth';
 import { createRateLimiter } from '../middleware/rateLimiter';
 import {
   handleGetCurriculum,
@@ -66,13 +66,18 @@ const learningWriteLimiter = createRateLimiter({
   message: 'Too many progress updates. Please try again later.',
 });
 
-// --- 公開コンテンツ（認証不要・全公開） ---
+// --- 公開コンテンツ（認証不要・全公開。セッション本文のみ購入判定のため optionalAuthenticate） ---
 
 router.get('/api/learning/curriculum', learningReadLimiter, handleGetCurriculum);
 
 router.get('/api/learning/modules/:moduleSlug', learningReadLimiter, handleGetModule);
 
-router.get('/api/learning/sessions/:sessionSlug', learningReadLimiter, handleGetSession);
+router.get(
+  '/api/learning/sessions/:sessionSlug',
+  learningReadLimiter,
+  optionalAuthenticate,
+  handleGetSession
+);
 
 // --- 進捗（要認証） ---
 

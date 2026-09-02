@@ -18,6 +18,13 @@ import {
   UpdateSessionInput,
 } from '../interfaces/learning-repository';
 import { LearningError } from '../errors';
+import { EntitlementChecker, allowAllEntitlement } from '../interfaces/entitlement-checker';
+
+/**
+ * 無料公開する週数（プロダクト方針: Week 1 のみ無料・それ以降は購入で解放）。
+ * curriculum_modules.is_published とは独立したコード変更不要の制御値。
+ */
+export const FREE_WEEKS = 1;
 
 const SLUG_PATTERN = /^[a-z0-9-]{1,80}$/;
 const MAX_TITLE_LENGTH = 200;
@@ -75,12 +82,24 @@ function validateObjectives(objectives: unknown): string[] {
 }
 
 export class LearningService {
-  constructor(private readonly repository: LearningRepository) {}
+  constructor(
+    private readonly repository: LearningRepository,
+    // 既定は常に許可（既存テスト・無料公開期間の後方互換。本番は container で PaymentService を注入）
+    private readonly entitlement: EntitlementChecker = allowAllEntitlement
+  ) {}
 
   // --- 公開読み取り ---
 
-  getCurriculum(): Promise<PhaseWithModules[]> {
-    return this.repository.getCurriculumTree(false);
+  /** ツリー自体は全員同一（目次・タイトルはセールスコピーとして公開）。要購入週に印を付けるのみ */
+  async getCurriculum(): Promise<PhaseWithModules[]> {
+    const tree = await this.repository.getCurriculumTree(false);
+    return tree.map((phase) => ({
+      ...phase,
+      modules: phase.modules.map((m) => ({
+        ...m,
+        requiresPurchase: m.weekNumber > FREE_WEEKS,
+      })),
+    }));
   }
 
   async getModuleBySlug(slug: string): Promise<ModuleWithSessions> {
@@ -88,13 +107,24 @@ export class LearningService {
     if (!module) {
       throw new LearningError('LEARNING_MODULE_001', 'モジュールが見つかりません', 404);
     }
-    return module;
+    return { ...module, requiresPurchase: module.weekNumber > FREE_WEEKS };
   }
 
-  async getSessionBySlug(slug: string): Promise<SessionDetail> {
+  /**
+   * セッション本文。Weeks 2-12（weekNumber > FREE_WEEKS）は購入者のみ。
+   * 401 ではなく 403 + PAYMENT_001（apiFetch が 401 で refresh サイクルに入るのを避ける）。
+   * viewerId は optionalAuthenticate 由来（未ログイン = null）。
+   */
+  async getSessionBySlug(slug: string, viewerId: string | null = null): Promise<SessionDetail> {
     const session = await this.repository.findSessionBySlug(slug, false);
     if (!session) {
       throw new LearningError('LEARNING_SESSION_001', 'セッションが見つかりません', 404);
+    }
+    if (session.moduleWeekNumber > FREE_WEEKS) {
+      const entitled = viewerId !== null && (await this.entitlement.hasEntitlement(viewerId));
+      if (!entitled) {
+        throw new LearningError('PAYMENT_001', 'このセッションは受講登録（購入）が必要です', 403);
+      }
     }
     return session;
   }

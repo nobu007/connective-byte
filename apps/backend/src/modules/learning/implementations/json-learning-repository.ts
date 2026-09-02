@@ -183,7 +183,13 @@ export class JsonLearningRepository implements LearningRepository {
       return null;
     }
     const { content, ...summary } = session;
-    return { ...summary, content, moduleSlug: module.slug, moduleTitle: module.title };
+    return {
+      ...summary,
+      content,
+      moduleSlug: module.slug,
+      moduleTitle: module.title,
+      moduleWeekNumber: module.weekNumber,
+    };
   }
 
   async findSessionById(id: string): Promise<SessionDetail | null> {
@@ -193,7 +199,13 @@ export class JsonLearningRepository implements LearningRepository {
     const module = this.data.modules.find((m) => m.id === session.moduleId);
     if (!module) return null;
     const { content, ...summary } = session;
-    return { ...summary, content, moduleSlug: module.slug, moduleTitle: module.title };
+    return {
+      ...summary,
+      content,
+      moduleSlug: module.slug,
+      moduleTitle: module.title,
+      moduleWeekNumber: module.weekNumber,
+    };
   }
 
   async getPhases(): Promise<Phase[]> {

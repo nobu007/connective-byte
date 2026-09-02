@@ -75,8 +75,13 @@ export async function handleGetSession(
   next: NextFunction
 ): Promise<void> {
   try {
-    const session = await learningService.getSessionBySlug(String(req.params.sessionSlug));
-    res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+    // optionalAuthenticate 由来。未ログインでも Week 1（無料週）は閲覧可
+    const session = await learningService.getSessionBySlug(
+      String(req.params.sessionSlug),
+      req.user?.id ?? null
+    );
+    // 応答がAuthorization（購入状態）で変化するため共有キャッシュには載せない
+    res.set('Cache-Control', 'private, max-age=60, stale-while-revalidate=300');
     res.status(200).json({ success: true, data: { session } });
   } catch (error) {
     handleLearningError(res, next, error);

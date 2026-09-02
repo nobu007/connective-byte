@@ -28,6 +28,12 @@ export interface ModuleSummary {
   weekNumber: number;
   orderIndex: number;
   isPublished: boolean;
+  /**
+   * 購入（エンタイトルメント）が必要な週かどうか。service 層で
+   * weekNumber > FREE_WEEKS として後付けする（リポジトリは関知しない）。
+   * 未設定＝無料扱い（旧テスト互換）
+   */
+  requiresPurchase?: boolean;
 }
 
 export interface SessionSummary {
@@ -47,6 +53,8 @@ export interface SessionDetail extends SessionSummary {
   content: string;
   moduleSlug: string;
   moduleTitle: string;
+  /** 親モジュールの週番号（購入ゲーティング判定に使用） */
+  moduleWeekNumber: number;
 }
 
 export interface ModuleWithSessions extends ModuleSummary {

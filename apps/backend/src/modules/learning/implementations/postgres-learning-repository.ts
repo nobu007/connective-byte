@@ -66,6 +66,7 @@ interface SessionRow {
 interface SessionWithModuleRow extends SessionRow {
   module_slug: string;
   module_title: string;
+  module_week_number: number;
 }
 
 interface ProgressRow {
@@ -135,6 +136,7 @@ function rowToSessionDetail(row: SessionWithModuleRow): SessionDetail {
     content: row.content ?? '',
     moduleSlug: row.module_slug,
     moduleTitle: row.module_title,
+    moduleWeekNumber: row.module_week_number,
   };
 }
 
@@ -246,7 +248,8 @@ export class PostgresLearningRepository implements LearningRepository {
     const { rows } = await this.query<SessionWithModuleRow>(
       `SELECT s.id, s.module_id, s.slug, s.title, s.description, s.duration_minutes,
               s.objectives, s.order_index, s.is_published, s.content,
-              m.slug AS module_slug, m.title AS module_title
+              m.slug AS module_slug, m.title AS module_title,
+              m.week_number AS module_week_number
        FROM learning_sessions s
        JOIN curriculum_modules m ON m.id = s.module_id
        WHERE s.slug = $1
@@ -260,7 +263,8 @@ export class PostgresLearningRepository implements LearningRepository {
     const { rows } = await this.query<SessionWithModuleRow>(
       `SELECT s.id, s.module_id, s.slug, s.title, s.description, s.duration_minutes,
               s.objectives, s.order_index, s.is_published, s.content,
-              m.slug AS module_slug, m.title AS module_title
+              m.slug AS module_slug, m.title AS module_title,
+              m.week_number AS module_week_number
        FROM learning_sessions s
        JOIN curriculum_modules m ON m.id = s.module_id
        WHERE s.id = $1`,

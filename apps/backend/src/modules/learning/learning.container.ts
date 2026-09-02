@@ -10,6 +10,7 @@ import { JsonLearningRepository } from './implementations/json-learning-reposito
 import { PostgresLearningRepository } from './implementations/postgres-learning-repository';
 import { LearningService } from './services/learning-service';
 import { ProgressService } from './services/progress-service';
+import { paymentsContainer } from '../payments/payments.container';
 
 export interface LearningContainer {
   learningRepository: LearningRepository;
@@ -27,10 +28,11 @@ export function buildLearningContainer(): LearningContainer {
     ? new PostgresLearningRepository()
     : new JsonLearningRepository();
 
+  // Weeks 2-12 の閲覧資格判定は PaymentService に委譲（依存方向: learning → payments）
   return {
     learningRepository,
-    learningService: new LearningService(learningRepository),
-    progressService: new ProgressService(learningRepository),
+    learningService: new LearningService(learningRepository, paymentsContainer.paymentService),
+    progressService: new ProgressService(learningRepository, paymentsContainer.paymentService),
   };
 }
 
