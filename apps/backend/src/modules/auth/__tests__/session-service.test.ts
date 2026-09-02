@@ -30,6 +30,7 @@ async function createUser(repository: JsonUserRepository, email: string): Promis
     bio: null,
     timezone: 'UTC',
     githubUsername: null,
+    purchasedAt: null,
     deletionScheduledAt: null,
     deletedAt: null,
   });

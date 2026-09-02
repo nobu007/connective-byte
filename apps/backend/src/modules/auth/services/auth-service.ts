@@ -46,6 +46,8 @@ export interface PublicUser {
   fullName: string;
   role: UserRole;
   isVerified: boolean;
+  /** 12週コース購入日（null = 未購入）。Weeks 2-12 の閲覧権限判定に使う */
+  purchasedAt: string | null;
 }
 
 export interface AuthResponse {
@@ -116,6 +118,7 @@ export class AuthService {
       fullName: data.fullName,
       role: 'learner', // Default role per spec
       isVerified: false, // Email verification required
+      purchasedAt: null,
       bio: null,
       timezone: 'UTC',
       githubUsername: null,
@@ -394,5 +397,6 @@ export function toPublicUser(user: User): PublicUser {
     fullName: user.fullName,
     role: user.role,
     isVerified: user.isVerified,
+    purchasedAt: user.purchasedAt ?? null,
   };
 }

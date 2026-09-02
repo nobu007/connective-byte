@@ -158,6 +158,7 @@ export class OAuthService {
         fullName: userInfo.name || userInfo.email.split('@')[0],
         role: 'learner',
         isVerified: true, // provider 側で email 検証済み
+        purchasedAt: null,
         bio: null,
         timezone: 'UTC',
         githubUsername: null,

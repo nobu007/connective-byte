@@ -31,6 +31,7 @@ interface UserRow {
   full_name: string;
   role: string;
   is_verified: boolean;
+  purchased_at: Date | string | null;
   bio: string | null;
   timezone: string;
   github_username: string | null;
@@ -83,6 +84,7 @@ function rowToUser(row: UserRow): User {
     fullName: row.full_name,
     role: row.role as User['role'],
     isVerified: row.is_verified,
+    purchasedAt: toIsoOrNull(row.purchased_at),
     bio: row.bio,
     timezone: row.timezone,
     githubUsername: row.github_username,
@@ -131,6 +133,7 @@ const UPDATE_COLUMNS: Record<string, string> = {
   fullName: 'full_name',
   role: 'role',
   isVerified: 'is_verified',
+  purchasedAt: 'purchased_at',
   bio: 'bio',
   timezone: 'timezone',
   githubUsername: 'github_username',

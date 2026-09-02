@@ -71,6 +71,7 @@ describe('UserService', () => {
       bio: null,
       timezone: 'UTC',
       githubUsername: null,
+      purchasedAt: null,
       deletionScheduledAt: null,
       deletedAt: null,
     });
@@ -254,6 +255,7 @@ describe('UserService', () => {
         bio: null,
         timezone: 'UTC',
         githubUsername: null,
+        purchasedAt: null,
         deletionScheduledAt: null,
         deletedAt: null,
       });
@@ -271,6 +273,7 @@ describe('UserService', () => {
         bio: null,
         timezone: 'UTC',
         githubUsername: null,
+        purchasedAt: null,
         deletionScheduledAt: null,
         deletedAt: null,
       });

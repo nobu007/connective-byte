@@ -17,9 +17,11 @@ import express from 'express';
 import { httpServerHandler } from 'cloudflare:node';
 import { securityHeaders, corsConfig, sanitizeInput } from './middleware/security';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler';
+import { captureRawBody } from './middleware/rawBody';
 import healthRoutes from './routes/healthRoutes';
 import authRoutes from './routes/authRoutes';
 import learningRoutes from './routes/learningRoutes';
+import paymentRoutes from './routes/paymentRoutes';
 import { authContainer } from './modules/auth/auth.container';
 
 const app = express();
@@ -35,7 +37,8 @@ app.use(securityHeaders);
 app.use(corsConfig);
 
 // Body parsing（learning の管理APIは Markdown 本文（最大1MB）を扱うため 1mb まで許可）
-app.use(express.json({ limit: '1mb' }));
+// verify: Stripe Webhook 署名検証用に生ボディを req.rawBody へ（参照のみ）
+app.use(express.json({ limit: '1mb', verify: captureRawBody }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 app.use(sanitizeInput);
@@ -44,6 +47,7 @@ app.use(sanitizeInput);
 app.use(healthRoutes);
 app.use(authRoutes);
 app.use(learningRoutes);
+app.use(paymentRoutes);
 
 // Error handling
 app.use(notFoundHandler);

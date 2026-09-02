@@ -76,6 +76,7 @@ function normalizeUser(user: User): User {
     bio: user.bio ?? null,
     timezone: user.timezone ?? 'UTC',
     githubUsername: user.githubUsername ?? null,
+    purchasedAt: user.purchasedAt ?? null,
     deletionScheduledAt: user.deletionScheduledAt ?? null,
     deletedAt: user.deletedAt ?? null,
   };

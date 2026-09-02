@@ -119,6 +119,15 @@ export const sanitizeInput: RequestHandler = (
     return;
   }
 
+  // Stripe Webhook も対象外:
+  // 署名検証に生ボディ（req.rawBody）を使い、本文は Stripe が送ったまま扱うため
+  // （sanitize が本文を書き換えると署名検証が必ず失敗する。学習コンテンツ系と同じ理由）。
+  // リクエストの真正性は Stripe-Signature の HMAC 検証で保証される。
+  if (req.path === '/api/payments/webhook') {
+    next();
+    return;
+  }
+
   // Sanitize query parameters
   if (req.query) {
     Object.keys(req.query).forEach((key) => {

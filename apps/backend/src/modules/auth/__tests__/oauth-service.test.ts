@@ -153,6 +153,7 @@ describe('OAuthService', () => {
       bio: null,
       timezone: 'UTC',
       githubUsername: null,
+      purchasedAt: null,
       deletionScheduledAt: null,
       deletedAt: null,
     });

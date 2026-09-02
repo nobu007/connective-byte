@@ -524,6 +524,7 @@ describe('Auth API Endpoints', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data.user.email).toBe(user.email);
       expect(response.body.data.user).not.toHaveProperty('passwordHash');
+      expect(response.body.data.user.purchasedAt).toBeNull();
       expect(response.body.data.oauthAccounts).toEqual([]);
     });
 

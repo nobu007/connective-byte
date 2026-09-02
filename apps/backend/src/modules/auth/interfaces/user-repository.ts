@@ -12,6 +12,8 @@ export interface User {
   fullName: string;
   role: UserRole;
   isVerified: boolean;
+  /** 12週コース購入日（users.purchased_at ミラー）。未購入は null。正本は purchases テーブル */
+  purchasedAt: string | null;
   bio: string | null;
   timezone: string;
   githubUsername: string | null;
