@@ -1,0 +1,82 @@
+- generic [active] [ref=f3e1]:
+    - banner [ref=f3e2]:
+        - navigation "Main navigation" [ref=f3e3]:
+            - generic [ref=f3e4]:
+                - link [ref=f3e5] [cursor=pointer]:
+                    - /url: /
+                    - img "ConnectiveByte" [ref=f3e6]
+                - button "Open menu" [ref=f3e7]
+    - main [ref=f3e9]:
+        - generic [ref=f3e10]:
+            - generic [ref=f3e11]:
+                - paragraph [ref=f3e12]: 12週間βカリキュラム
+                - heading "ラーニング" [level=1] [ref=f3e13]
+                - paragraph [ref=f3e14]: コンテンツは全員に公開。ログインすると進捗を記録できます。
+            - generic [ref=f3e15]:
+                - link "カリキュラム一覧へ" [ref=f3e16] [cursor=pointer]:
+                    - /url: /learning/
+                - generic [ref=f3e19]:
+                    - paragraph [ref=f3e20]: Week 1
+                    - heading "接続思考・基礎理解・技術統合" [level=1] [ref=f3e21]
+                    - paragraph [ref=f3e22]: 接続思考の核心概念を学び、個人最適化の限界とチーム思考の価値を体感する最初の1週間
+                - list [ref=f3e23]:
+                    - listitem [ref=f3e24]:
+                        - link "1. 接続思考・概論・エンジニア革命・導入 接続思考の核心概念を理解し、AI時代のエンジニアに迫られる変革を認識する 240分 未着手" [ref=f3e25] [cursor=pointer]:
+                            - /url: /learning/?module=week-01&session=day-01
+                            - generic [ref=f3e26]:
+                                - generic [ref=f3e27]: 1. 接続思考・概論・エンジニア革命・導入
+                                - generic [ref=f3e28]: 接続思考の核心概念を理解し、AI時代のエンジニアに迫られる変革を認識する
+                                - generic [ref=f3e29]: 240分
+                            - generic [ref=f3e33]: 未着手
+    - contentinfo [ref=f3e36]:
+        - generic [ref=f3e37]:
+            - generic [ref=f3e38]:
+                - generic [ref=f3e39]:
+                    - heading "ConnectiveByte" [level=3] [ref=f3e40]
+                    - paragraph [ref=f3e41]: 個を超え、知が立ち上がる場所
+                - generic [ref=f3e42]:
+                    - heading "ナビゲーション" [level=4] [ref=f3e43]
+                    - list [ref=f3e44]:
+                        - listitem [ref=f3e45]:
+                            - link "ホーム" [ref=f3e46] [cursor=pointer]:
+                                - /url: /
+                        - listitem [ref=f3e47]:
+                            - link "About" [ref=f3e48] [cursor=pointer]:
+                                - /url: /about/
+                        - listitem [ref=f3e49]:
+                            - link "原則" [ref=f3e50] [cursor=pointer]:
+                                - /url: /principles/
+                        - listitem [ref=f3e51]:
+                            - link "ラーニング" [ref=f3e52] [cursor=pointer]:
+                                - /url: /learning/
+                        - listitem [ref=f3e53]:
+                            - link "お問い合わせ" [ref=f3e54] [cursor=pointer]:
+                                - /url: /contact/
+                - generic [ref=f3e55]:
+                    - heading "フォロー" [level=4] [ref=f3e56]
+                    - generic [ref=f3e57]:
+                        - link "Twitter" [ref=f3e58] [cursor=pointer]:
+                            - /url: https://twitter.com/connectivebyte
+                        - link "Threads" [ref=f3e61] [cursor=pointer]:
+                            - /url: https://threads.net/@connectivebyte
+                    - list [ref=f3e64]:
+                        - listitem [ref=f3e65]:
+                            - link "プライバシーポリシー" [ref=f3e66] [cursor=pointer]:
+                                - /url: /privacy/
+            - generic [ref=f3e68]:
+                - heading "ニュースレター登録" [level=3] [ref=f3e69]
+                - paragraph [ref=f3e70]: AI時代の協創リーダーシップに関する最新情報をお届けします（月1-2回程度）
+                - generic [ref=f3e72]:
+                    - generic [ref=f3e73]:
+                        - generic [ref=f3e74]: メールアドレス*
+                        - textbox "メールアドレスrequired" [ref=f3e79]:
+                            - /placeholder: your@email.com
+                    - generic [ref=f3e81] [cursor=pointer]:
+                        - checkbox "プライバシーポリシーに同意しますrequired" [ref=f3e82]
+                        - generic [ref=f3e83]:
+                            - link "プライバシーポリシー" [ref=f3e84]:
+                                - /url: /privacy
+                            - text: に同意します*
+                    - button "登録する" [ref=f3e85]
+            - paragraph [ref=f3e87]: © 2026 ConnectiveByte. All rights reserved.
+    - alert [ref=f3e88]

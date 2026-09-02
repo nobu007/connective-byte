@@ -1,0 +1,82 @@
+- generic [active] [ref=e1]:
+    - banner [ref=e2]:
+        - navigation "Main navigation" [ref=e3]:
+            - generic [ref=e4]:
+                - link [ref=e5] [cursor=pointer]:
+                    - /url: /
+                    - img "ConnectiveByte" [ref=e6]
+                - list [ref=e7]:
+                    - listitem [ref=e8]:
+                        - link "ホーム" [ref=e9] [cursor=pointer]:
+                            - /url: /
+                    - listitem [ref=e10]:
+                        - link "About" [ref=e11] [cursor=pointer]:
+                            - /url: /about/
+                    - listitem [ref=e12]:
+                        - link "原則" [ref=e13] [cursor=pointer]:
+                            - /url: /principles/
+                    - listitem [ref=e14]:
+                        - link "ラーニング" [ref=e15] [cursor=pointer]:
+                            - /url: /learning/
+                    - listitem [ref=e16]:
+                        - link "お問い合わせ" [ref=e17] [cursor=pointer]:
+                            - /url: /contact/
+    - main [ref=e18]:
+        - generic [ref=e19]:
+            - generic [ref=e20]:
+                - paragraph [ref=e21]: 12週間βカリキュラム
+                - heading "ラーニング" [level=1] [ref=e22]
+                - paragraph [ref=e23]: コンテンツは全員に公開。ログインすると進捗を記録できます。
+            - status "読み込み中" [ref=e24]
+    - contentinfo [ref=e27]:
+        - generic [ref=e28]:
+            - generic [ref=e29]:
+                - generic [ref=e30]:
+                    - heading "ConnectiveByte" [level=3] [ref=e31]
+                    - paragraph [ref=e32]: 個を超え、知が立ち上がる場所
+                - generic [ref=e33]:
+                    - heading "ナビゲーション" [level=4] [ref=e34]
+                    - list [ref=e35]:
+                        - listitem [ref=e36]:
+                            - link "ホーム" [ref=e37] [cursor=pointer]:
+                                - /url: /
+                        - listitem [ref=e38]:
+                            - link "About" [ref=e39] [cursor=pointer]:
+                                - /url: /about/
+                        - listitem [ref=e40]:
+                            - link "原則" [ref=e41] [cursor=pointer]:
+                                - /url: /principles/
+                        - listitem [ref=e42]:
+                            - link "ラーニング" [ref=e43] [cursor=pointer]:
+                                - /url: /learning/
+                        - listitem [ref=e44]:
+                            - link "お問い合わせ" [ref=e45] [cursor=pointer]:
+                                - /url: /contact/
+                - generic [ref=e46]:
+                    - heading "フォロー" [level=4] [ref=e47]
+                    - generic [ref=e48]:
+                        - link "Twitter" [ref=e49] [cursor=pointer]:
+                            - /url: https://twitter.com/connectivebyte
+                        - link "Threads" [ref=e52] [cursor=pointer]:
+                            - /url: https://threads.net/@connectivebyte
+                    - list [ref=e55]:
+                        - listitem [ref=e56]:
+                            - link "プライバシーポリシー" [ref=e57] [cursor=pointer]:
+                                - /url: /privacy/
+            - generic [ref=e59]:
+                - heading "ニュースレター登録" [level=3] [ref=e60]
+                - paragraph [ref=e61]: AI時代の協創リーダーシップに関する最新情報をお届けします（月1-2回程度）
+                - generic [ref=e63]:
+                    - generic [ref=e64]:
+                        - generic [ref=e65]: メールアドレス*
+                        - textbox "メールアドレスrequired" [ref=e70]:
+                            - /placeholder: your@email.com
+                    - generic [ref=e72] [cursor=pointer]:
+                        - checkbox "プライバシーポリシーに同意しますrequired" [ref=e73]
+                        - generic [ref=e74]:
+                            - link "プライバシーポリシー" [ref=e75]:
+                                - /url: /privacy
+                            - text: に同意します*
+                    - button "登録する" [ref=e76]
+            - paragraph [ref=e78]: © 2026 ConnectiveByte. All rights reserved.
+    - alert [ref=e79]

@@ -1,0 +1,139 @@
+- generic [active] [ref=f1e1]:
+    - banner [ref=f1e2]:
+        - navigation "Main navigation" [ref=f1e3]:
+            - generic [ref=f1e4]:
+                - link [ref=f1e5] [cursor=pointer]:
+                    - /url: /
+                    - img "ConnectiveByte" [ref=f1e6]
+                - list [ref=f1e7]:
+                    - listitem [ref=f1e8]:
+                        - link "ホーム" [ref=f1e9] [cursor=pointer]:
+                            - /url: /
+                    - listitem [ref=f1e10]:
+                        - link "About" [ref=f1e11] [cursor=pointer]:
+                            - /url: /about/
+                    - listitem [ref=f1e12]:
+                        - link "原則" [ref=f1e13] [cursor=pointer]:
+                            - /url: /principles/
+                    - listitem [ref=f1e14]:
+                        - link "ラーニング" [ref=f1e15] [cursor=pointer]:
+                            - /url: /learning/
+                    - listitem [ref=f1e16]:
+                        - link "お問い合わせ" [ref=f1e17] [cursor=pointer]:
+                            - /url: /contact/
+                - link "ログイン" [ref=f1e19] [cursor=pointer]:
+                    - /url: /login/
+    - main [ref=f1e20]:
+        - generic [ref=f1e21]:
+            - generic [ref=f1e22]:
+                - paragraph [ref=f1e23]: 12週間βカリキュラム
+                - heading "ラーニング" [level=1] [ref=f1e24]
+                - paragraph [ref=f1e25]: コンテンツは全員に公開。ログインすると進捗を記録できます。
+            - article [ref=f1e26]:
+                - link "接続思考・基礎理解・技術統合 のセッション一覧へ" [ref=f1e27] [cursor=pointer]:
+                    - /url: /learning/?module=week-01
+                - generic [ref=f1e30]:
+                    - generic [ref=f1e31]:
+                        - heading "接続思考・概論・エンジニア革命・導入" [level=1] [ref=f1e32]
+                        - generic [ref=f1e33]: 未着手
+                    - paragraph [ref=f1e36]: 接続思考の核心概念を理解し、AI時代のエンジニアに迫られる変革を認識する
+                    - paragraph [ref=f1e37]: 所要時間 約240分
+                - generic [ref=f1e41]:
+                    - heading "このセッションの目標" [level=2] [ref=f1e42]
+                    - list [ref=f1e47]:
+                        - listitem [ref=f1e48]: 接続思考の核心概念とエンジニアにとっての価値を認識する
+                        - listitem [ref=f1e49]: 個人最適化の限界とチーム思考の必要性を実感する
+                        - listitem [ref=f1e50]: AI時代のエンジニア変革の緊急性を共有する
+                - generic [ref=f1e51]:
+                    - 'heading "Day 1: 接続思考・概論・エンジニア革命・導入" [level=1] [ref=f1e52]'
+                    - heading "この日のゴール" [level=2] [ref=f1e53]
+                    - paragraph [ref=f1e54]: 接続思考とは何かを理解し、自分の現在の開発プロセスを「接続」の視点で 分析できるようになる。
+                    - 'heading "午前: 導入・アイスブレイク・現状把握（10:00-12:15）" [level=2] [ref=f1e55]'
+                    - list [ref=f1e56]:
+                        - listitem [ref=f1e57]: β受講生の自己紹介と技術バックグラウンドの共有
+                        - listitem [ref=f1e58]: 個人の技術課題・チーム課題の洗い出し
+                        - listitem [ref=f1e59]: 接続思考・概論ビデオの視聴とディスカッション
+                    - 'heading "ワークショップ: 「個人脳の完結」とその限界" [level=3] [ref=f1e60]'
+                    - paragraph [ref=f1e61]: 個人の中で完結する開発プロセスが、なぜスケールしないのかを体験する。
+                    - code [ref=f1e63]:
+                        - text: '// 個人最適化の典型: 自分しか読めない省略記法 const f = (d) => d.map('
+                        - generic [ref=f1e64]: (x) =>
+                        - text: x?.v ?? 0).reduce(
+                        - generic [ref=f1e65]: (a, b) =>
+                        - text: a + b, 0);
+                    - paragraph [ref=f1e66]:
+                        - text: このコードは書いた本人には最速でも、チームには解読コストを押し付ける。
+                        - strong [ref=f1e67]: 個人の最適化 ≠ システムの最適化
+                        - text: — これが接続思考の出発点。
+                    - 'heading "午後: 現状分析・診断・個別評価（14:00-15:00）" [level=2] [ref=f1e68]'
+                    - list [ref=f1e69]:
+                        - listitem [ref=f1e70]: 技術スキルの詳細診断（強み・弱みの特定）
+                        - listitem [ref=f1e71]: チーム協働能力の評価と改善ポイントの発見
+                        - listitem [ref=f1e72]: ビジネス価値意識の測定
+                    - heading "目標設定・学習計画（15:15-16:15）" [level=2] [ref=f1e73]
+                    - list [ref=f1e74]:
+                        - listitem [ref=f1e75]: 12週間の個人目標をSMART基準で設定
+                        - listitem [ref=f1e76]: 学習計画の個別調整（強みの活用・弱みの補強）
+                        - listitem [ref=f1e77]: 週次進捗確認とフィードバックの方法説明
+                    - heading "成果物（Day 1終了時）" [level=2] [ref=f1e78]
+                    - list [ref=f1e79]:
+                        - listitem [ref=f1e80]: 個人現状分析レポート（技術・チーム・ビジネスの3面評価）
+                        - listitem [ref=f1e81]: 接続思考理解度テストの結果と弱点特定
+                        - listitem [ref=f1e82]: 12週間の学習目標設定（個別カスタマイズ版）
+                - generic [ref=f1e84]:
+                    - paragraph [ref=f1e85]: 進捗を記録するにはログインが必要です（コンテンツは引き続き閲覧できます）。
+                    - link "ログインして進捗を記録する" [ref=f1e86] [cursor=pointer]:
+                        - /url: /login/?next=%2Flearning%2F%3Fmodule%3Dweek-01%26session%3Dday-01
+                - navigation "セッションナビゲーション"
+    - contentinfo [ref=f1e87]:
+        - generic [ref=f1e88]:
+            - generic [ref=f1e89]:
+                - generic [ref=f1e90]:
+                    - heading "ConnectiveByte" [level=3] [ref=f1e91]
+                    - paragraph [ref=f1e92]: 個を超え、知が立ち上がる場所
+                - generic [ref=f1e93]:
+                    - heading "ナビゲーション" [level=4] [ref=f1e94]
+                    - list [ref=f1e95]:
+                        - listitem [ref=f1e96]:
+                            - link "ホーム" [ref=f1e97] [cursor=pointer]:
+                                - /url: /
+                        - listitem [ref=f1e98]:
+                            - link "About" [ref=f1e99] [cursor=pointer]:
+                                - /url: /about/
+                        - listitem [ref=f1e100]:
+                            - link "原則" [ref=f1e101] [cursor=pointer]:
+                                - /url: /principles/
+                        - listitem [ref=f1e102]:
+                            - link "ラーニング" [ref=f1e103] [cursor=pointer]:
+                                - /url: /learning/
+                        - listitem [ref=f1e104]:
+                            - link "お問い合わせ" [ref=f1e105] [cursor=pointer]:
+                                - /url: /contact/
+                - generic [ref=f1e106]:
+                    - heading "フォロー" [level=4] [ref=f1e107]
+                    - generic [ref=f1e108]:
+                        - link "Twitter" [ref=f1e109] [cursor=pointer]:
+                            - /url: https://twitter.com/connectivebyte
+                        - link "Threads" [ref=f1e112] [cursor=pointer]:
+                            - /url: https://threads.net/@connectivebyte
+                    - list [ref=f1e115]:
+                        - listitem [ref=f1e116]:
+                            - link "プライバシーポリシー" [ref=f1e117] [cursor=pointer]:
+                                - /url: /privacy/
+            - generic [ref=f1e119]:
+                - heading "ニュースレター登録" [level=3] [ref=f1e120]
+                - paragraph [ref=f1e121]: AI時代の協創リーダーシップに関する最新情報をお届けします（月1-2回程度）
+                - generic [ref=f1e123]:
+                    - generic [ref=f1e124]:
+                        - generic [ref=f1e125]: メールアドレス*
+                        - textbox "メールアドレスrequired" [ref=f1e130]:
+                            - /placeholder: your@email.com
+                    - generic [ref=f1e132] [cursor=pointer]:
+                        - checkbox "プライバシーポリシーに同意しますrequired" [ref=f1e133]
+                        - generic [ref=f1e134]:
+                            - link "プライバシーポリシー" [ref=f1e135]:
+                                - /url: /privacy
+                            - text: に同意します*
+                    - button "登録する" [ref=f1e136]
+            - paragraph [ref=f1e138]: © 2026 ConnectiveByte. All rights reserved.
+    - alert [ref=f1e139]

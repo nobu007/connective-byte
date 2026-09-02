@@ -1,0 +1,67 @@
+- generic [active] [ref=f4e1]:
+    - banner [ref=f4e2]:
+        - navigation "Main navigation" [ref=f4e3]:
+            - generic [ref=f4e4]:
+                - link [ref=f4e5] [cursor=pointer]:
+                    - /url: /
+                    - img "ConnectiveByte" [ref=f4e6]
+                - button "Open menu" [ref=f4e7]
+    - main [ref=f4e9]:
+        - generic [ref=f4e10]:
+            - generic [ref=f4e11]:
+                - paragraph [ref=f4e12]: 12週間βカリキュラム
+                - heading "ラーニング" [level=1] [ref=f4e13]
+                - paragraph [ref=f4e14]: コンテンツは全員に公開。ログインすると進捗を記録できます。
+            - status "読み込み中" [ref=f4e15]
+    - contentinfo [ref=f4e18]:
+        - generic [ref=f4e19]:
+            - generic [ref=f4e20]:
+                - generic [ref=f4e21]:
+                    - heading "ConnectiveByte" [level=3] [ref=f4e22]
+                    - paragraph [ref=f4e23]: 個を超え、知が立ち上がる場所
+                - generic [ref=f4e24]:
+                    - heading "ナビゲーション" [level=4] [ref=f4e25]
+                    - list [ref=f4e26]:
+                        - listitem [ref=f4e27]:
+                            - link "ホーム" [ref=f4e28] [cursor=pointer]:
+                                - /url: /
+                        - listitem [ref=f4e29]:
+                            - link "About" [ref=f4e30] [cursor=pointer]:
+                                - /url: /about/
+                        - listitem [ref=f4e31]:
+                            - link "原則" [ref=f4e32] [cursor=pointer]:
+                                - /url: /principles/
+                        - listitem [ref=f4e33]:
+                            - link "ラーニング" [ref=f4e34] [cursor=pointer]:
+                                - /url: /learning/
+                        - listitem [ref=f4e35]:
+                            - link "お問い合わせ" [ref=f4e36] [cursor=pointer]:
+                                - /url: /contact/
+                - generic [ref=f4e37]:
+                    - heading "フォロー" [level=4] [ref=f4e38]
+                    - generic [ref=f4e39]:
+                        - link "Twitter" [ref=f4e40] [cursor=pointer]:
+                            - /url: https://twitter.com/connectivebyte
+                        - link "Threads" [ref=f4e43] [cursor=pointer]:
+                            - /url: https://threads.net/@connectivebyte
+                    - list [ref=f4e46]:
+                        - listitem [ref=f4e47]:
+                            - link "プライバシーポリシー" [ref=f4e48] [cursor=pointer]:
+                                - /url: /privacy/
+            - generic [ref=f4e50]:
+                - heading "ニュースレター登録" [level=3] [ref=f4e51]
+                - paragraph [ref=f4e52]: AI時代の協創リーダーシップに関する最新情報をお届けします（月1-2回程度）
+                - generic [ref=f4e54]:
+                    - generic [ref=f4e55]:
+                        - generic [ref=f4e56]: メールアドレス*
+                        - textbox "メールアドレスrequired" [ref=f4e61]:
+                            - /placeholder: your@email.com
+                    - generic [ref=f4e63] [cursor=pointer]:
+                        - checkbox "プライバシーポリシーに同意しますrequired" [ref=f4e64]
+                        - generic [ref=f4e65]:
+                            - link "プライバシーポリシー" [ref=f4e66]:
+                                - /url: /privacy
+                            - text: に同意します*
+                    - button "登録する" [ref=f4e67]
+            - paragraph [ref=f4e69]: © 2026 ConnectiveByte. All rights reserved.
+    - alert [ref=f4e70]
