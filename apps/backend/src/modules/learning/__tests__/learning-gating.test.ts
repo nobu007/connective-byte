@@ -92,8 +92,25 @@ describe('Learning 購入ゲーティング（FREE_WEEKS=1）', () => {
 
     const response = await request(app).get(`/api/learning/sessions/${freeSlug}`).expect(200);
     expect(response.body.data.session.content).toContain('無料本文');
-    // 応答は Authorization（購入状態）で変化するため共有キャッシュ不可
+    // 応答は Authorization（購入状態）で変化するため共有キャッシュ不可。
+    // 無料週は同一ブラウザの再訪を許す（no-store にしない）
     expect(response.headers['cache-control']).toContain('private');
+    expect(response.headers['cache-control']).not.toContain('no-store');
+  });
+
+  it('無効な Bearer トークンでは匿名に落とさず 401（Week 1 も例外ではない）', async () => {
+    const suffix = unique();
+    const { freeSlug, paidSlug } = await seedWeeks(suffix);
+
+    // 期限切れ購入者が「ログイン済みなのにロック画面」になり、apiFetch の
+    // 自動リフレッシュ（401 でのみ発火）も働かなくなるのを防ぐ挙動
+    for (const slug of [paidSlug, freeSlug]) {
+      const response = await request(app)
+        .get(`/api/learning/sessions/${slug}`)
+        .set('Authorization', 'Bearer invalid-expired-token')
+        .expect(401);
+      expect(response.body.error.code).toBe('AUTH_TOKEN_003');
+    }
   });
 
   it('匿名で Week 5 を開くと 403 PAYMENT_001（401 にしない: refresh サイクル防止）', async () => {
@@ -134,6 +151,8 @@ describe('Learning 購入ゲーティング（FREE_WEEKS=1）', () => {
       .expect(200);
     expect(response.body.data.session.content).toContain('有料本文');
     expect(response.body.data.session.moduleWeekNumber).toBe(5);
+    // 有料本文はブラウザキャッシュにも残さない（別アカウント・返金後の漏れ防止）
+    expect(response.headers['cache-control']).toContain('no-store');
   });
 
   it('未購入の Week 5 への進捗 PUT は 403、購入者は 200', async () => {

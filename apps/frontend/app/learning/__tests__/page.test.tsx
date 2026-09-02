@@ -340,6 +340,47 @@ describe('LearningPage', () => {
     });
   });
 
+  describe('session expired（トークン喪失時の匿名フォールバック）', () => {
+    it('401→リフレッシュ失敗でも1回だけ匿名で再取得し Week 1 を表示する', async () => {
+      // 期限切れトークン保有・リフレッシュ Cookie も失効、という状態。
+      // optionalAuthenticate は無効トークンを匿名に落とさず 401 を返す設計
+      authState.status = 'authenticated';
+      setAccessToken('expired-token');
+      let moduleCallsWithToken = 0;
+      let moduleCallsAnonymous = 0;
+      server.use(
+        rest.post('**/api/auth/refresh', (_req, res, ctx) =>
+          res(ctx.status(401), ctx.json({ error: { code: 'AUTH_REFRESH_001', message: 'expired' } })),
+        ),
+        rest.get('**/api/learning/progress', (_req, res, ctx) =>
+          res(ctx.status(401), ctx.json({ error: { code: 'AUTH_TOKEN_003', message: 'Invalid' } })),
+        ),
+        rest.get('**/api/learning/modules/week-01', (req, res, ctx) => {
+          if (req.headers.get('authorization')) {
+            moduleCallsWithToken += 1;
+            return res(ctx.status(401), ctx.json({ error: { code: 'AUTH_TOKEN_003', message: 'Invalid' } }));
+          }
+          moduleCallsAnonymous += 1;
+          return res(ctx.status(200), ctx.json({ success: true, data: { module: moduleDetail } }));
+        }),
+        rest.get('**/api/learning/sessions/day-01', (req, res, ctx) =>
+          req.headers.get('authorization')
+            ? res(ctx.status(401), ctx.json({ error: { code: 'AUTH_TOKEN_003', message: 'Invalid' } }))
+            : res(ctx.status(200), ctx.json({ success: true, data: { session: sessionDetail } })),
+        ),
+      );
+
+      queryParams = { module: 'week-01', session: 'day-01' };
+      render(<LearningPage />);
+
+      // スピナーで固まらず、匿名再取得で本文が表示される
+      expect(await screen.findByRole('heading', { level: 1, name: 'AIとは何か' })).toBeInTheDocument();
+      // 1回目（トークン付き→401）の1回だけ失敗し、2回目（匿名）で復旧して終了
+      expect(moduleCallsWithToken).toBe(1);
+      expect(moduleCallsAnonymous).toBe(1);
+    });
+  });
+
   describe('paid weeks gating (PAYMENT_001)', () => {
     it('anonymous: 有料セッションはロック表示でログインCTA（404リダイレクトしない）', async () => {
       queryParams = { module: 'week-05', session: 'day-05' };

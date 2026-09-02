@@ -105,6 +105,14 @@ export class JsonPurchaseRepository implements PurchaseRepository {
     return existing;
   }
 
+  async findByPaymentIntent(paymentIntentId: string): Promise<PurchaseRecord | null> {
+    await this.initialize();
+    const matches = this.data.purchases
+      .filter((p) => p.stripePaymentIntentId === paymentIntentId)
+      .sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
+    return matches[0] ?? null;
+  }
+
   async hasActivePurchase(userId: string): Promise<boolean> {
     await this.initialize();
     return this.data.purchases.some((p) => p.userId === userId && p.status === 'active');

@@ -46,6 +46,13 @@ export interface PurchaseRepository {
   /** payment_intent で特定して取り消し。該当なしは null（冪等 no-op） */
   revokeByPaymentIntent(paymentIntentId: string): Promise<PurchaseRecord | null>;
 
+  /**
+   * payment_intent で購入行を照会（status を問わない最新の1行）。
+   * charge.refunded の再送で revoke が冪等 no-op になった際に
+   * ミラー（users.purchased_at）整合の再計算に使う
+   */
+  findByPaymentIntent(paymentIntentId: string): Promise<PurchaseRecord | null>;
+
   /** エンタイトルメント判定（learning ゲーティングから呼ばれる） */
   hasActivePurchase(userId: string): Promise<boolean>;
 

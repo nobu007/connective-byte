@@ -8,6 +8,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { LearningError } from './errors';
+import { FREE_WEEKS } from './services/learning-service';
 import { learningContainer } from './learning.container';
 
 const learningService = learningContainer.learningService;
@@ -80,8 +81,14 @@ export async function handleGetSession(
       String(req.params.sessionSlug),
       req.user?.id ?? null
     );
-    // 応答がAuthorization（購入状態）で変化するため共有キャッシュには載せない
-    res.set('Cache-Control', 'private, max-age=60, stale-while-revalidate=300');
+    // 応答がAuthorization（購入状態）で変化するため共有キャッシュには載せない。
+    // 有料本文は private でも不十分（同一ブラウザの別アカウント・返金後に
+    // HTTPキャッシュから読める）ためブラウザキャッシュにも残さない。
+    const cacheControl =
+      session.moduleWeekNumber > FREE_WEEKS
+        ? 'private, no-store'
+        : 'private, max-age=60, stale-while-revalidate=300';
+    res.set('Cache-Control', cacheControl);
     res.status(200).json({ success: true, data: { session } });
   } catch (error) {
     handleLearningError(res, next, error);

@@ -23,13 +23,17 @@ if (!email) {
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
-  console.error('❌ DATABASE_URL が設定されていません。.env に Neon の接続文字列を追加してください。');
+  console.error(
+    '❌ DATABASE_URL が設定されていません。.env に Neon の接続文字列を追加してください。'
+  );
   process.exit(1);
 }
 
 const sql = neon(connectionString);
 
-const [user] = await sql.query('SELECT id, email, purchased_at FROM users WHERE email = $1', [email]);
+const [user] = await sql.query('SELECT id, email, purchased_at FROM users WHERE email = $1', [
+  email,
+]);
 if (!user) {
   console.error(`❌ ユーザーが見つかりません: ${email}`);
   process.exit(1);
@@ -39,10 +43,22 @@ if (revoke) {
   await sql.query(
     `UPDATE purchases SET status = 'refunded', revoked_at = now(), updated_at = now()
      WHERE user_id = $1 AND status = 'active'`,
-    [user.id],
+    [user.id]
   );
-  await sql.query('UPDATE users SET purchased_at = NULL, updated_at = now() WHERE id = $1', [user.id]);
-  console.log(`✅ ${email} の受講登録を取り消しました（Weeks 2-12 は再ロック）`);
+  // Webhook（payment-service）と同じ意味論: 他に有効な購入が残っていれば
+  // ミラー（users.purchased_at）はクリアしない
+  const [stillActive] = await sql.query(
+    'SELECT 1 FROM purchases WHERE user_id = $1 AND status = $2 LIMIT 1',
+    [user.id, 'active']
+  );
+  if (!stillActive) {
+    await sql.query('UPDATE users SET purchased_at = NULL, updated_at = now() WHERE id = $1', [
+      user.id,
+    ]);
+  }
+  console.log(
+    `✅ ${email} の受講登録を取り消しました（Weeks 2-12 は再ロック${stillActive ? '。ただし他に有効な購入が残っています' : ''}）`
+  );
   process.exit(0);
 }
 
@@ -53,9 +69,13 @@ await sql.query(
    VALUES ($1, $2, 'active', $3, 29800, 'jpy')
    ON CONFLICT (stripe_checkout_session_id) DO UPDATE
      SET status = 'active', revoked_at = NULL, updated_at = now()`,
-  [crypto.randomUUID(), user.id, checkoutId],
+  [crypto.randomUUID(), user.id, checkoutId]
 );
-await sql.query('UPDATE users SET purchased_at = now(), updated_at = now() WHERE id = $1', [user.id]);
+await sql.query('UPDATE users SET purchased_at = now(), updated_at = now() WHERE id = $1', [
+  user.id,
+]);
 
 console.log(`✅ ${email} に受講登録（29,800円・税込）を付与しました`);
-console.log('   （Webhook と同じ状態: purchases 行 + users.purchased_at。次の /api/auth/me で反映）');
+console.log(
+  '   （Webhook と同じ状態: purchases 行 + users.purchased_at。次の /api/auth/me で反映）'
+);

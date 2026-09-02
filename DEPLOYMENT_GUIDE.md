@@ -153,6 +153,7 @@ SKUは **12週一括買い切り 29,800円（税込・免税事業者）** の1�
 2. **Payment Link 作成** → URL をフロント環境変数へ:
    - ローカル `.env`: `NEXT_PUBLIC_STRIPE_PAYMENT_LINK`（未設定だと CTA が「準備中」になり壊れた導線が出ない）
    - 本番: Cloudflare Pages の Environment variables に同じキー（`deploy:cf` のビルド時埋め込み）
+   - Payment Link 設定の「After completion」は **`https://connectivebyte.com/mypage/?purchase=success`** にリダイレクト（マイページでポーリングし付与を自動反映する導線）
 3. **Webhook エンドポイント**: `https://api.connectivebyte.com/api/payments/webhook`、イベントは `checkout.session.completed` + `charge.refunded` の2つのみ
 4. 発行された `whsec_…` を本番Workersへ: `npx wrangler secret put -c apps/backend/wrangler.toml STRIPE_WEBHOOK_SECRET`
    - テストモードの `whsec_` は `.env` の `STRIPE_WEBHOOK_SECRET` のみに置く（エンドポイント・モード毎に別値。本番値を `.env` に書かない）
@@ -173,6 +174,9 @@ npm run init:payments-db          # 1. DB スキーマ
 npx wrangler secret put -c apps/backend/wrangler.toml STRIPE_WEBHOOK_SECRET   # 2. 本番 whsec_
 npm run deploy:api                # 3. backend（webhook 受付開始）
 # 4. Stripe 本番 webhook エンドポイント作成（上記）
+#    → ダッシュボードの「Send test webhook」で checkout.session.completed を1件送り、
+#      delivery log が 200（=署名検証通過）なのを確認する。
+#      テストイベントは金額不一致のため付与されず（PAYMENT_UNMATCHED_001 の warn のみ）
 # 5. Pages に NEXT_PUBLIC_STRIPE_PAYMENT_LINK を設定
 npm run deploy:cf                 # 6. フロント
 npm run e2e:payments              # 7. ゲーティング・status・署名拒否・grant/revoke の通し検証

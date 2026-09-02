@@ -47,6 +47,12 @@ function LearningContent() {
   const [lockedSlug, setLockedSlug] = useState<string | null>(null);
   const [progress, setProgress] = useState<ProgressOverview | null>(null);
   const [error, setError] = useState('');
+  /**
+   * セッション喪失時（401→リフレッシュ失敗）に匿名で取得し直した回数。
+   * 1回だけ再試行し、Week 1 はログイン無しでも表示できる状態に戻す
+   * （認証が切れてもスピナーで止めない）。無限再試行防止のため効果は1回限り。
+   */
+  const [anonRetry, setAnonRetry] = useState(0);
 
   // 受講登録済みか（webhook 付与で users.purchasedAt が反映される）
   const purchased = Boolean(user?.purchasedAt);
@@ -111,7 +117,13 @@ function LearningContent() {
       })
       .catch((err) => {
         if (cancelled) return;
-        if (err instanceof AuthApiError && err.code === AUTH_SESSION_EXPIRED) return;
+        if (err instanceof AuthApiError && err.code === AUTH_SESSION_EXPIRED) {
+          // リフレッシュも失敗 = トークン喪失。apiFetch は token store を
+          // 既に null にしているため、1回だけ匿名で取り直す（Week 1 は
+          // 匿名で 200・有料週は PAYMENT_001 のロック表示になる）
+          if (anonRetry < 1) setAnonRetry((n) => n + 1);
+          return;
+        }
         // 有料週はセッション自体は存在するため、404リダイレクトより先に判定する
         if (err instanceof AuthApiError && err.code === 'PAYMENT_001') {
           setLockedSlug(sessionSlug);
@@ -127,7 +139,7 @@ function LearningContent() {
     return () => {
       cancelled = true;
     };
-  }, [moduleSlug, sessionSlug, router]);
+  }, [moduleSlug, sessionSlug, router, anonRetry]);
 
   // ロック表示に使う概要（タイトル・目標）は全員同一の curriculum ツリーから引く
   const lockedSummary = useMemo(() => {

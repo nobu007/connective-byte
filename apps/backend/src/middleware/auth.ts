@@ -122,7 +122,13 @@ export const authenticate: RequestHandler = (
 
 /**
  * Optional authentication middleware
- * Attaches user if token is valid, but doesn't require it
+ * Attaches user if token is valid, but doesn't require it.
+ *
+ * トークン未送出なら匿名として通す。一方、**送出されたトークンが
+ * 無効・期限切れなら 401 を返す**（匿名に落とさない）。
+ * 無効トークンを匿名扱いにすると、期限切れの購入者が
+ * 「ログインしているのにロック画面」となり、apiFetch の
+ * 自動リフレッシュ（401 でのみ発火）も働かないためである。
  */
 export const optionalAuthenticate: RequestHandler = (
   req: Request,
@@ -132,23 +138,38 @@ export const optionalAuthenticate: RequestHandler = (
   try {
     const authHeader = req.headers.authorization;
 
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
-      const decoded = verifyToken(token);
-
-      if (decoded) {
-        req.user = {
-          id: decoded.id,
-          email: decoded.email,
-          role: decoded.role,
-        };
-      }
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      next();
+      return;
     }
+
+    const token = authHeader.substring(7);
+    const decoded = verifyToken(token);
+
+    if (!decoded) {
+      res.status(401).json({
+        error: {
+          code: 'AUTH_TOKEN_003',
+          message: 'Invalid or expired token',
+        },
+      });
+      return;
+    }
+
+    req.user = {
+      id: decoded.id,
+      email: decoded.email,
+      role: decoded.role,
+    };
 
     next();
   } catch (error) {
-    // Continue without authentication
-    next();
+    res.status(401).json({
+      error: {
+        code: 'AUTH_TOKEN_003',
+        message: 'Authentication failed',
+      },
+    });
   }
 };
 

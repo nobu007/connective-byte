@@ -41,23 +41,41 @@ export function PurchaseStatusCard({ user, onPurchased, poll = false }: Props) {
     return next.purchased;
   }, []);
 
+  // 初回取得。poll=true で既に反映済み（Webhook がポーリング開始前に
+  // 間に合った）なら待たずに完了扱いにし、AuthProvider の user も更新する
   useEffect(() => {
-    void fetchStatus();
-  }, [fetchStatus]);
+    void fetchStatus()
+      .then((purchased) => {
+        if (purchased && poll) {
+          setPolling(false);
+          void onPurchasedRef.current();
+        }
+      })
+      .catch(() => {
+        // 取得失敗時は status=null のまま未登録ビューを表示（CTA は出る）
+      });
+  }, [fetchStatus, poll]);
 
   // 決済リターン直後は Webhook → DB 反映に数秒かかるためポーリングする
   useEffect(() => {
     if (!polling) return;
     const timer = setInterval(() => {
       attemptsRef.current += 1;
-      void fetchStatus().then((purchased) => {
-        if (purchased) {
-          setPolling(false);
-          void onPurchasedRef.current();
-        } else if (attemptsRef.current >= POLL_MAX_ATTEMPTS) {
-          setPolling(false);
-        }
-      });
+      void fetchStatus()
+        .then((purchased) => {
+          if (purchased) {
+            setPolling(false);
+            void onPurchasedRef.current();
+          } else if (attemptsRef.current >= POLL_MAX_ATTEMPTS) {
+            setPolling(false);
+          }
+        })
+        .catch(() => {
+          // 一時的な失敗では中断せず次の tick で再試行。上限到達で終了
+          if (attemptsRef.current >= POLL_MAX_ATTEMPTS) {
+            setPolling(false);
+          }
+        });
     }, POLL_INTERVAL_MS);
     return () => clearInterval(timer);
   }, [polling, fetchStatus]);

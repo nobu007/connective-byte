@@ -105,6 +105,29 @@ describe('PurchaseStatusCard', () => {
       jest.useRealTimers();
     });
 
+    it('初回取得で既に purchased なら待たずに onPurchased（スピナーを出さない）', async () => {
+      // Webhook がポーリング開始前に間に合った場合
+      const spy = jest.spyOn(paymentsApi, 'getStatus').mockResolvedValue(purchased);
+      const onPurchased = jest.fn();
+
+      render(<PurchaseStatusCard user={user} onPurchased={onPurchased} poll />);
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(onPurchased).toHaveBeenCalledTimes(1);
+      expect(screen.getByText('受講登録済み（29,800円（税込））')).toBeInTheDocument();
+      expect(screen.queryByText('決済の反映を確認しています…')).not.toBeInTheDocument();
+
+      // ポーリングは始まっていないため、時間が経っても onPurchased は重複しない
+      await act(async () => {
+        jest.advanceTimersByTime(10000);
+        await Promise.resolve();
+      });
+      expect(onPurchased).toHaveBeenCalledTimes(1);
+      spy.mockRestore();
+    });
+
     it('ポーリング中はスピナー+CTAなし → 反映されたら onPurchased（1回）→ 登録済みビュー', async () => {
       // 初回と1回目のポーリングは未購入、2回目で Webhook 付与が反映される
       const statuses = [unpurchased, unpurchased, purchased];

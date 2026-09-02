@@ -113,6 +113,17 @@ export class PostgresPurchaseRepository implements PurchaseRepository {
     return rows[0] ? rowToPurchase(rows[0]) : null;
   }
 
+  async findByPaymentIntent(paymentIntentId: string): Promise<PurchaseRecord | null> {
+    const { rows } = await this.query<PurchaseRow>(
+      `SELECT ${SELECT_COLUMNS}
+       FROM purchases WHERE stripe_payment_intent_id = $1
+       ORDER BY updated_at DESC
+       LIMIT 1`,
+      [paymentIntentId]
+    );
+    return rows[0] ? rowToPurchase(rows[0]) : null;
+  }
+
   async hasActivePurchase(userId: string): Promise<boolean> {
     const { rows } = await this.query<{ active: boolean }>(
       `SELECT EXISTS (

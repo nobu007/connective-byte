@@ -194,15 +194,19 @@ export class PaymentService {
     // 部分返金もこのイベントで流れる。確定仕様として全額・部分を問わず取り消す
     // （全額返金のみに限定する場合は amount_refunded === amount の比較をここに入れる）
     const revoked = await this.purchases.revokeByPaymentIntent(paymentIntentId);
-    if (!revoked) {
-      // 未登録 or 取り消し済み → 冪等 no-op
+    // revoke が冪等 no-op（未登録 or 取り消し済み）でも、users.update が先に
+    // 失敗して Stripe が再送した場合は purchased_at のクリアがまだ済んでいない
+    // 可能性があるため、status を問わない照会で対象ユーザーを復元して整合を取り直す
+    const purchase = revoked ?? (await this.purchases.findByPaymentIntent(paymentIntentId));
+    if (!purchase) {
+      // この payment_intent の購入行が存在しない → 本当の no-op
       return;
     }
 
     // 他に有効な購入が残っていなければ purchasedAt もクリア
-    const stillActive = await this.purchases.hasActivePurchase(revoked.userId);
+    const stillActive = await this.purchases.hasActivePurchase(purchase.userId);
     if (!stillActive) {
-      await this.users.update(revoked.userId, { purchasedAt: null });
+      await this.users.update(purchase.userId, { purchasedAt: null });
     }
   }
 

@@ -9,7 +9,7 @@ import crypto from 'crypto';
 import { paymentsContainer } from '../payments.container';
 import { authContainer } from '../../auth/auth.container';
 import { PaymentError } from '../errors';
-import { PRICE_AMOUNT_TOTAL, PRICE_CURRENCY } from '../services/payment-service';
+import { PaymentService, PRICE_AMOUNT_TOTAL, PRICE_CURRENCY } from '../services/payment-service';
 
 const SECRET = 'whsec_test_secret';
 
@@ -206,6 +206,64 @@ describe('PaymentService.handleWebhook', () => {
     expect((await paymentsContainer.paymentService.getStatus(user.id)).purchased).toBe(false);
     const updated = await authContainer.userRepository.findById(user.id);
     expect(updated?.purchasedAt).toBeNull();
+  });
+
+  it('refund の再送は冪等（2回目も正常返却・purchasedAt は null のまま）', async () => {
+    const user = await createUser('refund-retry');
+    const { sessionId, paymentIntentId } = nextIds();
+    const grant = signedEvent(
+      checkoutCompletedEvent(sessionId, paymentIntentId, { client_reference_id: user.id })
+    );
+    await paymentsContainer.paymentService.handleWebhook(grant.rawBody, grant.signature);
+
+    const refund = signedEvent(refundedEvent(paymentIntentId));
+    await paymentsContainer.paymentService.handleWebhook(refund.rawBody, refund.signature);
+    await expect(
+      paymentsContainer.paymentService.handleWebhook(refund.rawBody, refund.signature)
+    ).resolves.toEqual({ received: true });
+
+    const updated = await authContainer.userRepository.findById(user.id);
+    expect(updated?.purchasedAt).toBeNull();
+  });
+
+  it('revoke 後の users.update 失敗（500→再送）でも purchasedAt をクリアする', async () => {
+    const user = await createUser('mirror-retry');
+    const { sessionId, paymentIntentId } = nextIds();
+    const grant = signedEvent(
+      checkoutCompletedEvent(sessionId, paymentIntentId, { client_reference_id: user.id })
+    );
+    await paymentsContainer.paymentService.handleWebhook(grant.rawBody, grant.signature);
+    expect((await authContainer.userRepository.findById(user.id))?.purchasedAt).not.toBeNull();
+
+    // users.update を1回だけ失敗させる（transient 500 → Stripe が refund を再送）
+    const realUsers = authContainer.userRepository;
+    const flakyUsers: typeof realUsers = Object.create(realUsers);
+    let failNext = true;
+    flakyUsers.update = async (...args: Parameters<typeof realUsers.update>) => {
+      if (failNext) {
+        failNext = false;
+        throw new Error('simulated transient failure');
+      }
+      return realUsers.update(...args);
+    };
+    const service = new PaymentService(paymentsContainer.purchaseRepository, flakyUsers);
+
+    const refund1 = signedEvent(refundedEvent(paymentIntentId));
+    // 1回目: revoke 自体は成功するが users.update で失敗 → Stripe に 500
+    await expect(service.handleWebhook(refund1.rawBody, refund1.signature)).rejects.toThrow(
+      'simulated transient failure'
+    );
+
+    // 2回目（再送）: revoke は冪等 no-op になるが、findByPaymentIntent で
+    // 対象を復元して purchasedAt のクリアを完了させる
+    const refund2 = signedEvent(refundedEvent(paymentIntentId));
+    await expect(service.handleWebhook(refund2.rawBody, refund2.signature)).resolves.toEqual({
+      received: true,
+    });
+
+    const updated = await authContainer.userRepository.findById(user.id);
+    expect(updated?.purchasedAt).toBeNull();
+    expect((await paymentsContainer.paymentService.getStatus(user.id)).purchased).toBe(false);
   });
 
   it('未知の payment_intent の refund は no-op（正常返却）', async () => {
