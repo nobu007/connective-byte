@@ -147,7 +147,19 @@ SKUは **12週一括買い切り 29,800円（税込・免税事業者）** の1�
 - ユーザー解決: `client_reference_id`（フロントが Payment Link に付与）→ fallback `prefilled_email`。解決不可・金額不一致は **log+200**（5xxを返すとStripeが無限リトライするため）
 - ゲーティング: Week 1 無料 / Week 2+ は `GET /api/learning/sessions/:slug` と `PUT progress` が 403 `PAYMENT_001`。目次・タイトルは全員公開（セールスコピー）
 
-### Stripe ダッシュボード設定（ユーザー作業・一度だけ）
+### Stripe 設定（2026-09-01 完了・Stripe API で作成）
+
+ダッシュボードの代わりに `sk_live_` キーでの form-encoded POST で作成した。作成済みリソース:
+
+| リソース      | 値                                                                                                                                             |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Product       | `prod_VBlixpHNiir1k7`（ConnectiveByte 12週間カリキュラム）                                                                                     |
+| Price         | `price_1UBOB2ChAcQlTHvq4b7wtAB9`（one-time 29,800 JPY 税込）                                                                                   |
+| Payment Link  | `https://buy.stripe.com/5kQbJ06dNcqJbjw4pf6oo02`（After completion → `https://connectivebyte.com/mypage/?purchase=success`）                   |
+| Webhook       | `we_1UBOBGChAcQlTHvqPCTzxSSM`（live・`checkout.session.completed` + `charge.refunded`・`https://api.connectivebyte.com/api/payments/webhook`） |
+| Worker secret | `STRIPE_WEBHOOK_SECRET`（本番 `whsec_`・wrangler secret に設定済み。`.env` には書かない）                                                      |
+
+再設定・追加作成時の手順（通常はダッシュボードで良い）:
 
 1. **商品**: 「ConnectiveByte 12週間カリキュラム」+ Price **one-time 29,800 JPY（税込）**
 2. **Payment Link 作成** → URL をフロント環境変数へ:
@@ -167,20 +179,21 @@ npm run dev                                                # フロントの CTA
 # → Stripe CLI に配送ログ / マイページ ?purchase=success でポーリング反映（3秒×最大20回）
 ```
 
-### 本番リリース順序（Weeks 2-12 公開フリップが最後）
+### 本番リリース順序（1-7 完了・残りは 8 のみ）
 
 ```bash
-npm run init:payments-db          # 1. DB スキーマ
-npx wrangler secret put -c apps/backend/wrangler.toml STRIPE_WEBHOOK_SECRET   # 2. 本番 whsec_
-npm run deploy:api                # 3. backend（webhook 受付開始）
-# 4. Stripe 本番 webhook エンドポイント作成（上記）
+npm run init:payments-db          # 1. DB スキーマ ✅
+npx wrangler secret put -c apps/backend/wrangler.toml STRIPE_WEBHOOK_SECRET   # 2. 本番 whsec_ ✅
+npm run deploy:api                # 3. backend（webhook 受付開始）✅
+# 4. Stripe 本番 webhook エンドポイント作成 ✅（上表 we_1UBOBG…）
 #    → ダッシュボードの「Send test webhook」で checkout.session.completed を1件送り、
 #      delivery log が 200（=署名検証通過）なのを確認する。
 #      テストイベントは金額不一致のため付与されず（PAYMENT_UNMATCHED_001 の warn のみ）
-# 5. Pages に NEXT_PUBLIC_STRIPE_PAYMENT_LINK を設定
-npm run deploy:cf                 # 6. フロント
-npm run e2e:payments              # 7. ゲーティング・status・署名拒否・grant/revoke の通し検証
-# 8. 最後に Weeks 2-12 を管理UI（/learning/admin/）で is_published=true に
+# 5. Pages に NEXT_PUBLIC_STRIPE_PAYMENT_LINK を設定 ✅（初回はビルド時インライン変数で埋め込み。
+#    以降のビルドのために .env にも NEXT_PUBLIC_STRIPE_PAYMENT_LINK を保存推奨）
+npm run deploy:cf                 # 6. フロント ✅（Production f1a480ea・chunk に payment link 埋め込み確認）
+npm run e2e:payments              # 7. ゲーティング・status・署名拒否・grant/revoke の通し検証 ✅ 26/26
+# 8. 最後に Weeks 2-12 を管理UI（/learning/admin/）で is_published=true に ← 未実施（唯一の残作業）
 #    （公開前の本番ブラウザ全文レビューはプロダクト方針で必須・content-curriculum/README.md 参照）
 ```
 
