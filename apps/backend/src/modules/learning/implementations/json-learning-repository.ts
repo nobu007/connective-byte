@@ -3,7 +3,7 @@
  *
  * ローカル開発・テスト用（DATABASE_URL 未設定時に container が選択）。
  * auth の JsonUserRepository と同じファイル永続化パターン。
- * phases は init script 相当の3 Phase を initialize 時に自動シードする。
+ * phases は init script 相当の4 Phase（0=序文 + 1-3）を initialize 時に自動シードする。
  */
 
 import fs from 'fs/promises';
@@ -108,8 +108,13 @@ export class JsonLearningRepository implements LearningRepository {
       .catch(() => false);
     if (exists) {
       const parsed = JSON.parse(await fs.readFile(this.dbPath, 'utf-8'));
+      // 既存ファイルに欠けている Phase（シード追加など）を補完して番号順に並べる
+      const stored = parsed.phases ?? [];
+      const missing = DEFAULT_PHASES.filter(
+        (p) => !stored.some((s: Phase & { id: string }) => s.number === p.number)
+      );
       this.data = {
-        phases: parsed.phases?.length ? parsed.phases : DEFAULT_PHASES,
+        phases: [...stored, ...missing].sort((a, b) => a.number - b.number),
         modules: parsed.modules ?? [],
         sessions: parsed.sessions ?? [],
         progress: parsed.progress ?? [],

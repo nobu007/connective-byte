@@ -34,7 +34,7 @@ describe('Learning API Endpoints (public read)', () => {
 
       expect(response.body.success).toBe(true);
       expect(Array.isArray(response.body.data.phases)).toBe(true);
-      // Json 実装は3 Phase を自動シードする
+      // Json 実装は4 Phase（0=序文 + 1-3）を自動シードする
       expect(response.body.data.phases.map((p: { number: number }) => p.number)).toEqual([
         0, 1, 2, 3,
       ]);

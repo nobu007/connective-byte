@@ -424,7 +424,7 @@ export class LearningService {
     return value;
   }
 
-  /** weekNumber を含む Phase を解決（phases は3つ固定） */
+  /** weekNumber を含む Phase を解決（phases は0=序文 + 1-3の固定シード） */
   private async resolvePhaseId(weekNumber: number): Promise<string> {
     const phases = await this.repository.getPhases();
     const phase = phases.find((p) => weekNumber >= p.startWeek && weekNumber <= p.endWeek);

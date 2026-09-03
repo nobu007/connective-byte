@@ -25,6 +25,7 @@ Neon Postgres へ取込み、`/learning/` から配信する。
 ```
 content-curriculum/
 ├── README.md          ← この仕様書
+├── week-00/           ← 序文（Phase 0・常に無料）。購入前の価値説明。教材でなく商品説明
 └── week-01/           ← モジュール単位のディレクトリ（slug = ディレクトリ名）
     ├── _module.md     ← モジュール定義（frontmatter 必須）
     ├── day-01.md      ← セッション本文（slug = ディレクトリ名-ファイル名 = week-01-day-01）
@@ -39,7 +40,7 @@ frontmatter のみ使用（body は読まない）:
 ---
 title: 接続思考の基礎
 description: 最初の1週間で全体像を掴む
-weekNumber: 1 # 1-52。Phase（W1-4/5-8/9-12）の自動振り分けに使う
+weekNumber: 1 # 0-52（0=序文）。Phase（W0/W1-4/5-8/9-12）の自動振り分けに使う
 ---
 ```
 

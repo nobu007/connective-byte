@@ -30,7 +30,7 @@ if (!usersTable?.reg) {
 }
 
 const STATEMENTS = [
-  // Phase は3つ固定（W1-3 / W4-8 / W9-12）。管理CRUD対象外で init 時にシードする。
+  // Phase は固定シード（P0=序文 W0 / P1=W1-4 / P2=W5-8 / P3=W9-12）。管理CRUD対象外で init 時にシードする。
   `CREATE TABLE IF NOT EXISTS phases (
     id UUID PRIMARY KEY,
     number INT NOT NULL UNIQUE,
