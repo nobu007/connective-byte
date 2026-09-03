@@ -135,11 +135,13 @@ export function SessionView({ session, module, progress, onProgressChanged }: Pr
         )}
       </div>
 
-      <nav className="mt-8 flex justify-between gap-4" aria-label="セッションナビゲーション">
+      {/* 前/次カードはモバイル（<640px）で縦積み。横並びのままだと
+          320px×2+gap が画面幅を超えて横溢れする（2026-09-03 の公開前レビューで発見） */}
+      <nav className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-between" aria-label="セッションナビゲーション">
         {prev ? (
           <Link
             href={`/learning/?module=${encodeURIComponent(session.moduleSlug)}&session=${encodeURIComponent(prev.slug)}`}
-            className="flex-1 max-w-xs border border-gray-200 rounded-lg p-3 hover:border-[#10b981]/50 transition-colors"
+            className="w-full border border-gray-200 rounded-lg p-3 hover:border-[#10b981]/50 transition-colors sm:flex-1 sm:max-w-xs"
           >
             <span className="flex items-center gap-1 text-xs text-gray-400">
               <ArrowLeft size={12} aria-hidden /> 前へ
@@ -147,12 +149,12 @@ export function SessionView({ session, module, progress, onProgressChanged }: Pr
             <span className="block text-sm font-medium text-gray-900 truncate">{prev.title}</span>
           </Link>
         ) : (
-          <span className="flex-1" />
+          <span className="hidden sm:block sm:flex-1" />
         )}
         {next ? (
           <Link
             href={`/learning/?module=${encodeURIComponent(session.moduleSlug)}&session=${encodeURIComponent(next.slug)}`}
-            className="flex-1 max-w-xs border border-gray-200 rounded-lg p-3 text-right hover:border-[#10b981]/50 transition-colors"
+            className="w-full border border-gray-200 rounded-lg p-3 text-right hover:border-[#10b981]/50 transition-colors sm:flex-1 sm:max-w-xs"
           >
             <span className="flex items-center justify-end gap-1 text-xs text-gray-400">
               次へ <ArrowRight size={12} aria-hidden />
@@ -160,7 +162,7 @@ export function SessionView({ session, module, progress, onProgressChanged }: Pr
             <span className="block text-sm font-medium text-gray-900 truncate">{next.title}</span>
           </Link>
         ) : (
-          <span className="flex-1" />
+          <span className="hidden sm:block sm:flex-1" />
         )}
       </nav>
     </article>

@@ -440,6 +440,69 @@ describe('LearningPage', () => {
       // ロック表示にはならない
       expect(screen.queryByText(/受講登録（購入）が必要です/)).not.toBeInTheDocument();
     });
+
+    it('ハードロード（auth復元中の着地）でも購入者はロック確定せず本文に到達する', async () => {
+      // F5・直リンク・Stripe戻りの直後: AuthProvider は 'loading'（refresh 中）で
+      // スタートする。この間に匿名fetchが走ると購入者でも 403 PAYMENT_001 の
+      // ロック表示で確定してしまう（2026-09-03 に本番で発見）。
+      authState.status = 'loading';
+      authState.user = null;
+      setAccessToken(null);
+
+      let moduleFetches = 0;
+      server.use(
+        rest.get('**/api/learning/progress', (_req, res, ctx) =>
+          res(ctx.status(200), ctx.json({ success: true, data: emptyOverview() })),
+        ),
+        rest.get('**/api/learning/modules/week-05', (req, res, ctx) => {
+          moduleFetches += 1;
+          // ロード中の匿名リクエストはロック確定の原因になるため、
+          // 本実装では authStatus 確定前はリクエスト自体を出さない。
+          // ここでは購入済みトークンでのみ 200 を返す（検証の対偶）
+          return req.headers.get('authorization')
+            ? res(ctx.status(200), ctx.json({ success: true, data: { module: paidModuleDetail } }))
+            : res(ctx.status(403), ctx.json({ error: { code: 'PAYMENT_001', message: ' gated' } }));
+        }),
+        rest.get('**/api/learning/sessions/day-05', (req, res, ctx) =>
+          req.headers.get('authorization')
+            ? res(ctx.status(200), ctx.json({ success: true, data: { session: paidSessionDetail } }))
+            : res(ctx.status(403), ctx.json({ error: { code: 'PAYMENT_001', message: ' gated' } })),
+        ),
+      );
+
+      queryParams = { module: 'week-05', session: 'day-05' };
+      // authState の変化は再レンダーを起こさないため、タイマーで flip + 再レンダーする
+      // ハーネス（実運用では AuthProvider の状態更新が再レンダーを起こす）
+      function Harness() {
+        const [tick, setTick] = React.useState(0);
+        React.useEffect(() => {
+          const t = setTimeout(() => {
+            authState.status = 'authenticated';
+            authState.user = baseUser('2026-08-30T00:00:00Z');
+            setAccessToken('test-token');
+            setTick((x) => x + 1);
+          }, 30);
+          return () => clearTimeout(t);
+        }, []);
+        return (
+          <div>
+            <span data-testid="tick">{tick}</span>
+            <LearningPage />
+          </div>
+        );
+      }
+      render(<Harness />);
+
+      // loading 中は詳細fetchが一切走らない（匿名 403 でロックが確定しない）
+      await new Promise((r) => setTimeout(r, 15));
+      expect(moduleFetches).toBe(0);
+      expect(screen.queryByText(/受講登録する/)).not.toBeInTheDocument();
+
+      // refresh 完了（flip）→ 再取得 → 購入者として本文が表示される
+      expect(await screen.findByText('有料本文', { selector: 'h1,h2,h3' })).toBeInTheDocument();
+      expect(moduleFetches).toBe(1);
+      expect(screen.queryByText(/受講登録する/)).not.toBeInTheDocument();
+    });
   });
 });
 

@@ -94,8 +94,12 @@ function LearningContent() {
     loadProgress();
   }, [loadProgress]);
 
-  // ビューごとの詳細取得（slug 変更・セッション直接指定に追従）
+  // ビューごとの詳細取得（slug 変更・セッション直接指定に追従）。
+  // authStatus が 'loading'（refresh 中）に取得すると購入者でも匿名扱いの
+  // 403 PAYMENT_001 でロック表示が確定してしまうため、認証状態の確定を待つ
+  // （authStatus が変化した際も再取得する: ログイン→本文、ログアウト→ロック）
   useEffect(() => {
+    if (authStatus === 'loading') return;
     let cancelled = false;
     setModule(null);
     setSession(null);
@@ -139,7 +143,7 @@ function LearningContent() {
     return () => {
       cancelled = true;
     };
-  }, [moduleSlug, sessionSlug, router, anonRetry]);
+  }, [moduleSlug, sessionSlug, router, anonRetry, authStatus]);
 
   // ロック表示に使う概要（タイトル・目標）は全員同一の curriculum ツリーから引く
   const lockedSummary = useMemo(() => {
