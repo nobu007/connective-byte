@@ -23,12 +23,13 @@ describe('LearningService', () => {
   });
 
   describe('phase シード', () => {
-    it('初期化時に3 Phase が番号順に並ぶ', async () => {
+    it('初期化時に4 Phase（0=序文 + 1-3）が番号順に並ぶ', async () => {
       const tree = await service.getCurriculum();
-      expect(tree.map((p) => p.number)).toEqual([1, 2, 3]);
-      expect(tree[0]).toMatchObject({ startWeek: 1, endWeek: 3 });
-      expect(tree[1]).toMatchObject({ startWeek: 4, endWeek: 8 });
-      expect(tree[2]).toMatchObject({ startWeek: 9, endWeek: 12 });
+      expect(tree.map((p) => p.number)).toEqual([0, 1, 2, 3]);
+      expect(tree[0]).toMatchObject({ startWeek: 0, endWeek: 0 });
+      expect(tree[1]).toMatchObject({ startWeek: 1, endWeek: 4 });
+      expect(tree[2]).toMatchObject({ startWeek: 5, endWeek: 8 });
+      expect(tree[3]).toMatchObject({ startWeek: 9, endWeek: 12 });
       expect(tree.every((p) => p.modules)).toBe(true);
     });
   });
@@ -46,16 +47,24 @@ describe('LearningService', () => {
       expect(created).toMatchObject({ slug: 'week-01', weekNumber: 1, isPublished: true });
 
       const tree = await service.getCurriculum();
+      expect(tree[0].modules).toHaveLength(0);
+      expect(tree[1].modules).toHaveLength(1);
+      expect(tree[2].modules).toHaveLength(0);
+      expect(tree[3].modules).toHaveLength(0);
+    });
+
+    it('weekNumber 0 は Phase 0（序文）に配置される', async () => {
+      await service.createModule({ slug: 'week-00', title: '序文', weekNumber: 0 });
+      const tree = await service.getAdminCurriculum();
       expect(tree[0].modules).toHaveLength(1);
       expect(tree[1].modules).toHaveLength(0);
-      expect(tree[2].modules).toHaveLength(0);
     });
 
     it('weekNumber 5 は Phase 2 に配置される', async () => {
       await service.createModule({ slug: 'week-05', title: 'W5', weekNumber: 5 });
       const tree = await service.getAdminCurriculum();
-      expect(tree[0].modules).toHaveLength(0);
-      expect(tree[1].modules).toHaveLength(1);
+      expect(tree[1].modules).toHaveLength(0);
+      expect(tree[2].modules).toHaveLength(1);
     });
 
     it('不正な slug を 400 で拒否する', async () => {
@@ -72,7 +81,7 @@ describe('LearningService', () => {
 
     it('範囲外の weekNumber を 400 で拒否する', async () => {
       await expect(
-        service.createModule({ slug: 'week-00', title: 'x', weekNumber: 0 })
+        service.createModule({ slug: 'week-00', title: 'x', weekNumber: -1 })
       ).rejects.toMatchObject({ code: 'LEARNING_VALIDATION_001', httpStatus: 400 });
     });
 
@@ -118,12 +127,12 @@ describe('LearningService', () => {
       });
 
       const tree = await service.getCurriculum();
-      expect(tree[0].modules.map((m) => m.slug)).toEqual(['week-01']);
-      expect(tree[0].modules[0].sessions.map((s) => s.slug)).toEqual(['day-01']);
+      expect(tree[1].modules.map((m) => m.slug)).toEqual(['week-01']);
+      expect(tree[1].modules[0].sessions.map((s) => s.slug)).toEqual(['day-01']);
 
       const adminTree = await service.getAdminCurriculum();
-      expect(adminTree[0].modules.map((m) => m.slug)).toEqual(['week-01', 'week-02']);
-      expect(adminTree[0].modules[0].sessions.map((s) => s.slug)).toEqual(['day-01', 'day-02']);
+      expect(adminTree[1].modules.map((m) => m.slug)).toEqual(['week-01', 'week-02']);
+      expect(adminTree[1].modules[0].sessions.map((s) => s.slug)).toEqual(['day-01', 'day-02']);
     });
   });
 
@@ -295,7 +304,7 @@ describe('LearningService', () => {
       await expect(service.reorderSession(b.id, 'down')).resolves.toBe(true);
 
       const tree = await service.getAdminCurriculum();
-      expect(tree[0].modules[0].sessions.map((s) => s.slug)).toEqual([
+      expect(tree[1].modules[0].sessions.map((s) => s.slug)).toEqual([
         'day-01',
         'day-03',
         'day-02',
@@ -307,15 +316,15 @@ describe('LearningService', () => {
     it('is_published の切替で公開ツリーの出現が変わる', async () => {
       const created = await service.createModule({ slug: 'week-01', title: 'W1', weekNumber: 1 });
       let tree = await service.getCurriculum();
-      expect(tree[0].modules).toHaveLength(0);
+      expect(tree[1].modules).toHaveLength(0);
 
       await service.updateModule(created.id, { isPublished: true });
       tree = await service.getCurriculum();
-      expect(tree[0].modules.map((m) => m.slug)).toEqual(['week-01']);
+      expect(tree[1].modules.map((m) => m.slug)).toEqual(['week-01']);
 
       await service.updateModule(created.id, { isPublished: false });
       tree = await service.getCurriculum();
-      expect(tree[0].modules).toHaveLength(0);
+      expect(tree[1].modules).toHaveLength(0);
     });
 
     it('slug 変更時、他モジュールとの衝突は 409', async () => {
@@ -345,7 +354,7 @@ describe('LearningService', () => {
       await expect(service.reorderModule(a.id, 'down')).resolves.toBe(true);
 
       const tree = await service.getAdminCurriculum();
-      expect(tree[0].modules.map((m) => m.slug)).toEqual(['week-02', 'week-01']);
+      expect(tree[1].modules.map((m) => m.slug)).toEqual(['week-02', 'week-01']);
       expect(b).toBeDefined();
     });
   });

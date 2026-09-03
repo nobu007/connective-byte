@@ -38,7 +38,9 @@ export function ModuleView({ module, progress, purchased }: Props) {
       </Link>
 
       <header className="mb-8">
-        <p className="text-xs font-semibold tracking-wider text-[#10b981] uppercase">Week {module.weekNumber}</p>
+        <p className="text-xs font-semibold tracking-wider text-[#10b981] uppercase">
+          {module.weekNumber === 0 ? 'はじめに' : `Week ${module.weekNumber}`}
+        </p>
         <h1 className="text-2xl font-bold text-gray-900">
           {module.title}
           <span

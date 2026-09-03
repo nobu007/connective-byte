@@ -266,7 +266,8 @@ describe('Learning Admin API Endpoints', () => {
       expect(response.body.data.moved).toBe(true);
 
       const tree = await learningContainer.learningService.getAdminCurriculum();
-      const slugs = tree[0].modules.filter((m) => m.slug.endsWith(suffix)).map((m) => m.slug);
+      // Phase 0（序文）が先頭のため week-01/02 は Phase 1 = tree[1]
+      const slugs = tree[1].modules.filter((m) => m.slug.endsWith(suffix)).map((m) => m.slug);
       expect(slugs).toEqual([`week-02-${suffix}`, `week-01-${suffix}`]);
     });
   });

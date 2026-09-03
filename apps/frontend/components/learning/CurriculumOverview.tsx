@@ -33,7 +33,7 @@ export function CurriculumOverview({ phases, progress, purchased }: Props) {
         <section key={phase.id} aria-labelledby={`phase-${phase.number}`}>
           <div className="mb-4">
             <p className="text-xs font-semibold tracking-wider text-[#10b981] uppercase">
-              Phase {phase.number} · Week {phase.startWeek}-{phase.endWeek}
+              {phase.number === 0 ? 'はじめに' : `Phase ${phase.number} · Week ${phase.startWeek}-${phase.endWeek}`}
             </p>
             <h2 id={`phase-${phase.number}`} className="text-xl font-bold text-gray-900">
               {phase.title}
@@ -57,7 +57,7 @@ export function CurriculumOverview({ phases, progress, purchased }: Props) {
                         className="font-semibold text-gray-900 hover:text-[#1e3a8a] hover:underline"
                       >
                         <BookOpen size={16} className="inline mr-1.5 text-[#1e3a8a]" aria-hidden />
-                        Week {module.weekNumber}: {module.title}
+                        {module.weekNumber === 0 ? module.title : `Week ${module.weekNumber}: ${module.title}`}
                       </Link>
                       <span
                         className={`inline-flex items-center gap-1 ml-2 align-middle text-[11px] font-semibold px-1.5 py-0.5 rounded ${locked ? 'text-[#1e3a8a] bg-[#1e3a8a]/5' : 'text-[#10b981] bg-[#10b981]/5'}`}

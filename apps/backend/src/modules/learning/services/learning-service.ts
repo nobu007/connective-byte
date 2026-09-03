@@ -372,8 +372,9 @@ export class LearningService {
 
   private validateWeekNumber(value: unknown): number {
     const num = typeof value === 'number' ? value : Number(value);
-    if (!Number.isInteger(num) || num < 1 || num > 52) {
-      throw new LearningError('LEARNING_VALIDATION_001', 'weekNumber は 1〜52 の整数です');
+    // week 0 = 序文モジュール（Phase 0・docs/product-strategy.md）
+    if (!Number.isInteger(num) || num < 0 || num > 52) {
+      throw new LearningError('LEARNING_VALIDATION_001', 'weekNumber は 0〜52 の整数です');
     }
     return num;
   }

@@ -35,7 +35,9 @@ describe('Learning API Endpoints (public read)', () => {
       expect(response.body.success).toBe(true);
       expect(Array.isArray(response.body.data.phases)).toBe(true);
       // Json 実装は3 Phase を自動シードする
-      expect(response.body.data.phases.map((p: { number: number }) => p.number)).toEqual([1, 2, 3]);
+      expect(response.body.data.phases.map((p: { number: number }) => p.number)).toEqual([
+        0, 1, 2, 3,
+      ]);
       expect(response.headers['cache-control']).toContain('max-age=60');
       expect(response.headers['cache-control']).toContain('stale-while-revalidate');
     });

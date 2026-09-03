@@ -168,7 +168,7 @@ function LearningContent() {
           <p className="text-xs font-semibold tracking-wider text-[#10b981] uppercase mb-2">12週間カリキュラム</p>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">ラーニング</h1>
           <p className="text-gray-600">
-            Week 1 は無料公開。Weeks 2-12 は受講登録（{PURCHASE_PRICE_LABEL}）で解放されます。
+            はじめに（Week 0）と Week 1 は無料公開。Weeks 2-12 は受講登録（{PURCHASE_PRICE_LABEL}）で解放されます。
           </p>
           {progress && progress.overall.totalSessions > 0 && (
             <div className="mt-4 max-w-sm mx-auto">
