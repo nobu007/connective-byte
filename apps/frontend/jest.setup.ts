@@ -4,7 +4,14 @@
 // used for __tests__/testing-library.js
 import 'whatwg-fetch';
 import '@testing-library/jest-dom';
+import { configure } from '@testing-library/dom';
 import { server } from './mocks/server';
+
+// waitFor/findBy の猶予を広げる（既定1秒）。フルスイート並列実行時は最初の
+// render がモジュールグラフのコールドスタートを支払い、fetch 後の初回描画が
+// 1秒を超えることがある（実績: learning page の初回waitForが負荷で切断。
+// 単独実行では293msで通る負荷依存フレーク）。成功は早く返る・実エラーは5秒後失敗
+configure({ asyncUtilTimeout: 5000 });
 
 // web-vitals uses Performance APIs jsdom does not implement; stub all reporters
 jest.mock('web-vitals', () => ({
