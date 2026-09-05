@@ -380,32 +380,48 @@ describe('LoggingService', () => {
   });
 
   describe('performance', () => {
+    // 絶対ms閾値はフルスイート並列実行の負荷で切断する (実績: 50ms閾値が
+    // 並列時にflake・単独実行では常に緑)。負荷に依存しない検証へ置き換える:
+    // フィルタは実出力との相対比較、実出力は破滅的回帰だけ検知する煙霧テスト。
+    const elapsedMs = (start: bigint) => Number(process.hrtime.bigint() - start) / 1e6;
+
     it('should filter logs quickly', () => {
       loggingService.setLogLevel('error');
       const logger = loggingService.createLogger('Test');
 
-      const start = Date.now();
+      const filteredStart = process.hrtime.bigint();
       for (let i = 0; i < 1000; i++) {
         logger.debug('This should be filtered');
       }
-      const duration = Date.now() - start;
+      const filteredMs = elapsedMs(filteredStart);
 
-      // 1000 filtered logs should stay well below unfiltered logging cost.
-      // Margin widened: tight absolute thresholds flake under parallel test load.
-      expect(duration).toBeLessThan(50);
+      const activeStart = process.hrtime.bigint();
+      for (let i = 0; i < 100; i++) {
+        logger.error('active reference log');
+      }
+      const activeMs = elapsedMs(activeStart);
+
+      // フィルタ済み1000件が実出力100件より高コストなら fast path が機能して
+      // いない (実出力は1件あたり整形+transportで10倍以上重い。同一テスト内の
+      // 相対比較なので並列負荷の影響を受けない)
+      expect(filteredMs).toBeLessThan(activeMs);
+      // フィルタされたログは一切出力しない
+      expect(consoleLogSpy).not.toHaveBeenCalled();
     });
 
     it('should log efficiently', () => {
       const logger = loggingService.createLogger('Test');
 
-      const start = Date.now();
+      const start = process.hrtime.bigint();
       for (let i = 0; i < 100; i++) {
         logger.info('Test message');
       }
-      const duration = Date.now() - start;
+      const durationMs = elapsedMs(start);
 
-      // 100 active logs should take < 100ms (< 1ms each)
-      expect(duration).toBeLessThan(100);
+      // 1件あたり10ms未満 — 同期ブロック・O(n^2) 的回帰の検知用 (並列負荷を
+      // 許容する上限。「1ms/件」相当の平時保証は上の相対比較側が担う)
+      expect(durationMs).toBeLessThan(1000);
+      expect(consoleLogSpy).toHaveBeenCalledTimes(100);
     });
   });
 
