@@ -84,3 +84,6 @@ yarn-error.log*
 
 
 # python
+
+# AI-hub harness worktrees (runtime artifacts; cleanup is owned by the harness)
+/worktrees/
