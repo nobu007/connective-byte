@@ -54,16 +54,20 @@ apps/frontend/
 ### インストール
 
 ```bash
-# 依存関係のインストール
-npm install
+# リポジトリのルートで、全workspaceの固定依存関係をインストール
+npm ci
 
-# 開発サーバーの起動
-npm run dev
+# フロントエンドの開発サーバーを起動
+npm run dev -w apps/frontend
 ```
+
+依存関係の固定情報はリポジトリ直下の `package-lock.json` に集約しています。フロントエンド単独のlockfileは作成せず、追加・更新はルートから `npm install <package> -w apps/frontend` で行ってください。
 
 開発サーバーは http://localhost:3000 で起動します。
 
 ### 利用可能なコマンド
+
+以下は `apps/frontend` ディレクトリで実行します。
 
 ```bash
 npm run dev          # 開発サーバー起動

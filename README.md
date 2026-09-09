@@ -66,8 +66,10 @@ cd connective-byte
 2. 依存関係のインストール（ワークスペース全体を一括）:
 
 ```bash
-npm install
+npm ci
 ```
+
+固定情報はルートの `package-lock.json` のみを使用します。更新はCIと同じnpm 10系で実行し（例: `npx npm@10 install <package> -w apps/frontend`）、`npx npm@10 ls postcss --all` と `npm audit --omit=dev --audit-level=high` を確認してください。npm 11.16.0ではworkspace経由のPostCSS overrideが失われる動作を確認しています（[npmの関連報告](https://github.com/npm/cli/issues/9659)）。
 
 3. 環境変数の設定:
 
