@@ -236,3 +236,25 @@ npm run e2e:payments              # 7. ゲーティング・status・署名拒�
 ## 旧ホスティング（Netlify）
 
 2026年8月にCloudflare Pagesへ移行した。移行の経緯: Netlifyの月枠クレジット枯渇でデプロイがアカウントレベルでブロックされたため。旧構成（`netlify.toml`・`netlify/functions/`・`npm run deploy`）は撤去済み（git履歴で参照可能）。フォームロジックの変更は `apps/frontend/lib/api/` の共有handlerのみでよく、`functions/api/`（本番）と `app/api/`（開発）が自動的にそれを共用する。
+
+## 通信状態の内部参照
+
+会員APIのWorkerは`WorkerEntrypoint`を継承し、従来のHTTP/日次メンテナンスを維持したまま
+`communicationRead` RPCを提供します。HTTPルートには登録していません。Cloudflare Service
+bindingを持つ自社Workerからだけ呼び、既存auth/paymentsコンテナの同じrepositoryを参照します。
+JWT発行・購読登録・課金変更は行いません。
+
+RPC v1の操作は`check_target`（資格情報を除いたhost/port/databaseの一致判定）、
+`list`（UUIDカーソル、最大100件）、`member`（本人確認/削除状態と全購入status）です。
+`member`は返金行も含み、passwordHash・氏名・Stripe ID・金額を返しません。取得不能は
+空の購入履歴へ変換せず、固定エラーで呼出元の送信判断を止めます。
+
+配信希望/同意/解除/日程の正本はsaas-infraの通信モジュールです。本番の候補集計は
+同モジュールの運用鍵で保護した操作から実行します。DB接続文字列やJWT鍵を別Workerへ
+複製しません。ローカル設定との一致は資格情報を除いた接続先を比較するもので、
+認証情報の同一性や、複数DBをまたいだ同時点スナップショットの保証ではありません。
+
+既存Workerのコード更新は`wrangler versions upload --keep-vars`で候補版を作り、内容確認後に
+`wrangler versions deploy`で適用します。routes/cronはこの更新で変更せず、既存secretを保持します。
+公開APIの未認証401、存在しないRPC相当URLの404、内部の実会員/全購入履歴の読取りを確認します。
+失敗時は退避した旧バージョンへ戻し、通信の実行は未開始/停止状態を維持します。

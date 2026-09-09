@@ -15,6 +15,8 @@
 
 import express from 'express';
 import { httpServerHandler } from 'cloudflare:node';
+import { WorkerEntrypoint } from 'cloudflare:workers';
+import { neon } from '@neondatabase/serverless';
 import { securityHeaders, corsConfig, sanitizeInput } from './middleware/security';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler';
 import { captureRawBody } from './middleware/rawBody';
@@ -23,6 +25,8 @@ import authRoutes from './routes/authRoutes';
 import learningRoutes from './routes/learningRoutes';
 import paymentRoutes from './routes/paymentRoutes';
 import { authContainer } from './modules/auth/auth.container';
+import { paymentsContainer } from './modules/payments/payments.container';
+import { communicationRead } from './services/communicationSource';
 
 const app = express();
 app.disable('x-powered-by');
@@ -69,9 +73,6 @@ const serverHandler = httpServerHandler({ port: PORT });
 interface ScheduledEvent {
   scheduledTime: number;
 }
-interface ScheduledController {
-  waitUntil(promise: Promise<unknown>): void;
-}
 
 async function runScheduledMaintenance(event: ScheduledEvent): Promise<void> {
   const { maintenanceService } = authContainer;
@@ -86,9 +87,33 @@ async function runScheduledMaintenance(event: ScheduledEvent): Promise<void> {
   );
 }
 
-export default {
-  fetch: (request: Request): Promise<Response> => serverHandler.fetch(request),
-  async scheduled(event: ScheduledEvent, _env: unknown, ctx: ScheduledController): Promise<void> {
-    ctx.waitUntil(runScheduledMaintenance(event));
-  },
-};
+export default class MemberApi extends WorkerEntrypoint<{ DATABASE_URL: string }> {
+  fetch(request: Request): Promise<Response> {
+    return serverHandler.fetch(request);
+  }
+  async scheduled(event: ScheduledEvent): Promise<void> {
+    this.ctx.waitUntil(runScheduledMaintenance(event));
+  }
+  // RPC is reachable only through a Cloudflare Service binding. Public HTTP
+  // continues through Express; no URL exposes this method or member enumeration.
+  async communicationRead(input: unknown): Promise<unknown> {
+    return communicationRead(input, {
+      databaseUrl: this.env.DATABASE_URL,
+      users: authContainer.userRepository,
+      purchases: paymentsContainer.purchaseRepository,
+      listIds: async (after, limit) => {
+        const sql = neon(this.env.DATABASE_URL);
+        const results = await sql.transaction(
+          [
+            sql.query(
+              'SELECT id FROM users WHERE ($1::uuid IS NULL OR id > $1::uuid) ORDER BY id LIMIT $2',
+              [after, limit]
+            ),
+          ],
+          { readOnly: true, fetchOptions: { signal: AbortSignal.timeout(15000) } }
+        );
+        return results[0].map((row) => row.id as string);
+      },
+    });
+  }
+}
