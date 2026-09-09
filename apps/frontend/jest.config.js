@@ -14,6 +14,7 @@ const config = {
   // Add more setup options before each test is run
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   // Module path mapping for monorepo structure
+  moduleNameMapper: { '^@/(.*)$': '<rootDir>/$1' },
   moduleDirectories: ['node_modules', '<rootDir>/../..'],
   // 注意: ESM-only パッケージ（react-markdown 等）の transform 指定は
   // ここでは効かない。next/jest は transformIgnorePatterns の先頭に

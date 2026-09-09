@@ -18,12 +18,14 @@ import { ProfileForm } from '@/components/mypage/ProfileForm';
 import { PasswordChangeForm } from '@/components/mypage/PasswordChangeForm';
 import { SessionList } from '@/components/mypage/SessionList';
 import { AccountDeletion } from '@/components/mypage/AccountDeletion';
+import { CommunicationPreferences } from '@/components/mypage/CommunicationPreferences';
 import { PurchaseStatusCard } from '@/components/mypage/PurchaseStatusCard';
 
-type Tab = 'profile' | 'security' | 'sessions' | 'account';
+type Tab = 'communication' | 'profile' | 'security' | 'sessions' | 'account';
 
 const TABS: Array<{ key: Tab; label: string }> = [
   { key: 'profile', label: 'プロフィール' },
+  { key: 'communication', label: '配信設定' },
   { key: 'security', label: 'セキュリティ' },
   { key: 'sessions', label: 'セッション' },
   { key: 'account', label: 'アカウント' },
@@ -110,6 +112,7 @@ function MyPageContent() {
         </div>
 
         {tab === 'profile' && <ProfileForm user={user} onUpdated={setUser} />}
+        {tab === 'communication' && <CommunicationPreferences key={user.id} />}
         {tab === 'security' && <PasswordChangeForm />}
         {tab === 'sessions' && <SessionList />}
         {tab === 'account' && (
