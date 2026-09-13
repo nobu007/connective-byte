@@ -1,5 +1,7 @@
 # AGENTS.md - 汎用開発指示書
 
+不変条件は[SYSTEM_CONSTITUTION.md](SYSTEM_CONSTITUTION.md)、発火・停止は[AUTOMATION.md](AUTOMATION.md)、長期の到達順序は[ORDER.md](ORDER.md)。以下の無料/有料の提供規約と公開条件を維持する。
+
 # プロダクト方針 - 学習コンテンツ公開・課金（絶対遵守）
 
 - **無料公開は Week 1（導入・概論）まで**。それ以上の無料公開は「売れるものがなくなる」ため禁止
