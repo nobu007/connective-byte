@@ -139,3 +139,5 @@ npm run deploy:cf    # ビルド → Cloudflare Pages 本番へアップロー�
 ## 📄 ライセンス
 
 MPL-2.0（Mozilla Public License 2.0）の下で公開されています。詳細は[LICENSE](./LICENSE)を参照してください。
+
+[長期計画と段階ごとの出口条件](ORDER.md#長期計画2026-09-13)。現在の作業・権限は既存の正本に従う。
