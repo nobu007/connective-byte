@@ -384,26 +384,36 @@ describe('LoggingService', () => {
     // 並列時にflake・単独実行では常に緑)。負荷に依存しない検証へ置き換える:
     // フィルタは実出力との相対比較、実出力は破滅的回帰だけ検知する煙霧テスト。
     const elapsedMs = (start: bigint) => Number(process.hrtime.bigint() - start) / 1e6;
+    // 相対比較でも並列負荷は影響する: preemption/GCの1回ヒットが短いループの
+    // 単発測定を数百%歪める (実績: filtered 77ms vs active 10msでflake)。
+    // 3回測って最良値を比べる — 全回が歪む確率は十分低い。
+    const bestOfMs = (fn: () => void, runs = 3) => {
+      let best = Infinity;
+      for (let r = 0; r < runs; r++) {
+        const start = process.hrtime.bigint();
+        fn();
+        best = Math.min(best, elapsedMs(start));
+      }
+      return best;
+    };
 
     it('should filter logs quickly', () => {
       loggingService.setLogLevel('error');
       const logger = loggingService.createLogger('Test');
 
-      const filteredStart = process.hrtime.bigint();
-      for (let i = 0; i < 1000; i++) {
-        logger.debug('This should be filtered');
-      }
-      const filteredMs = elapsedMs(filteredStart);
-
-      const activeStart = process.hrtime.bigint();
-      for (let i = 0; i < 100; i++) {
-        logger.error('active reference log');
-      }
-      const activeMs = elapsedMs(activeStart);
+      const filteredMs = bestOfMs(() => {
+        for (let i = 0; i < 1000; i++) {
+          logger.debug('This should be filtered');
+        }
+      });
+      const activeMs = bestOfMs(() => {
+        for (let i = 0; i < 100; i++) {
+          logger.error('active reference log');
+        }
+      });
 
       // フィルタ済み1000件が実出力100件より高コストなら fast path が機能して
-      // いない (実出力は1件あたり整形+transportで10倍以上重い。同一テスト内の
-      // 相対比較なので並列負荷の影響を受けない)
+      // いない (実出力は1件あたり整形+transportで10倍以上重い)
       expect(filteredMs).toBeLessThan(activeMs);
       // フィルタされたログは一切出力しない
       expect(consoleLogSpy).not.toHaveBeenCalled();
