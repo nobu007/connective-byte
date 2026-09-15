@@ -10,7 +10,7 @@
 
 [CI](.github/workflows/ci.yml)はpush/PR、[security](.github/workflows/security.yml)はpush/PRと週次。正確なcronはworkflowを正本とする。教材更新・会員運営の周期とは別。
 
-本ホストcrontabにはfleet運用の定常駆動がある (x-discover 収集09:17/投稿21:07 — 収集は生成物の版管理の自動再生成 `regen_stale` を含む・2026-09-15〜)。発火定義の正本はbusiness_notes `横断/2026-08-30-x-discover-operations.md`、生成物台帳はconnectivebyte-web `scripts/ARTIFACTS.md`。
+本ホストcrontabにはfleet運用の定常駆動がある (x-discover 収集09:17/投稿21:07 — 収集は生成物の版管理の自動再生成 `regen_stale` を含む・2026-09-15〜)。発火定義の正本はbusiness_notes `横断/2026-08-30-x-discover-operations.md`、生成物台帳はconnectivebyte-web `ARTIFACTS.md` (repo root — scripts/木の外に置き文書変更で版を変えない)。
 
 ## Entrypoint（実行コマンド）
 
