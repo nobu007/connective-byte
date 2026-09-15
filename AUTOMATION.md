@@ -10,6 +10,8 @@
 
 [CI](.github/workflows/ci.yml)はpush/PR、[security](.github/workflows/security.yml)はpush/PRと週次。正確なcronはworkflowを正本とする。教材更新・会員運営の周期とは別。
 
+本ホストcrontabにはfleet運用の定常駆動がある (x-discover 収集09:17/投稿21:07 — 収集は生成物の版管理の自動再生成 `regen_stale` を含む・2026-09-15〜)。発火定義の正本はbusiness_notes `横断/2026-08-30-x-discover-operations.md`、生成物台帳はconnectivebyte-web `scripts/ARTIFACTS.md`。
+
 ## Entrypoint（実行コマンド）
 
 `npm run dev`で開発、`npm run lint`・`npm run type-check`・`npm test`・`npm run build`で変更に応じて検証する。`npm run deploy:cf`と`npm run deploy:api`は公開操作。`grant-purchase`やDB初期化も読み取り確認として実行しない。コマンドの定義は[package.json](package.json)。
@@ -34,4 +36,4 @@ CLI・CI・公開用scriptの存在を確認。実配備・決済・権利付与
 
 公開には対象版の技術検証に加え、既存のコンテンツ公開条件とブラウザ確認を満たす。worktree lifecycleとcleanupは共有harnessへ委譲する。
 
-_最終更新: 2026-09-13 ／ driver・workflow・委譲先変更時は本ファイルと入口の参照を更新すること。_
+_最終更新: 2026-09-15 ／ driver・workflow・委譲先変更時は本ファイルと入口の参照を更新すること。_
