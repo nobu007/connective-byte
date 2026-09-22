@@ -272,3 +272,7 @@ apps/backend/.dev.vars
 
 # AI-hub harness worktrees (runtime artifacts; cleanup is owned by the harness)
 /worktrees/
+
+# auto-added by instructions/10_storage/100_audit_storage_policy.md
+.audit/development_direction.yml
+
