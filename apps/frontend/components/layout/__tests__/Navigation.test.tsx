@@ -28,10 +28,23 @@ jest.mock('../../../content/site-config', () => ({
   },
 }));
 
+// Mock auth context（Navigation は useAuth でログイン状態を表示）
+const authState = {
+  status: 'unauthenticated' as 'loading' | 'authenticated' | 'unauthenticated',
+  user: null as { fullName: string } | null,
+  logout: jest.fn(),
+};
+jest.mock('../../auth/AuthProvider', () => ({
+  useAuth: () => authState,
+}));
+
 describe('Navigation', () => {
   beforeEach(() => {
     // Reset any DOM state
     document.body.style.overflow = 'unset';
+    authState.status = 'unauthenticated';
+    authState.user = null;
+    authState.logout.mockClear();
   });
 
   it('renders site name', () => {
@@ -50,6 +63,31 @@ describe('Navigation', () => {
     render(<Navigation />);
     const nav = screen.getByRole('navigation', { name: /main navigation/i });
     expect(nav).toBeInTheDocument();
+  });
+
+  describe('auth slot', () => {
+    it('shows login link when unauthenticated', () => {
+      render(<Navigation />);
+      expect(screen.getAllByRole('link', { name: /ログイン/ }).length).toBeGreaterThan(0);
+    });
+
+    it('shows mypage and logout when authenticated', () => {
+      authState.status = 'authenticated';
+      authState.user = { fullName: 'テストユーザー' };
+
+      render(<Navigation />);
+      expect(screen.getAllByRole('link', { name: /マイページ/ }).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('button', { name: /ログアウト/ }).length).toBeGreaterThan(0);
+      expect(screen.queryByRole('link', { name: /^ログイン$/ })).not.toBeInTheDocument();
+    });
+
+    it('shows no auth entry while session is restoring', () => {
+      authState.status = 'loading';
+
+      render(<Navigation />);
+      expect(screen.queryByRole('link', { name: /ログイン/ })).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: /マイページ/ })).not.toBeInTheDocument();
+    });
   });
 
   describe('mobile menu', () => {

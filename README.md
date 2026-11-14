@@ -40,25 +40,18 @@ ConnectiveByteは、「理解されない孤独を吹き飛ばして、AI活用�
 - **Runtime**: [Node.js](https://nodejs.org/)
 - **Template Engine**: [LiquidJS](https://liquidjs.com/)
 
-## 🎯 プロジェクトの哲学
-
-- **接続性**: あらゆるコンポーネントが緊密に連携し、シームレスな統合を実現
-- **拡張性**: モジュラー設計による容易な機能拡張
-- **保守性**: クリーンアーキテクチャと明確な責務分離による高い保守性
-
 ## 🏗️ プロジェクト構造
 
 ```
 ConnectiveByte/
 ├── apps/
 │   ├── frontend/    # Next.jsによるフロントエンドアプリケーション
-│   ├── backend/     # APIサーバー（FastAPI/Express）
-│   └── bot/         # Discord/Slack Bot
+│   └── backend/     # Express.jsによるAPIサーバー
 ├── libs/
 │   ├── components/  # 再利用可能なUIコンポーネント
-│   ├── logic/       # ビジネスロジックと共通機能
-│   └── design/      # デザインシステム
-└── starter-kit/     # 開発者向けテンプレート
+│   └── logic/       # ビジネスロジックと共通機能
+└── functions/
+    └── api/         # 本番用API（Cloudflare Pages Functions: ニュースレター・問い合わせフォーム）
 ```
 
 ## 🚀 クイックスタート
@@ -70,27 +63,27 @@ git clone https://github.com/nobu007/connective-byte.git
 cd connective-byte
 ```
 
-2. 環境変数の設定:
+2. 依存関係のインストール（ワークスペース全体を一括）:
 
 ```bash
-cd apps/frontend
-cp .env.example .env.local
-# .env.localを編集して必要な環境変数を設定
+npm ci
 ```
 
-3. フロントエンドの起動:
+固定情報はルートの `package-lock.json` のみを使用します。更新はCIと同じnpm 10系で実行し（例: `npx npm@10 install <package> -w apps/frontend`）、`npx npm@10 ls postcss --all` と `npm audit --omit=dev --audit-level=high` を確認してください。npm 11.16.0ではworkspace経由のPostCSS overrideが失われる動作を確認しています（[npmの関連報告](https://github.com/npm/cli/issues/9659)）。
+
+3. 環境変数の設定:
 
 ```bash
-npm install
-npm run dev
+cp .env.example .env
+# .envを編集して必要な環境変数を設定（frontend/backend共通・ルート一箇所）
 ```
 
-4. バックエンドの起動:
+4. 開発サーバーの起動:
 
 ```bash
-cd apps/backend
-npm install
-npm run dev
+npm run dev              # frontend + backend を同時起動
+npm run dev:frontend     # フロントエンドのみ
+npm run dev:backend      # バックエンドのみ
 ```
 
 ### 環境変数の設定
@@ -110,41 +103,27 @@ npm run dev
 - `NEXT_PUBLIC_PLAUSIBLE_API_HOST`: Plausible AnalyticsのAPIホスト（デフォルト: https://plausible.io）
 - `NEXT_PUBLIC_PLAUSIBLE_TRACK_LOCALHOST`: ローカル環境でのトラッキング有効化（開発時のみ）
 
-詳細は `apps/frontend/.env.example` を参照してください。
+詳細は `.env.example` を参照してください。
 
 ## 🚀 デプロイ
 
-### Netlifyへのデプロイ
+### Cloudflare Pagesへの手動デプロイ
 
-このプロジェクトはNetlifyで簡単にデプロイできます。
+pushごとの自動ビルドは行わない。開発完了時に手動でデプロイする（直接アップロードのためビルドクレジットを消費しない）:
 
-#### クイックデプロイ
+```bash
+npm run env:check    # .env の検証（RESEND_API_KEY の有効性確認を含む）
+npm run deploy:cf    # ビルド → Cloudflare Pages 本番へアップロード
+```
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/nobu007/connective-byte)
-
-#### 手動デプロイ
-
-1. [Netlify](https://www.netlify.com/)にログイン
-2. 「Add new site」→「Import an existing project」を選択
-3. GitHubリポジトリを接続
-4. ビルド設定は`netlify.toml`から自動で読み込まれます
-
-詳細な手順は[NETLIFY_DEPLOY.md](./NETLIFY_DEPLOY.md)を参照してください。
-
-#### デプロイ設定（自動適用）
-
-- **Base directory**: `apps/frontend`
-- **Build command**: `npm run build`
-- **Publish directory**: `apps/frontend/out`
-- **Node.js version**: 20
+初回セットアップ（Cloudflareアカウント、APIトークン、本番secret、カスタムドメイン）は
+[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)を参照。
 
 ## 📚 ドキュメント
 
 各コンポーネントの詳細なドキュメントは以下を参照してください：
 
 - [フロントエンド](./apps/frontend/README.md)
-- [バックエンド](./apps/backend/README.md)
-- [コンポーネントライブラリ](./libs/components/README.md)
 - [公開思想ガイド](./docs/public/philosophy.md)
 - [公開技術原則](./docs/public/technology-principles.md)
 - [公開/非公開境界](./docs/public/public-private-boundary.md)
@@ -159,4 +138,6 @@ npm run dev
 
 ## 📄 ライセンス
 
-MITライセンスの下で公開されています。詳細は[LICENSE](./LICENSE)を参照してください。
+MPL-2.0（Mozilla Public License 2.0）の下で公開されています。詳細は[LICENSE](./LICENSE)を参照してください。
+
+[長期計画と段階ごとの出口条件](ORDER.md#長期計画2026-09-13)。現在の作業・権限は既存の正本に従う。

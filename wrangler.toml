@@ -1,0 +1,9 @@
+# Cloudflare Pages 設定（wrangler CLI 用）
+# デプロイ: npm run deploy:cf （ビルド → wrangler pages deploy）
+name = "connective-byte"
+pages_build_output_dir = "apps/frontend/out"
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# 本番環境変数（RESEND_API_KEY / RESEND_AUDIENCE_ID）は
+# Cloudflare dashboard または wrangler pages secret put で設定する。

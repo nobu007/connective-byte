@@ -44,7 +44,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+/lib/
 lib64/
 parts/
 sdist/
@@ -263,7 +263,16 @@ yarn-error.log*
 # TypeScript cache
 *.tsbuildinfo
 
-# Local Netlify folder
-.netlify
 
 # python
+.wrangler/
+
+# Cloudflare Workers ローカル秘密変数（wrangler dev 用）
+apps/backend/.dev.vars
+
+# AI-hub harness worktrees (runtime artifacts; cleanup is owned by the harness)
+/worktrees/
+
+# auto-added by instructions/10_storage/100_audit_storage_policy.md
+.audit/development_direction.yml
+

@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import * as Icons from 'lucide-react';
 import { Check } from 'lucide-react';
+import { contentIcons } from './icon-map';
 import { Card } from './Card';
 import { useTrackEvent } from '@/lib/analytics/useTrackEvent';
 import type { ValueCard as ValueCardType } from '@/types/content';
@@ -35,7 +35,7 @@ const colorClasses: Record<string, { bg: string; icon: string; border: string; t
 
 export function ValueCard({ icon, title, subtitle, description, benefits, color, index }: ValueCardProps) {
   const trackEvent = useTrackEvent();
-  const IconComponent = Icons[icon as keyof typeof Icons] as React.ComponentType<{ size?: number; className?: string }>;
+  const IconComponent = contentIcons[icon];
   const colors = colorClasses[color];
 
   const handleCardClick = () => {

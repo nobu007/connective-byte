@@ -14,9 +14,10 @@ interface ButtonProps {
   ariaLabel?: string;
 }
 
+// 背景色は白文字とのコントラスト比 4.5:1 以上（WCAG 2.1 AA）を確保する濃さにしている
 const variantClasses = {
-  primary: 'bg-[#f97316] text-white hover:bg-[#ea580c] shadow-lg hover:shadow-xl',
-  secondary: 'bg-[#10b981] text-white hover:bg-[#059669] shadow-lg hover:shadow-xl',
+  primary: 'bg-[#c2410c] text-white hover:bg-[#9a3412] shadow-lg hover:shadow-xl',
+  secondary: 'bg-[#047857] text-white hover:bg-[#065f46] shadow-lg hover:shadow-xl',
   outline: 'border-2 border-[#1e3a8a] text-[#1e3a8a] hover:bg-[#1e3a8a] hover:text-white',
 };
 

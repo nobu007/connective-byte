@@ -82,7 +82,8 @@ yarn-error.log*
 # TypeScript cache
 *.tsbuildinfo
 
-# Local Netlify folder
-.netlify
 
 # python
+
+# AI-hub harness worktrees (runtime artifacts; cleanup is owned by the harness)
+/worktrees/

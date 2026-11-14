@@ -8,6 +8,8 @@ import { Router } from 'express';
 import healthRoutes from './healthRoutes';
 import authRoutes from './authRoutes';
 import labRoutes from './labRoutes';
+import learningRoutes from './learningRoutes';
+import paymentRoutes from './paymentRoutes';
 import { handleRoot } from '../controllers/healthController';
 
 const router = Router();
@@ -22,6 +24,8 @@ router.get('/', handleRoot);
  */
 router.use(healthRoutes);
 router.use(authRoutes);
+router.use(learningRoutes);
+router.use(paymentRoutes);
 router.use('/api/lab', labRoutes);
 
 export default router;

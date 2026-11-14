@@ -20,7 +20,7 @@ ConnectiveByteは、「理解されない孤独を吹き飛ばして、AI活用�
 - **Animations**: Framer Motion
 - **Forms**: React Hook Form + Zod
 - **Icons**: Lucide React
-- **Deployment**: Netlify (Static Export)
+- **Deployment**: Cloudflare Pages (Static Export)
 
 ## 📦 プロジェクト構造
 
@@ -54,16 +54,20 @@ apps/frontend/
 ### インストール
 
 ```bash
-# 依存関係のインストール
-npm install
+# リポジトリのルートで、全workspaceの固定依存関係をインストール
+npm ci
 
-# 開発サーバーの起動
-npm run dev
+# フロントエンドの開発サーバーを起動
+npm run dev -w apps/frontend
 ```
+
+依存関係の固定情報はリポジトリ直下の `package-lock.json` に集約しています。フロントエンド単独のlockfileは作成せず、追加・更新はルートから `npm install <package> -w apps/frontend` で行ってください。
 
 開発サーバーは http://localhost:3000 で起動します。
 
 ### 利用可能なコマンド
+
+以下は `apps/frontend` ディレクトリで実行します。
 
 ```bash
 npm run dev          # 開発サーバー起動
@@ -118,17 +122,16 @@ RESEND_API_KEY=your_api_key_here
 
 ## 🚀 デプロイメント
 
-### Netlifyへのデプロイ
+### Cloudflare Pagesへのデプロイ
 
-1. Netlifyアカウントにログイン
-2. リポジトリを接続
-3. ビルド設定:
-   - Build command: `npm run build`
-   - Publish directory: `apps/frontend/out`
-4. 環境変数を設定
-5. デプロイ
+開発完了時にリポジトリルートから手動デプロイ（直接アップロードのためビルドクレジット不要）:
 
-詳細は`netlify.toml`を参照してください。
+```bash
+npm run env:check    # 環境変数の検証
+npm run deploy:cf    # ビルド → 本番へアップロード
+```
+
+詳細はルートの `DEPLOYMENT_GUIDE.md` を参照。
 
 ## 📊 パフォーマンス
 

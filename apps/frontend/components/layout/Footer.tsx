@@ -38,7 +38,7 @@ export function Footer() {
                 href={siteConfig.links.twitter}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#9ca3af] hover:text-white transition-colors"
+                className="inline-flex items-center p-2 -m-2 rounded-md text-[#9ca3af] hover:text-white transition-colors"
                 aria-label="Twitter"
               >
                 <Twitter size={20} />
@@ -47,7 +47,7 @@ export function Footer() {
                 href={siteConfig.links.threads}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#9ca3af] hover:text-white transition-colors"
+                className="inline-flex items-center p-2 -m-2 rounded-md text-[#9ca3af] hover:text-white transition-colors"
                 aria-label="Threads"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -75,7 +75,10 @@ export function Footer() {
             <p className="text-[#9ca3af] text-sm mb-6">
               AI時代の協創リーダーシップに関する最新情報をお届けします（月1-2回程度）
             </p>
-            <NewsletterSignupForm variant="footer" />
+            {/* フォームは light テーマなので白カードで載せる（フッター背景とのコントラスト確保） */}
+            <div className="bg-white rounded-xl p-6 shadow-lg">
+              <NewsletterSignupForm variant="footer" />
+            </div>
           </div>
         </div>
 

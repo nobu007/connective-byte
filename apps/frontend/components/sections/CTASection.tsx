@@ -74,7 +74,7 @@ export function CTASection({ headline, description, steps, ctaText, ctaLink, var
               >
                 <div
                   className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold ${
-                    variant === 'minimal' ? 'bg-[#10b981] text-white' : 'bg-white text-[#f97316]'
+                    variant === 'minimal' ? 'bg-[#047857] text-white' : 'bg-white text-[#c2410c]'
                   }`}
                 >
                   {index + 1}
@@ -89,7 +89,7 @@ export function CTASection({ headline, description, steps, ctaText, ctaLink, var
               href={ctaLink}
               variant={variant === 'minimal' ? 'primary' : 'secondary'}
               size="lg"
-              className={variant === 'minimal' ? '' : 'bg-white text-[#f97316] hover:bg-white/90'}
+              className={variant === 'minimal' ? '' : 'bg-white text-[#c2410c] hover:bg-white/90'}
               onClick={handleCTAClick}
             >
               {ctaText}
