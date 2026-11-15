@@ -53,7 +53,7 @@ export function SocialProof({ participantCount, programName, badge, description 
         >
           <motion.div
             variants={fadeInUp}
-            className="inline-block bg-gradient-to-r from-[#f97316] to-[#a855f7] text-white px-6 py-2 rounded-full text-sm font-semibold mb-8"
+            className="inline-block bg-gradient-to-r from-[#c2410c] to-[#9a3412] text-white px-6 py-2 rounded-full text-sm font-semibold mb-8"
           >
             {badge}
           </motion.div>

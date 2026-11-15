@@ -113,29 +113,43 @@ describe('HealthService', () => {
     });
 
     it('should execute checks in parallel', async () => {
-      const delays = [100, 50, 75];
-      const startTime = Date.now();
+      // 実時間計測は負荷で setTimeout が伸び誤検知するため fake timer で決定的に検証
+      // （逐次なら sum(delays)=225ms、並列なら max(delays)=100ms で完了する）
+      jest.useFakeTimers();
+      try {
+        const delays = [100, 50, 75];
 
-      delays.forEach((delay, index) => {
-        const check: HealthCheckFunction = () =>
-          new Promise((resolve) =>
-            setTimeout(
-              () =>
-                resolve({
-                  name: `check${index}`,
-                  status: 'ok',
-                }),
-              delay
-            )
-          );
-        healthService.registerCheck(`check${index}`, check);
-      });
+        delays.forEach((delay, index) => {
+          const check: HealthCheckFunction = () =>
+            new Promise((resolve) =>
+              setTimeout(
+                () =>
+                  resolve({
+                    name: `check${index}`,
+                    status: 'ok',
+                  }),
+                delay
+              )
+            );
+          healthService.registerCheck(`check${index}`, check);
+        });
 
-      await healthService.getHealthStatus(false);
-      const duration = Date.now() - startTime;
+        let finished = false;
+        const pending = healthService.getHealthStatus(false).then((result) => {
+          finished = true;
+          return result;
+        });
 
-      // Should take roughly the time of the longest check, not the sum
-      expect(duration).toBeLessThan(delays.reduce((a, b) => a + b, 0));
+        // 並列なら最長 100ms チェックの完了で全体が終わる。150ms 時点で
+        // 完了していなければ逐次（225ms 必要）ということになる
+        await jest.advanceTimersByTimeAsync(150);
+        expect(finished).toBe(true);
+
+        const result = await pending;
+        expect(result.success).toBe(true);
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('should include response time for each check', async () => {
@@ -327,12 +341,21 @@ describe('HealthService', () => {
     });
 
     it('should have memory check', async () => {
+      // Mock heap stats: real usage varies by runner and can cross the warn
+      // threshold, making the status assertion flaky on CI
+      jest.spyOn(process, 'memoryUsage').mockReturnValue({
+        heapUsed: 40 * 1024 * 1024,
+        heapTotal: 128 * 1024 * 1024,
+      } as NodeJS.MemoryUsage);
+
       const result = await healthService.getHealthStatus(false);
       const memoryCheck = result.data?.checks?.find((c) => c.name === 'memory');
 
       expect(memoryCheck).toBeDefined();
       expect(memoryCheck?.status).toBe('ok');
       expect(memoryCheck?.message).toContain('Heap');
+
+      jest.restoreAllMocks();
     });
 
     it.skip('should have disk space check (disabled to avoid hangs)', async () => {

@@ -21,7 +21,7 @@ Next.jsアプリケーションのE2EテストでAPI通信をモックする場�
 - **対象URLの指定**: `page.route('**/api/health', ...)` のように、globパターンを使って対象のAPIエンドポイントを正確に指定します。`**` はホスト名やポート番号を問わないため、柔軟なマッチングが可能です。
 - **レスポンスの作成**: `route.fulfill()` を使って、ステータスコード、コンテントタイプ、ボディを定義した偽のレスポンスを返却します。
 
-#### 実装例 (`e2e/api-interaction.spec.ts`)
+#### 実装例
 
 ```typescript
 import { test, expect } from '@playwright/test';

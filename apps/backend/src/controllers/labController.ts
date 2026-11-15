@@ -25,6 +25,14 @@ import { ProgressTracker } from '../modules/lab/progress/ProgressTracker';
 import { ReportBuilder } from '../modules/lab/reports/ReportBuilder';
 import { VisualizationGenerator } from '../modules/lab/reports/VisualizationGenerator';
 
+/**
+ * Express 5 types route params as string | string[]; lab routes use single-segment params only.
+ */
+function getParam(req: Request, name: string): string {
+  const value = req.params[name];
+  return Array.isArray(value) ? value[0] : value;
+}
+
 // Initialize services
 const sandboxManager = new SandboxManager();
 
@@ -86,7 +94,7 @@ export class LabController {
    */
   static getSessionMetrics(req: Request, res: Response): void {
     try {
-      const metrics = sandboxManager.getSessionMetrics(req.params.sessionId);
+      const metrics = sandboxManager.getSessionMetrics(getParam(req, 'sessionId'));
       res.json(metrics);
     } catch (error) {
       res.status(404).json({
@@ -100,7 +108,7 @@ export class LabController {
    */
   static terminateSession(req: Request, res: Response): void {
     try {
-      sandboxManager.terminateSession(req.params.sessionId);
+      sandboxManager.terminateSession(getParam(req, 'sessionId'));
       res.status(204).send();
     } catch (error) {
       res.status(404).json({
@@ -114,7 +122,7 @@ export class LabController {
    */
   static async executeAPICall(req: Request, res: Response): Promise<void> {
     try {
-      const { sessionId } = req.params;
+      const sessionId = getParam(req, 'sessionId');
       const { request } = req.body;
 
       const session = sandboxManager.getSession(sessionId);
@@ -149,7 +157,7 @@ export class LabController {
    */
   static async getExperimentSummary(req: Request, res: Response): Promise<void> {
     try {
-      const summary = await costTracker.getExperimentSummary(req.params.experimentId);
+      const summary = await costTracker.getExperimentSummary(getParam(req, 'experimentId'));
       res.json(summary);
     } catch (error) {
       res.status(500).json({
@@ -165,7 +173,7 @@ export class LabController {
     try {
       const { scenario, calls } = req.body;
       const baseline = await baselineManager.createBaseline({
-        experimentId: req.params.experimentId,
+        experimentId: getParam(req, 'experimentId'),
         scenario,
         calls,
       });
@@ -210,7 +218,7 @@ export class LabController {
    */
   static async applyStrategy(req: Request, res: Response): Promise<void> {
     try {
-      const strategy = strategyRegistry.get(req.params.strategyName);
+      const strategy = strategyRegistry.get(getParam(req, 'strategyName'));
       if (!strategy) {
         res.status(404).json({ error: 'Strategy not found' });
         return;
@@ -294,7 +302,7 @@ export class LabController {
   static startChallenge(req: Request, res: Response): void {
     try {
       const { userId } = req.body;
-      const session = challengeManager.startChallenge(req.params.challengeId, userId);
+      const session = challengeManager.startChallenge(getParam(req, 'challengeId'), userId);
       res.status(201).json(session);
     } catch (error) {
       res.status(400).json({
@@ -309,7 +317,7 @@ export class LabController {
   static submitChallenge(req: Request, res: Response): void {
     try {
       const { metrics } = req.body;
-      const result = challengeManager.submitSolution(req.params.sessionId, metrics);
+      const result = challengeManager.submitSolution(getParam(req, 'sessionId'), metrics);
       res.json(result);
     } catch (error) {
       res.status(400).json({
@@ -323,8 +331,8 @@ export class LabController {
    */
   static async getUserProgress(req: Request, res: Response): Promise<void> {
     try {
-      const progress = await progressTracker.getProgress(req.params.userId);
-      const recommendations = await progressTracker.getRecommendations(req.params.userId);
+      const progress = await progressTracker.getProgress(getParam(req, 'userId'));
+      const recommendations = await progressTracker.getRecommendations(getParam(req, 'userId'));
       res.json({ progress, recommendations });
     } catch (error) {
       res.status(500).json({

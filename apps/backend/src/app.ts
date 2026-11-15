@@ -16,6 +16,7 @@ import {
   securityLogger,
 } from './middleware/security';
 import { apiLimiter } from './middleware/rateLimiter';
+import { captureRawBody } from './middleware/rawBody';
 import { swaggerSpec } from './config/swagger';
 
 /**
@@ -35,7 +36,8 @@ export function createApp(): Application {
   app.use('/api', apiLimiter);
 
   // Body parsing middleware
-  app.use(express.json({ limit: '10mb' }));
+  // verify: Stripe Webhook 署名検証用に生ボディを req.rawBody へ（参照のみ）
+  app.use(express.json({ limit: '10mb', verify: captureRawBody }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
   // Input sanitization (applied after parsing)

@@ -7,8 +7,9 @@ test.describe('Homepage', () => {
 
   test('should display hero section', async ({ page }) => {
     await expect(page.getByRole('heading', { name: /個を超え、知が立ち上がる場所/i })).toBeVisible();
-    await expect(page.getByText(/AI時代の知的共創圏/i)).toBeVisible();
-    await expect(page.getByRole('link', { name: /無料相談に申し込む/i }).first()).toBeVisible();
+    // exact: the <title> also contains this phrase (substring match would hit both)
+    await expect(page.getByText('AI時代の知的共創圏 ConnectiveByte', { exact: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: /無料で Week 1 を始める/i }).first()).toBeVisible();
   });
 
   test('should display problem statement section', async ({ page }) => {
@@ -20,28 +21,35 @@ test.describe('Homepage', () => {
 
   test('should display value propositions', async ({ page }) => {
     await expect(page.getByText(/接続可能な人材になる、3つの価値/i)).toBeVisible();
-    await expect(page.getByText(/Connect/i)).toBeVisible();
-    await expect(page.getByText(/Active/i)).toBeVisible();
-    await expect(page.getByText(/Collective/i)).toBeVisible();
+    // values render as <h3> in ValueCard; plain getByText also matches the
+    // logo alt text and body copy, so scope to exact headings (the footer
+    // <h3>ConnectiveByte</h3> would substring-match "Connect" otherwise)
+    await expect(page.getByRole('heading', { name: 'Connect', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Active', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Collective', exact: true })).toBeVisible();
   });
 
   test('should display social proof section', async ({ page }) => {
     await expect(page.getByText(/Version 0/i)).toBeVisible();
-    await expect(page.getByText(/参加者募集中/i)).toBeVisible();
+    await expect(page.getByText(/受講受付中/i)).toBeVisible();
   });
 
   test('should display final CTA section', async ({ page }) => {
-    await expect(page.getByText(/まずは無料相談から/i)).toBeVisible();
-    await expect(page.getByRole('link', { name: /無料相談に申し込む/i }).last()).toBeVisible();
+    await expect(page.getByText(/まずは Week 1 を無料で/i)).toBeVisible();
+    await expect(page.getByRole('link', { name: /無料で Week 1 を始める/i }).last()).toBeVisible();
   });
 
   test('should have working CTA buttons', async ({ page }) => {
-    // Click hero CTA
-    await page
-      .getByRole('link', { name: /無料相談に申し込む/i })
-      .first()
-      .click();
-    await expect(page).toHaveURL(/\/contact/);
+    // Hero CTA は framer-motion の出現アニメーション（opacity 0→1）で描画される。
+    // opacity が 1 になるのは hydration + アニメーション完了後のみなので、これを
+    // hydration 完了のシグナルとして待つ（前にもクリックすると next/link が
+    // 未ハイドレートで遷移しない）
+    const cta = page.getByRole('link', { name: /無料で Week 1 を始める/i }).first();
+    await expect(cta).toBeVisible();
+    await expect(cta).toHaveCSS('opacity', '1');
+    // Click hero CTA（受講導線: /learning/ へ）
+    await cta.click();
+    await expect(page).toHaveURL(/\/learning/);
   });
 });
 
@@ -64,7 +72,7 @@ test.describe('About Page', () => {
   });
 
   test('should display mission statement', async ({ page }) => {
-    await expect(page.getByText(/次世代の学び：情報を鵜呑みにしないためのAI時代リテラシー教育/i)).toBeVisible();
+    await expect(page.getByText(/AIと人が協創できる基盤を育てる/i)).toBeVisible();
   });
 
   test('should display vision tagline', async ({ page }) => {
@@ -78,7 +86,8 @@ test.describe('Privacy Page', () => {
   });
 
   test('should display privacy policy', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /プライバシーポリシー/i })).toBeVisible();
+    // exact: "10. プライバシーポリシーの変更" also matches the substring
+    await expect(page.getByRole('heading', { name: 'プライバシーポリシー', exact: true })).toBeVisible();
   });
 
   test('should have table of contents', async ({ page }) => {
@@ -87,15 +96,16 @@ test.describe('Privacy Page', () => {
   });
 
   test('should have all required sections', async ({ page }) => {
-    await expect(page.getByText(/個人情報の定義/i)).toBeVisible();
-    await expect(page.getByText(/個人情報の収集/i)).toBeVisible();
-    await expect(page.getByText(/個人情報の利用目的/i)).toBeVisible();
-    await expect(page.getByText(/個人情報の第三者提供/i)).toBeVisible();
-    await expect(page.getByText(/個人情報の管理/i)).toBeVisible();
+    // headings, not TOC links: getByText matches both for each section title
+    await expect(page.getByRole('heading', { name: /個人情報の定義/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /個人情報の収集/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /個人情報の利用目的/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /個人情報の第三者提供/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /個人情報の管理/ })).toBeVisible();
   });
 
   test('should have contact information', async ({ page }) => {
-    await expect(page.getByText(/info@connectivebyte.com/i)).toBeVisible();
+    await expect(page.getByText(/info@connectivebyte.com/i).first()).toBeVisible();
   });
 });
 
@@ -105,8 +115,10 @@ test.describe('Footer', () => {
 
     for (const pagePath of pages) {
       await page.goto(pagePath);
-      await expect(page.getByText(/個を超え、知が立ち上がる場所/i).last()).toBeVisible();
-      await expect(page.getByText(/© 2024 ConnectiveByte/i)).toBeVisible();
+      // scope to footer: the <title> and hero heading also contain the tagline
+      await expect(page.locator('footer').getByText(/個を超え、知が立ち上がる場所/i)).toBeVisible();
+      // copyright year is dynamic (new Date().getFullYear())
+      await expect(page.locator('footer').getByText(/© \d{4} ConnectiveByte/)).toBeVisible();
     }
   });
 
@@ -118,7 +130,9 @@ test.describe('Footer', () => {
 
   test('should have privacy policy link in footer', async ({ page }) => {
     await page.goto('/');
-    const privacyLink = page.getByRole('link', { name: /プライバシーポリシー/i }).last();
+    // .first() = the footer legal link (same tab). The newsletter consent
+    // link has target="_blank" and would leave the URL unchanged.
+    const privacyLink = page.getByRole('link', { name: 'プライバシーポリシー', exact: true }).first();
     await expect(privacyLink).toBeVisible();
     await privacyLink.click();
     await expect(page).toHaveURL(/\/privacy/);

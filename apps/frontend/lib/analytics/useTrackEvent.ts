@@ -6,6 +6,7 @@ import { usePlausible } from './PlausibleProvider';
 export type EventName =
   | 'Contact Form Submission'
   | 'CTA Click'
+  | 'Purchase CTA Click'
   | 'Newsletter Signup Click'
   | 'Value Props Viewed'
   | 'Social Proof Viewed'

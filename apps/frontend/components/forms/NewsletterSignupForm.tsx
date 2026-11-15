@@ -141,7 +141,7 @@ export function NewsletterSignupForm({ variant = 'footer', showNameField = false
           <input
             type="checkbox"
             {...register('consent')}
-            className="mt-1 mr-3 w-5 h-5 text-[#10b981] border-[#e5e7eb] rounded focus:ring-2 focus:ring-[#10b981]"
+            className="mt-0.5 mr-3 w-6 h-6 shrink-0 text-[#10b981] border-[#e5e7eb] rounded focus:ring-2 focus:ring-[#10b981]"
             aria-required="true"
             aria-invalid={errors.consent ? 'true' : 'false'}
             aria-describedby={errors.consent ? 'consent-error' : undefined}
@@ -166,8 +166,7 @@ export function NewsletterSignupForm({ variant = 'footer', showNameField = false
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-[#10b981] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#059669] focus:outline-none focus:ring-2 focus:ring-[#10b981] focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        aria-label={isSubmitting ? '送信中...' : 'ニュースレターに登録'}
+        className="w-full bg-[#047857] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#065f46] focus:outline-none focus:ring-2 focus:ring-[#10b981] focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isSubmitting ? (
           <span className="flex items-center justify-center">

@@ -113,26 +113,38 @@ describe('HealthService', () => {
     });
 
     test('should execute checks in parallel for performance', async () => {
-      const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+      // 実時間計測は負荷で setTimeout(100) が 300ms+ に伸び誤検知するため
+      // fake timer で決定的に検証する（逐次なら 2 チェックで 200ms 必要）
+      jest.useFakeTimers();
+      try {
+        const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-      // Register slow checks
-      service.registerCheck('slow-check-1', async () => {
-        await delay(50);
-        return { name: 'slow-check-1', status: 'ok' as const };
-      });
+        // Register slow checks
+        service.registerCheck('slow-check-1', async () => {
+          await delay(100);
+          return { name: 'slow-check-1', status: 'ok' as const };
+        });
 
-      service.registerCheck('slow-check-2', async () => {
-        await delay(50);
-        return { name: 'slow-check-2', status: 'ok' as const };
-      });
+        service.registerCheck('slow-check-2', async () => {
+          await delay(100);
+          return { name: 'slow-check-2', status: 'ok' as const };
+        });
 
-      const startTime = Date.now();
-      await service.getHealthStatus();
-      const duration = Date.now() - startTime;
+        let finished = false;
+        const pending = service.getHealthStatus().then((result) => {
+          finished = true;
+          return result;
+        });
 
-      // If parallel, should take ~50ms, not ~100ms (sequential)
-      // Allow some overhead for execution
-      expect(duration).toBeLessThan(90);
+        // 並列なら 100ms チェックが同時進行し 150ms 後には完了しているはず
+        await jest.advanceTimersByTimeAsync(150);
+        expect(finished).toBe(true);
+
+        const result = await pending;
+        expect(result.success).toBe(true);
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     test('should include uptime and memory in checks', async () => {
@@ -304,8 +316,21 @@ describe('HealthService', () => {
     });
 
     describe('checkMemory', () => {
+      afterEach(() => {
+        jest.restoreAllMocks();
+      });
+
+      // Mock heap stats so threshold assertions are deterministic on any runner
+      // (real heap usage varies by environment and made this suite flaky on CI)
+      const mockHeapUsage = (usedMB: number, totalMB: number) => {
+        jest.spyOn(process, 'memoryUsage').mockReturnValue({
+          heapUsed: usedMB * 1024 * 1024,
+          heapTotal: totalMB * 1024 * 1024,
+        } as NodeJS.MemoryUsage);
+      };
+
       test('should return ok when usage is low', async () => {
-        // Under normal test conditions, memory should be OK
+        mockHeapUsage(40, 128); // 31.3%
         const result = await service.getHealthStatus();
         const memoryCheck = result.data?.checks?.find((c) => c.name === 'memory');
 
@@ -316,7 +341,24 @@ describe('HealthService', () => {
         expect(memoryCheck?.message).toContain('MB');
       });
 
+      test('should return warn when heap usage exceeds 90%', async () => {
+        mockHeapUsage(118, 128); // 92.2%
+        const result = await service.getHealthStatus();
+        const memoryCheck = result.data?.checks?.find((c) => c.name === 'memory');
+
+        expect(memoryCheck?.status).toBe('warn');
+      });
+
+      test('should return error when heap usage exceeds 95%', async () => {
+        mockHeapUsage(126, 128); // 98.4%
+        const result = await service.getHealthStatus();
+        const memoryCheck = result.data?.checks?.find((c) => c.name === 'memory');
+
+        expect(memoryCheck?.status).toBe('error');
+      });
+
       test('should include memory usage percentage', async () => {
+        mockHeapUsage(45.23, 128);
         const result = await service.getHealthStatus();
         const memoryCheck = result.data?.checks?.find((c) => c.name === 'memory');
 
@@ -325,6 +367,7 @@ describe('HealthService', () => {
       });
 
       test('should report heap usage in megabytes', async () => {
+        mockHeapUsage(45.23, 128);
         const result = await service.getHealthStatus();
         const memoryCheck = result.data?.checks?.find((c) => c.name === 'memory');
 

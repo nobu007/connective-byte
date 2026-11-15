@@ -87,33 +87,29 @@ ConnectiveByteは「接続思考」を核とした、AI時代のエンジニア�
 
 ---
 
-### 5. user-authentication ✅ NEW
+### 5. user-authentication ✅ 実装完了
 
-**状態**: 要件・設計・タスク完了
+**状態**: 実装完了（2026年8月。本番稼働: Cloudflare Workers + Neon Postgres）
 
 **概要**: ユーザー認証・プロフィール管理システム
 
-**主要機能**:
+**主要機能**（実装済み）:
 
 - ユーザー登録・メール認証
-- JWT + Refresh Token認証
-- セッション管理
-- パスワードリセット
-- OAuth連携（Google、GitHub）
-- 二要素認証（TOTP）
-- ロールベースアクセス制御
-- プロフィール管理
-- アカウント削除
-- セキュリティ監視
+- JWT（15分・メモリ保持）+ Refresh Cookie（`cb_rt` httpOnly・30日・ローテーション）
+- セッション管理（一覧・個別失効・他セッション失効・再利用検知で全失効）
+- パスワードリセット・変更
+- OAuthログイン（Google。設計はprovider汎用）
+- プロフィール管理（bio / timezone / GitHubユーザー名）
+- アカウント削除（30日猶予→Cronで匿名化）
+- セキュリティ監視（auth_logs・ログインロックアウト10回/1h・レートリミット）
+- フロント: `/login/` `/register/` `/mypage/`（プロフィール|セキュリティ|セッション|アカウントのタブ）
+
+**後回し**: 二要素認証（TOTP）、GitHub OAuth（接口はprovider汎用のため追加のみ）、メールアドレス変更、管理者ロール管理UI
 
 **実装優先度**: 🔴 最優先（学習システムの前提条件）
 
-**実装期間**: 4週間
-
-- Phase 1: コア認証（1週間）
-- Phase 2: セキュリティ強化（1週間）
-- Phase 3: 拡張機能（1週間）
-- Phase 4: 仕上げと統合（1週間）
+**実装記録**: Stage 1（メール検証・PWリセット）→ Stage 2（ローテーション・セッション・ロックアウト・Google OAuth・マイページ）で完了。E2E `npm run e2e:auth` 25項目
 
 ---
 
@@ -162,11 +158,11 @@ ConnectiveByteは「接続思考」を核とした、AI時代のエンジニア�
 
 ---
 
-### Stage 2: 認証システム（4週間）
+### Stage 2: 認証システム ✅ 完了（2026年8月）
 
 5. **user-authentication** - 認証・認可システム
 
-**目標**: セキュアなユーザー管理基盤の確立
+**目標**: セキュアなユーザー管理基盤の確立 — 達成。Google OAuthの本番公開と2FAを後続ステージに繰り越し
 
 ---
 
@@ -191,26 +187,24 @@ ConnectiveByteは「接続思考」を核とした、AI時代のエンジニア�
 - TanStack Query
 - Plausible Analytics
 
-### バックエンド
+### バックエンド（実績）
 
-- Express.js
+- Express.js（auth + healthルートをCloudflare Workers化して配信）
 - TypeScript
-- Prisma ORM
-- PostgreSQL
-- Redis
-- Passport.js
-- JWT (jsonwebtoken)
-- bcrypt
-- speakeasy (2FA)
+- Neon Postgres（`@neondatabase/serverless` HTTP接続。ORMなし・手書きSQL）
+- JWT (jsonwebtoken) — アクセストークン15分 + httpOnly Cookie ローテーション
+- PBKDF2-SHA256（WorkersのCPU制限10msに bcrypt 純JSが収まらないため）
+- OAuth 2.0は依存なしの自前実装（provider汎用・現在はGoogleのみ）
+- ロックアウト・レートリミットは express-rate-limit + auth_logs（Redis不使用）
 
-### インフラ
+### インフラ（実績）
 
-- Netlify (フロントエンド)
-- Railway/Render (バックエンド)
-- PostgreSQL (データベース)
-- Redis (キャッシュ・セッション)
-- AWS S3 / Cloudflare R2 (ファイルストレージ)
+- Cloudflare Pages（フロントエンド静的エクスポート + Pages Functions。2026年8月にNetlifyから移行）
+- Cloudflare Workers（auth API: `api.connectivebyte.com`。Cron Triggerでメンテナンス実行）
+- Neon Postgres（データベース。フリーティア）
 - Resend (メール配信)
+- Plausible Analytics（アクセス解析）
+- ファイルストレージ（R2等）は未導入 — 必要になったStageで検討
 
 ### テスト
 

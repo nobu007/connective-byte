@@ -2,8 +2,8 @@
   "hero": {
     "headline": "個を超え、知が立ち上がる場所",
     "subheadline": "AI時代の知的共創圏 ConnectiveByte",
-    "ctaText": "無料相談に申し込む",
-    "ctaLink": "/contact"
+    "ctaText": "無料で Week 1 を始める",
+    "ctaLink": "/learning/"
   },
   "problems": [
     {
@@ -54,14 +54,14 @@
   "socialProof": {
     "participantCount": 10,
     "programName": "Version 0",
-    "badge": "参加者募集中",
-    "description": "初期プログラム参加者として、無料で体系的なAI協働スキルを学び、接続可能な人材への第一歩を踏み出しましょう。"
+    "badge": "受講受付中",
+    "description": "Week 1 は無料で体験。12週間の本編は 29,800円（税込）で解放されます。体系的なAI協働スキルを学び、接続可能な人材への第一歩を踏み出しましょう。"
   },
   "finalCTA": {
-    "headline": "まずは無料相談から",
-    "description": "あなたの課題をお聞かせください。AI時代の協創リーダーへの道をサポートします。",
-    "steps": ["フォームから申し込み", "オンライン面談（30分）", "プログラム参加"],
-    "ctaText": "無料相談に申し込む",
-    "ctaLink": "/contact"
+    "headline": "まずは Week 1 を無料で",
+    "description": "AI時代の協働スキルを12週間のカリキュラムで体系的に。Week 1 は無料公開中ですぐに始められます。",
+    "steps": ["Week 1 を無料で体験", "受講登録（29,800円・税込）", "Weeks 2-12 の本編を解放"],
+    "ctaText": "無料で Week 1 を始める",
+    "ctaLink": "/learning/"
   }
 }

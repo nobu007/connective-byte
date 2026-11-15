@@ -490,36 +490,17 @@ Visit http://localhost:3000 to preview your changes.
 
 ## Deployment Process
 
-### Automatic Deployment (Recommended)
+### Deployment
 
-If your repository is connected to Netlify or similar service:
+Deployments are manual, run when development is complete:
 
-1. **Commit your changes** to Git:
+1. **Commit your changes** to Git and push
 
-   ```bash
-   git add apps/frontend/content/
-   git commit -m "Update homepage hero section"
-   git push
-   ```
-
-2. **Automatic build** will trigger on Netlify
-
-3. **Wait 2-5 minutes** for deployment to complete
-
-4. **Verify changes** on the live website
-
-### Manual Deployment
-
-If deploying manually:
-
-1. **Build the project**:
+2. **Deploy from the repository root**:
 
    ```bash
-   cd apps/frontend
-   npm run build
+   npm run deploy:cf
    ```
-
-2. **Deploy the `out/` directory** to your hosting service
 
 3. **Verify changes** on the live website
 
@@ -657,3 +638,17 @@ If you encounter issues not covered in this guide:
 
 **Last Updated**: November 2025  
 **Version**: 1.0
+
+## public-principles.json（公開プリンシプルページ）
+
+`apps/frontend/content/public-principles.json` は `/principles` ページのコンテンツを管理する。
+
+| キー         | 内容                                        |
+| ------------ | ------------------------------------------- |
+| `hero`       | ページ先頭の見出し・サブタイトル            |
+| `philosophy` | 公開する思想（philosophy）セクション        |
+| `technology` | 技術原則セクション                          |
+| `boundary`   | 公開/非公開の境界に関するセクション         |
+| `cta`        | ページ末尾のCTA（リンク先は `/contact` 等） |
+
+元ネタは `docs/public/*.md`（philosophy / technology-principles / public-private-boundary）。公開文言を変更する場合はこのJSONを編集する。
